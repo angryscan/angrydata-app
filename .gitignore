@@ -1,0 +1,12 @@
+*.db
+/target/
+/build/
+/.gradle/
+/.idea/
+/.kotlin/
+*.txt
+/jenkinsfile/*.json
+!src/test/resources/**/*.txt
+/gradle-bin/
+/shared/build/
+/desktop/build/

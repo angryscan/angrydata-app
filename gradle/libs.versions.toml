@@ -1,0 +1,43 @@
+[versions]
+kotlin = "2.0.21"
+exposed = "0.49.0"
+poi = "5.2.5"
+compose = "1.7.1"
+jacoco = "0.8.11"
+ktor = "2.3.10"
+
+[libraries]
+exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
+exposed-dao = { module = "org.jetbrains.exposed:exposed-dao", version.ref = "exposed" }
+exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }
+
+material-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended-desktop", version.ref = "compose" }
+logging-oshai = { module = "io.github.oshai:kotlin-logging-jvm", version = "6.0.3" }
+logging-logback = { module = "ch.qos.logback:logback-classic", version = "1.5.3" }
+dorkbox = { module = "com.dorkbox:SystemTray", version = "4.4" }
+
+files-junrar = { module = "com.github.junrar:junrar", version = "7.5.5" }
+files-fastexcel = { module = "org.dhatim:fastexcel-reader", version = "0.17.0" }
+files-pdfbox = { module = "org.apache.pdfbox:pdfbox", version = "2.0.31" } # Update to 3.x version?
+files-poi-core = { module = "org.apache.poi:poi", version.ref = "poi" }
+files-poi-scratchpad = { module = "org.apache.poi:poi-scratchpad", version.ref = "poi" }
+files-poi-ooxml = { module = "org.apache.poi:poi-ooxml", version.ref = "poi" }
+
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.6.3" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version = "0.5.0" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.8.0" }
+
+sql-sqlite = { module = "io.github.willena:sqlite-jdbc", version = "3.45.1.0" }
+sql-postgresql = { module = "org.postgresql:postgresql", version = "42.7.3" }
+
+ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor"}
+ktor-network = { module = "io.ktor:ktor-network", version.ref = "ktor"}
+
+[plugins]
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+#kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kotlin-jpa = { id = "org.jetbrains.kotlin.plugin.jpa", version.ref = "kotlin" }
+compose = { id = "org.jetbrains.compose", version.ref = "compose" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin"}
+kover = { id = "org.jetbrains.kotlinx.kover", version = "0.7.6" }

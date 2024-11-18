@@ -1,0 +1,4 @@
+-dontshrink
+-dontoptimize
+
+-ignorewarnings

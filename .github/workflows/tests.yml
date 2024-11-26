@@ -23,8 +23,6 @@ jobs:
 
     - name: Validate gradle wrappers
       uses: gradle/wrapper-validation-action@v3.5.0
-      with:
-        directory: lib
 
     - name: Build with Gradle Wrapper
       run: ./gradlew allTests --stacktrace

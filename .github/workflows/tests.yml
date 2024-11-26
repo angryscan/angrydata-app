@@ -23,7 +23,7 @@ jobs:
       uses: gradle/actions/wrapper-validation@v4
 
     - name: Build with Gradle Wrapper
-      run: ./gradlew allTests --stacktrace
+      run: ./gradlew allTests
 
   Tests-Windows:
     runs-on: windows-latest

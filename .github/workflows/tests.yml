@@ -21,12 +21,6 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Set up Xvfb
-      run: |
-        sudo apt-get install -y xvfb
-        Xvfb :99 -screen 0 1920x1080x24 &
-        export DISPLAY=:99
-
     - name: Checkout Lib
       uses: actions/checkout@v4
       with:
@@ -36,8 +30,10 @@ jobs:
     - name: Validate gradle wrappers
       uses: gradle/actions/wrapper-validation@v4
 
-    - name: Build with Gradle Wrapper
-      run: ./gradlew allTests --no-daemon
+    - name: Tests with Gradle Wrapper and XVFB
+      uses: coactions/setup-xvfb@v1
+      with:
+        run: ./gradlew allTests --no-daemon
 
   Tests-Windows:
     runs-on: windows-latest
@@ -55,5 +51,5 @@ jobs:
       - name: Validate gradle wrappers
         uses: gradle/actions/wrapper-validation@v4
 
-      - name: Build with Gradle Wrapper
+      - name: Tests with Gradle Wrapper
         run: ./gradlew allTests

@@ -33,7 +33,7 @@ jobs:
         directory: lib
 
     - name: Build with Gradle Wrapper
-      run: ./gradlew allTests
+      run: ./gradlew allTests --stacktrace
 
   Tests-Windows:
     runs-on: windows-latest

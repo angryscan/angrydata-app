@@ -21,12 +21,6 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Checkout Lib
-      uses: actions/checkout@v4
-      with:
-        repository: packetdima/angrydata
-        path: lib
-
     - name: Validate gradle wrappers
       uses: gradle/wrapper-validation-action@v3.5.0
       with:
@@ -47,12 +41,6 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-
-      - name: Checkout Lib
-        uses: actions/checkout@v4
-        with:
-          repository: packetdima/angrydata
-          path: lib
 
       - name: Validate gradle wrappers
         uses: gradle/wrapper-validation-action@v3.5.0

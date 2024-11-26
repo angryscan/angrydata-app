@@ -4,7 +4,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.use
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
-import ru.packetdima.datascanner.main
 import ru.packetdima.datascanner.common.Settings
 import ru.packetdima.datascanner.ui.UIProperties
 import ru.packetdima.datascanner.ui.custom.ApplicationErrorWindow
@@ -30,9 +29,9 @@ internal class MainKtTest {
     @Test
     fun guiRunTest() {
         rule.runOnUiThread {
-            val uiPath = javaClass.getResource("/common/ui.json")
+            val uiPath = javaClass.getResource("/common/ui.json")?.file
             assertNotNull(uiPath)
-            Settings.ui = UIProperties(uiPath.file)
+            Settings.ui = UIProperties(uiPath)
 
             Settings.ui.theme.value = UIProperties.ThemeType.Dark
             var isVisible = true
@@ -59,9 +58,9 @@ internal class MainKtTest {
 
     @Test
     fun onError() {
-        val uiPath = javaClass.getResource("/common/ui.json")
+        val uiPath = javaClass.getResource("/common/ui.json")?.file
         assertNotNull(uiPath)
-        Settings.ui = UIProperties(uiPath.file)
+        Settings.ui = UIProperties(uiPath)
         ImageComposeScene(width = 1024, height = 768).use { window ->
             window.setContent {
                 ApplicationErrorWindow(Exception("SomeError"))

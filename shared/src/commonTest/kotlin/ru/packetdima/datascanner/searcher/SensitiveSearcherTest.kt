@@ -23,12 +23,12 @@ import kotlin.test.assertNotNull
 internal class SensitiveSearcherTest {
     @Test
     fun `Check whole dir scan`() {
-        val path = javaClass.getResource("/files")
+        val path = this::class.java.getResource("/files")?.file
         assertNotNull(path)
 
-        inspectDirectory(path.file)
+        inspectDirectory(path)
 
-        var results = mutableMapOf<String, MutableMap<DetectFunction, Int>>()
+        val results = mutableMapOf<String, MutableMap<DetectFunction, Int>>()
         transaction {
             Reports.join(Attributes, JoinType.INNER, Reports.attribute, Attributes.id)
                 .join(ScannedFiles, JoinType.INNER, Reports.file, ScannedFiles.id)

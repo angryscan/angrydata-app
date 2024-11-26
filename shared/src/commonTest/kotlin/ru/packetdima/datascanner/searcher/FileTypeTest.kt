@@ -100,11 +100,13 @@ internal class FileTypeTest() {
         }
         println(text?.let { DetectFunction.IPv6.scan(it) })
 
+        println("Checking fast scan")
         filelist.forEach { filename ->
             println(filename)
             val map = Matrix.getMap(filename, true)
             checkScan(filename, map, true)
         }
+        println("Checking full scan")
         filelist.forEach { filename ->
             println(filename)
             val map = Matrix.getMap(filename, false)

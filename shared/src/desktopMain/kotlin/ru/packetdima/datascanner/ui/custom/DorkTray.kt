@@ -2,17 +2,15 @@ package ru.packetdima.datascanner.ui.custom
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.toAwtImage
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.window.ApplicationScope
 import dorkbox.systemTray.MenuItem
 import dorkbox.systemTray.SystemTray
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.painterResource
 import ru.packetdima.datascanner.resources.*
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun ApplicationScope.DorkTray(
     mainIsVisible: Boolean,
@@ -21,7 +19,7 @@ fun ApplicationScope.DorkTray(
 ) {
     val tray by remember { mutableStateOf(SystemTray.get() ?: throw Exception("Unable to load SystemTray!")) }
 
-    val trayImage = painterResource("icons/icon.png")
+    val trayImage = painterResource(Res.drawable.icon)
         .toAwtImage(Density(2f), LayoutDirection.Ltr)
 
     LaunchedEffect(true) {

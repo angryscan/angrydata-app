@@ -23,7 +23,7 @@ import kotlin.test.assertNotNull
 internal class SensitiveSearcherTest {
     @Test
     fun `Check whole dir scan`() {
-        val path = this::class.java.getResource("/files")?.file
+        val path = javaClass.getResource("/files")?.file
         assertNotNull(path)
 
         inspectDirectory(path)

@@ -33,7 +33,8 @@ jobs:
         directory: lib
 
     - name: Local library build
-      run: ./lib/gradlew publishToMavenLocal
+      working-directory: ./lib
+      run: ./gradlew publishToMavenLocal
 
     - name: Validate gradle wrapper
       uses: gradle/wrapper-validation-action@v3.5.0
@@ -66,7 +67,8 @@ jobs:
           directory: lib
 
       - name: Local library build
-        run: ./lib/gradlew publishToMavenLocal
+        working-directory: ./lib
+        run: ./gradlew publishToMavenLocal
 
       - name: Validate gradle wrapper
         uses: gradle/wrapper-validation-action@v3.5.0

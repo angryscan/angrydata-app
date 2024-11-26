@@ -34,12 +34,10 @@ jobs:
         path: lib
 
     - name: Validate gradle wrappers
-      uses: gradle/wrapper-validation-action@v3.5.0
-      with:
-        directory: lib
+      uses: gradle/actions/wrapper-validation@v4
 
     - name: Build with Gradle Wrapper
-      run: ./gradlew allTests
+      run: ./gradlew allTests --no-daemon
 
   Tests-Windows:
     runs-on: windows-latest
@@ -54,14 +52,8 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Checkout Lib
-        uses: actions/checkout@v4
-        with:
-          repository: packetdima/angrydata
-          path: lib
-
       - name: Validate gradle wrappers
-        uses: gradle/wrapper-validation-action@v3.5.0
+        uses: gradle/actions/wrapper-validation@v4
 
       - name: Build with Gradle Wrapper
         run: ./gradlew allTests

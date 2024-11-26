@@ -10,8 +10,6 @@ jobs:
   Tests-Linux:
 
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
 
     steps:
     - uses: actions/checkout@v4
@@ -22,15 +20,13 @@ jobs:
         distribution: 'temurin'
 
     - name: Validate gradle wrappers
-      uses: gradle/wrapper-validation-action@v4
+      uses: gradle/actions/wrapper-validation@v4
 
     - name: Build with Gradle Wrapper
       run: ./gradlew allTests --stacktrace
 
   Tests-Windows:
     runs-on: windows-latest
-    permissions:
-      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -41,7 +37,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Validate gradle wrappers
-        uses: gradle/wrapper-validation-action@v4
+        uses: gradle/actions/wrapper-validation@v4
 
       - name: Build with Gradle Wrapper
         run: ./gradlew allTests

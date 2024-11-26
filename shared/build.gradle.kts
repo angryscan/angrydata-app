@@ -30,7 +30,7 @@ kotlin {
                 api(libs.exposed.dao)
                 api(libs.exposed.jdbc)
 
-                implementation("ru.packetdima.datascanner:scanner-library:1.0.0-SNAPSHOT")
+                implementation(libs.datascanner)
 
                 implementation(libs.files.pdfbox)
                 implementation(libs.files.fastexcel)

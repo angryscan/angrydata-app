@@ -27,17 +27,10 @@ jobs:
         repository: packetdima/angrydata
         path: lib
 
-    - name: Validate gradle wrapper for Lib
+    - name: Validate gradle wrappers
       uses: gradle/wrapper-validation-action@v3.5.0
       with:
         directory: lib
-
-    - name: Local library build
-      working-directory: ./lib
-      run: ./gradlew publishToMavenLocal
-
-    - name: Validate gradle wrapper
-      uses: gradle/wrapper-validation-action@v3.5.0
 
     - name: Build with Gradle Wrapper
       run: ./gradlew allTests
@@ -61,16 +54,7 @@ jobs:
           repository: packetdima/angrydata
           path: lib
 
-      - name: Validate gradle wrapper for Lib
-        uses: gradle/wrapper-validation-action@v3.5.0
-        with:
-          directory: lib
-
-      - name: Local library build
-        working-directory: ./lib
-        run: ./gradlew publishToMavenLocal
-
-      - name: Validate gradle wrapper
+      - name: Validate gradle wrappers
         uses: gradle/wrapper-validation-action@v3.5.0
 
       - name: Build with Gradle Wrapper

@@ -21,6 +21,12 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
+    - name: Set up Xvfb
+      run: |
+        sudo apt-get install -y xvfb
+        Xvfb :99 -screen 0 1920x1080x24 &
+        export DISPLAY=:99
+
     - name: Checkout Lib
       uses: actions/checkout@v4
       with:

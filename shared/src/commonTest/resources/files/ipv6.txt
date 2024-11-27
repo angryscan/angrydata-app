@@ -1,0 +1,55 @@
+{1: Initial address, regex should say valid/match}
+2001:0db8:0000:0000:0000:ff00:0042:8329
+
+{2: After removing all leading zeroes, regex should say valid/match}
+2001:db8:0:0:0:ff00:42:8329
+
+{3: After omitting consecutive sections of zeroes, regex should say valid/match}
+2001:db8::ff00:42:8329
+
+{4: The loopback address, regex should say valid/match}
+0000:0000:0000:0000:0000:0000:0000:0001
+
+{5: The loopback address be abbreviated to ::1 by using both rules, regex should say valid/match}
+::1
+
+{6: This should be valid, regex should say valid/match}
+ABCD:ABCD:ABCD:ABCD:ABCD:ABCD:192.168.158.190
+
+{7: This should be valid/match, it's correct}
+::
+
+{These two formats allows IPv6 applications to communicate directly with IPv4 applications, regex should say valid/match}
+{8}
+0:0:0:0:0:ffff:192.1.56.10
+{9}
+::ffff:192.1.56.10/96
+
+{These next two formats are used for tunneling. It allows IPv6 nodes to communicate across an IPv4 infrastructure, regex should say valid/match}
+{10}
+0:0:0:0:0:0:192.1.56.10
+{11}
+::192.1.56.10/96
+
+{These 4 should be valid/match}
+{12}
+::FFFF:129.144.52.38
+{13}
+::129.144.52.38
+{14}
+::FFFF:d
+{15}
+1080:0:0:0:8:800:200C:417A
+
+{These 4 should NOT be valid/match}
+{16}
+::FFFF:d.d.d
+{17}
+::FFFF:d.d
+{18}
+::d.d.d
+{19}
+::d.d
+
+{17 Our case - 5 digits instead of 4}
+20014:0db8:0000:0000:0000:ff00:0042:8329

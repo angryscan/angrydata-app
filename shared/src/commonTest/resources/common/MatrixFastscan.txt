@@ -1,0 +1,11 @@
+						Emails	Phones	CardNumbers	CarNumber	SNILS	Passport	OMS	INN	AccountNumber	Address	BlackList	ValuableInfo	Login	Password	CVV	Name	IP						
+veryLong/very_long.csv	30		2		0			0			0		0			0	0	0				0		0			0				0		0			0	0		0
+veryLong/very_long.doc	0		0		0			0			0		0			0	0	0				0		0			0				0		0			0	0		0						
+veryLong/very_long.docx	0		0		0			0			0		0			0	0	0				0		0			0				0		0			0	0		0						
+veryLong/very_long.json	17		0		0			0			0		0			0	0	0				0		0			0				0		0			0	0		0
+veryLong/very_long.log	0		1		0			0			0		0			0	0	0				0		0			0				0		0			0	0		0						
+veryLong/very_long.pdf	0		0		0			0			0		0			0	0	0				0		0			0				0		0			0	0		0						
+veryLong/very_long.txt	0		0		0			0			0		0			0	0	0				0		0			0				0		0			0	0		0						
+veryLong/very_long.xls	89		2		0			0			0		0			0	0	0				0		0			0				0		0			0	0		0
+veryLong/very_long.xlsx	89		2		0			0			0		0			0	0	0				0		0			0				0		0			0	0		0
+veryLong/very_long.xml	37		1		0			0			0		0			0	0	0				0		0			0				0		0			0	0		0

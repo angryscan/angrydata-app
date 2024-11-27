@@ -3,8 +3,8 @@ package ru.packetdima.datascanner.searcher
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.runBlocking
 import org.apache.poi.openxml4j.util.ZipSecureFile
-import ru.packetdima.datascanner.common.Cleaner
-import ru.packetdima.datascanner.common.DetectFunction
+import info.downdetector.bigdatascanner.common.Cleaner
+import info.downdetector.bigdatascanner.common.DetectFunction
 import ru.packetdima.datascanner.common.Settings
 import ru.packetdima.datascanner.searcher.properties.Properties
 import ru.packetdima.datascanner.ui.UIProperties

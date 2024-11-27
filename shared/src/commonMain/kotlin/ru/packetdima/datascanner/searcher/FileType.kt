@@ -17,8 +17,8 @@ import org.apache.poi.xwpf.usermodel.XWPFParagraph
 import org.apache.poi.xwpf.usermodel.XWPFTable
 import org.dhatim.fastexcel.reader.ReadableWorkbook
 import org.mozilla.universalchardet.UniversalDetector
-import ru.packetdima.datascanner.common.Cleaner
-import ru.packetdima.datascanner.common.DetectFunction
+import info.downdetector.bigdatascanner.common.Cleaner
+import info.downdetector.bigdatascanner.common.DetectFunction
 import ru.packetdima.datascanner.common.Settings
 import java.io.BufferedInputStream
 import java.io.File

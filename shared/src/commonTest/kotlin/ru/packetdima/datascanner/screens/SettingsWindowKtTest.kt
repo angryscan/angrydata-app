@@ -2,7 +2,7 @@ package ru.packetdima.datascanner.screens
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.*
 import androidx.compose.ui.unit.dp
-import ru.packetdima.datascanner.common.DetectFunction
+import info.downdetector.bigdatascanner.common.DetectFunction
 import ru.packetdima.datascanner.common.InitSettingsTest
 import ru.packetdima.datascanner.common.Settings
 import ru.packetdima.datascanner.searcher.FileType

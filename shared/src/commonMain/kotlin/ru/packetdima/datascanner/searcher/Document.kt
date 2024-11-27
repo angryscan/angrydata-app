@@ -2,7 +2,7 @@
 
 package ru.packetdima.datascanner.searcher
 
-import ru.packetdima.datascanner.common.DetectFunction
+import info.downdetector.bigdatascanner.common.DetectFunction
 
 class Document(val size: Long, val path: String) {
 /* This is main struct in this library - searcher.Document. All texts represent as searcher.Document finally */

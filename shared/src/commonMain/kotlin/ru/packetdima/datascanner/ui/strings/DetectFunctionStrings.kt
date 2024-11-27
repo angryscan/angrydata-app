@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
-import ru.packetdima.datascanner.common.DetectFunction
+import info.downdetector.bigdatascanner.common.DetectFunction
 import ru.packetdima.datascanner.resources.*
 
 @OptIn(ExperimentalResourceApi::class)

@@ -4,7 +4,6 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -13,10 +12,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
 import ru.packetdima.datascanner.common.AppFiles
-import ru.packetdima.datascanner.common.DetectFunction
+import info.downdetector.bigdatascanner.common.DetectFunction
 import ru.packetdima.datascanner.common.Settings
 import ru.packetdima.datascanner.searcher.FileType
 import ru.packetdima.datascanner.store.ContextMenu
@@ -28,7 +26,6 @@ import ru.packetdima.datascanner.ui.windows.settings.items.ThemeSelection
 import ru.packetdima.datascanner.ui.windows.settings.items.ThreadCount
 import ru.packetdima.datascanner.resources.*
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun SettingsWindow(
     onCloseClick: () -> Unit
@@ -59,7 +56,7 @@ fun SettingsWindow(
     Box(
         modifier = Modifier
             .size(300.dp, 460.dp)
-            .background(colors.surface, RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colors.surface, RoundedCornerShape(12.dp))
             .border(BorderStroke(1.dp, MaterialTheme.colors.primary), shape = RoundedCornerShape(4.dp))
             .padding(10.dp, 10.dp, 0.dp, 10.dp),
         contentAlignment = Alignment.TopEnd
@@ -72,7 +69,7 @@ fun SettingsWindow(
                 text = stringResource(Res.string.uiSettings),
                 fontSize = 17.sp,
                 fontWeight = FontWeight.W600,
-                color = colors.onBackground
+                color = MaterialTheme.colors.onBackground
             )
             Column(
                 modifier = Modifier.height(385.dp)
@@ -134,7 +131,7 @@ fun SettingsWindow(
                         text = stringResource(Res.string.uiExtToScan),
                         fontSize = 17.sp,
                         fontWeight = FontWeight.W500,
-                        color = colors.onSurface
+                        color = MaterialTheme.colors.onSurface
                     )
                     ExtensionSelection(extensions)
 
@@ -144,7 +141,7 @@ fun SettingsWindow(
                         text = stringResource(Res.string.uiDetectFun),
                         fontSize = 17.sp,
                         fontWeight = FontWeight.W500,
-                        color = colors.onSurface
+                        color = MaterialTheme.colors.onSurface
                     )
                     DetectFunctionSelection(detectFunctions)
                 }
@@ -160,7 +157,7 @@ fun SettingsWindow(
                     onClick = onCloseClick,
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = Color.Transparent,
-                        contentColor = colors.error
+                        contentColor = MaterialTheme.colors.error
                     ),
                     border = null
                 ) {
@@ -196,7 +193,7 @@ fun SettingsWindow(
                     },
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = Color.Transparent,
-                        contentColor = colors.primary
+                        contentColor = MaterialTheme.colors.primary
                     ),
                     border = null
                 ) {
@@ -278,7 +275,7 @@ fun GroupedCheckbox(
                                 itemStateChanged(item.first.first, it)
                             },
                             colors = CheckboxDefaults.colors(
-                                checkedColor = colors.primary,
+                                checkedColor = MaterialTheme.colors.primary,
                                 uncheckedColor = Color.DarkGray
                             ),
                             enabled = true,

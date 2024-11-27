@@ -3,7 +3,7 @@ package ru.packetdima.datascanner.searcher
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.Database
 import ru.packetdima.datascanner.common.AppFiles
-import ru.packetdima.datascanner.common.DetectFunction
+import info.downdetector.bigdatascanner.common.DetectFunction
 import ru.packetdima.datascanner.common.Settings
 import ru.packetdima.datascanner.searcher.properties.Properties
 import ru.packetdima.datascanner.ui.UIProperties

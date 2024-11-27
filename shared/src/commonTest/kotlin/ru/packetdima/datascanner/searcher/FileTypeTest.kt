@@ -80,12 +80,12 @@ internal class FileTypeTest() {
             Settings.searcher.fastScan.value = isFastScan
             assertEquals(isFastScan, Settings.searcher.fastScan.value)
 
-            runBlocking {
-                val path = javaClass.getResource("/files/$filename")
-                assertNotNull(path)
-                val f = File(path.file)
-                val enumType: FileType? = f.let { FileType.getFileType(it) }
+            val path = javaClass.getResource("/files/$filename")
+            assertNotNull(path)
+            val f = File(path.file)
+            val enumType: FileType? = f.let { FileType.getFileType(it) }
 
+            runBlocking {
                 enumType?.scanFile(f, currentCoroutineContext()).let {
                     assertNotNull(it)
                     assertEquals(map, it.getDocumentFields())

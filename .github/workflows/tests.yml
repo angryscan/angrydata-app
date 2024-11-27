@@ -1,13 +1,8 @@
 name: Tests Linux
 
 on:
-  pull_request:
   push:
-
-permissions:
-  contents: read
-  actions: read
-  checks: write
+  pull_request:
 
 jobs:
   Tests-Linux:
@@ -39,16 +34,7 @@ jobs:
     - name: Tests with Gradle Wrapper and XVFB
       uses: coactions/setup-xvfb@v1
       with:
-        run: ./gradlew koverXmlReport --no-daemon
-
-    - name: Test Reporter
-      uses: dorny/test-reporter@v1.9.1
-      if: success() || failure()
-      with:
-        name: JUnit Report
-        path: '**/build/test-results/*/TEST-*.xml'
-        reporter: java-junit
-
+        run: ./gradlew allTests --no-daemon
 
   Tests-Windows:
     runs-on: windows-latest
@@ -67,12 +53,4 @@ jobs:
         uses: gradle/actions/wrapper-validation@v4
 
       - name: Tests with Gradle Wrapper
-        run: ./gradlew koverXmlReport
-
-      - name: Test Reporter
-        uses: dorny/test-reporter@v1.9.1
-        if: success() || failure()
-        with:
-          name: JUnit Report
-          path: '**/build/test-results/*/TEST-*.xml'
-          reporter: java-junit
+        run: ./gradlew allTests

@@ -4,7 +4,7 @@ exposed = "0.49.0"
 poi = "5.2.5"
 compose = "1.7.1"
 ktor = "2.3.10"
-datascanner = "1.0.0"
+datascanner = "1.0.1"
 
 [libraries]
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }

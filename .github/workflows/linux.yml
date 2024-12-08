@@ -60,9 +60,15 @@ jobs:
       - name: Validate gradle wrappers
         uses: gradle/actions/wrapper-validation@v4
 
+      - name: Set verion variable
+        run: export VERSION=${{github.event.release.tag_name}}
+
       - name: Build with Gradle
         run: ./gradlew packageReleaseDeb
 
+      - name: Get version
+        run: ./gradlew printVersion
+
       - name: Upload artifact
         run: |
-          gh release upload ${{github.event.release.tag_name}} './desktop/build/compose/binaries/main-release/deb/Big Data Scanner.deb'
+          gh release upload ${{github.event.release.tag_name}} './desktop/build/compose/binaries/main-release/deb/Big Data Scanner-${{github.event.release.tag_name}}.deb'

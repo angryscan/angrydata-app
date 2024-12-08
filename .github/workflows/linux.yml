@@ -72,3 +72,5 @@ jobs:
       - name: Upload artifact
         run: |
           gh release upload ${{github.event.release.tag_name}} './desktop/build/compose/binaries/main-release/deb/Big Data Scanner-${{github.event.release.tag_name}}.deb'
+        env:
+          GITHUB_TOKEN: ${{ github.TOKEN }}

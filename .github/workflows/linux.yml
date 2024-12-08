@@ -2,6 +2,7 @@ name: Build Linux
 
 on:
   release:
+    types: [published]
 
 jobs:
   Tests-Linux:

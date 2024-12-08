@@ -19,7 +19,6 @@ import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import ru.packetdima.datascanner.common.AppFiles
 import ru.packetdima.datascanner.common.Settings
-import ru.packetdima.datascanner.consoleRun
 import ru.packetdima.datascanner.searcher.properties.Properties
 import ru.packetdima.datascanner.ui.UIProperties
 import ru.packetdima.datascanner.ui.custom.ApplicationErrorWindow
@@ -136,7 +135,7 @@ suspend fun main(args: Array<String>) {
 
 
     if (args.isNotEmpty() && args.first().let { it == "-c" || it == "-console" }) {
-        consoleRun(args) {}
+        Console.consoleRun(args)
     } else {
         if (args.isNotEmpty()) {
             logger.warn { "Started with ${args.size} argument(s):" }

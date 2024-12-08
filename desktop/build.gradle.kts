@@ -16,6 +16,8 @@ kotlin {
                 implementation(project(":shared"))
                 implementation(libs.logging.oshai)
                 implementation(libs.logging.logback)
+                implementation(libs.logging.log4j.core)
+                implementation(libs.console.progressbar)
             }
         }
         val desktopMain by getting {

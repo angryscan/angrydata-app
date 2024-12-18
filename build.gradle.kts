@@ -13,7 +13,7 @@ plugins {
 val dummyAttribute = Attribute.of("ru.packetdima", String::class.java)
 
 group = "ru.packetdima"
-version = System.getenv("VERSION") ?: "01.007.00"
+version = System.getenv("VERSION") ?: "1.0.0"
 
 subprojects {
     group = rootProject.group

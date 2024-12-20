@@ -13,13 +13,13 @@ object AppFiles {
         else -> Path(System.getProperty("user.home")).resolve(".ads")
     }
 
-    val WorkDir = WorkDirPath.toFile().let { path ->
+    val WorkDir = WorkDirPath.toFile().also { path ->
         if (!path.exists() && !path.mkdir())
             throw Exception("Fail to create application directory")
         if (!path.isDirectory)
             throw Exception("Path ${WorkDirPath.absolute()} exists and it's not directory")
-        path.absoluteFile ?: Exception("Fail to create application directory")
-    }
+        path.absoluteFile
+    } ?: throw Exception("Fail to create application directory")
 
     val LoggingDir: Path = WorkDirPath.resolve("logs")
 

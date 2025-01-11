@@ -1,6 +1,7 @@
 package ru.packetdima.datascanner.searcher
 
 import info.downdetector.bigdatascanner.common.DetectFunction
+import info.downdetector.bigdatascanner.common.IDetectFunction
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -70,7 +71,7 @@ internal class DocumentTest {
 
     @Test
     fun getDocumentFields() {
-        val expected = mapOf(DetectFunction.Emails to 1)
+        val expected = mapOf<IDetectFunction, Int>(DetectFunction.Emails to 1)
         val document = Document(1, "123")
         document + mapOf(DetectFunction.Name to 0)
         assertEquals(mapOf(), document.getDocumentFields())

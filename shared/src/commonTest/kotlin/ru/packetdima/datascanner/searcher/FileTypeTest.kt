@@ -5,6 +5,7 @@ import kotlinx.coroutines.runBlocking
 import org.apache.poi.openxml4j.util.ZipSecureFile
 import info.downdetector.bigdatascanner.common.Cleaner
 import info.downdetector.bigdatascanner.common.DetectFunction
+import info.downdetector.bigdatascanner.common.IDetectFunction
 import ru.packetdima.datascanner.common.Settings
 import ru.packetdima.datascanner.searcher.properties.Properties
 import ru.packetdima.datascanner.ui.UIProperties
@@ -76,7 +77,7 @@ internal class FileTypeTest() {
         )
             .map { filename -> "veryLong/$filename" }
 
-        fun checkScan(filename: String, map: Map<DetectFunction, Int>?, isFastScan: Boolean = false) {
+        fun checkScan(filename: String, map: Map<IDetectFunction, Int>?, isFastScan: Boolean = false) {
             Settings.searcher.fastScan.value = isFastScan
             assertEquals(isFastScan, Settings.searcher.fastScan.value)
 

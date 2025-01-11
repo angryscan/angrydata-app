@@ -18,7 +18,7 @@ import org.apache.poi.xwpf.usermodel.XWPFTable
 import org.dhatim.fastexcel.reader.ReadableWorkbook
 import org.mozilla.universalchardet.UniversalDetector
 import info.downdetector.bigdatascanner.common.Cleaner
-import info.downdetector.bigdatascanner.common.DetectFunction
+import info.downdetector.bigdatascanner.common.IDetectFunction
 import ru.packetdima.datascanner.common.Settings
 import java.io.BufferedInputStream
 import java.io.File
@@ -419,9 +419,13 @@ enum class FileType(val extensions: List<String>) {
 
     abstract suspend fun scanFile(file: File, context: CoroutineContext): Document
 
-    protected fun scan(text: String): Map<DetectFunction, Int> {
+    protected fun scan(text: String): Map<IDetectFunction, Int> {
         val cleanText = Cleaner.cleanText(text)
         return Settings.searcher.detectFunctions.map { f ->
+            f to f.scan(cleanText).takeIf { it > 0 }
+        }.mapNotNull { p ->
+            p.second?.let { p.first to it }
+        }.toMap() + Settings.searcher.userSignature.map { f ->
             f to f.scan(cleanText).takeIf { it > 0 }
         }.mapNotNull { p ->
             p.second?.let { p.first to it }

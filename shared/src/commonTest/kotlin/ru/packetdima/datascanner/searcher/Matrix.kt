@@ -1,6 +1,7 @@
 package ru.packetdima.datascanner.searcher
 
 import info.downdetector.bigdatascanner.common.DetectFunction
+import info.downdetector.bigdatascanner.common.IDetectFunction
 import java.io.File
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -30,7 +31,7 @@ class Matrix {
             return m
         }
 
-        fun getMap(file: String, isFastscan: Boolean = false): Map<DetectFunction, Int>? {
+        fun getMap(file: String, isFastscan: Boolean = false): Map<IDetectFunction, Int>? {
             val filename = file.replace('\\', '/')
             val res = mutableMapOf<DetectFunction, Int>()
             if (matrix[filename] == null)

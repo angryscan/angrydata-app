@@ -80,4 +80,14 @@
     <string name="settingsContextMenuTitle">Context menu</string>
     <string name="settingsContextMenuText">File explorer</string>
     <string name="contextScanWith">Scan with ADS</string>
+    <string name="uiUserSignature">User signature</string>
+    <string name="add">Add</string>
+    <string name="name">Name</string>
+    <string name="signature">Signature</string>
+    <string name="userSignatureTitle">User signature</string>
+    <string name="errorUserSignatureTitle">User signature save error</string>
+    <string name="errorUserSignatureEmpty">User signature can't be empty</string>
+    <string name="errorUserSignatureNameEmpty">Name can't be empty</string>
+    <string name="errorUserSignatureSave">Can't save user signature</string>
+    <string name="errorUserSignatureAlreadyExist">User signature with this name already exist</string>
 </resources>

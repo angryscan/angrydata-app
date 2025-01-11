@@ -4,18 +4,24 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.rememberDialogState
 import org.jetbrains.compose.resources.stringResource
 import ru.packetdima.datascanner.common.AppFiles
 import info.downdetector.bigdatascanner.common.DetectFunction
 import ru.packetdima.datascanner.common.Settings
+import ru.packetdima.datascanner.common.UserSignature
 import ru.packetdima.datascanner.searcher.FileType
 import ru.packetdima.datascanner.store.ContextMenu
 import ru.packetdima.datascanner.ui.CheckboxWithText
@@ -25,6 +31,7 @@ import ru.packetdima.datascanner.ui.windows.settings.items.LanguageSelection
 import ru.packetdima.datascanner.ui.windows.settings.items.ThemeSelection
 import ru.packetdima.datascanner.ui.windows.settings.items.ThreadCount
 import ru.packetdima.datascanner.resources.*
+import ru.packetdima.datascanner.ui.windows.settings.items.UserSignatureWindow
 
 @Composable
 fun SettingsWindow(
@@ -39,11 +46,19 @@ fun SettingsWindow(
 
     val extensions by remember { mutableStateOf(Settings.searcher.extensions.toMutableList()) }
     val detectFunctions by remember { mutableStateOf(Settings.searcher.detectFunctions.toMutableList()) }
+    val activeUserSignatures by remember {
+        mutableStateOf(Settings.searcher.userSignature.filter {
+            Settings.userFunctionLoader.userSignature.contains(
+                it
+            )
+        }.toMutableList())
+    }
 
     var fastScan by remember { mutableStateOf(Settings.searcher.fastScan.value) }
 
     var confirmDialog by remember { mutableStateOf(false) }
     var contextMenu by remember { mutableStateOf(ContextMenu.enabled) }
+    var allUserSignatures by remember { mutableStateOf(Settings.userFunctionLoader.userSignature.toMutableList()) }
 
     if (confirmDialog) {
         ConfirmationDialog(
@@ -113,7 +128,7 @@ fun SettingsWindow(
                         }
                     )
 
-                    if(ContextMenu.supported()) {
+                    if (ContextMenu.supported()) {
                         CheckboxWithText(
                             state = contextMenu,
                             title = stringResource(Res.string.settingsContextMenuTitle),
@@ -144,6 +159,25 @@ fun SettingsWindow(
                         color = MaterialTheme.colors.onSurface
                     )
                     DetectFunctionSelection(detectFunctions)
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Text(
+                        text = stringResource(Res.string.uiUserSignature),
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.W500,
+                        color = MaterialTheme.colors.onSurface
+                    )
+
+                    UserSignatureSelection(
+                        activeUserSignatures = activeUserSignatures,
+                        allUserSignatures = allUserSignatures,
+                        onDelete = {
+                            allUserSignatures = it.toMutableList()
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
                 }
 
 
@@ -170,6 +204,13 @@ fun SettingsWindow(
                             Settings.ui.language.value = language
                             confirmDialog = true
                         }
+
+                        Settings.userFunctionLoader.userSignature.removeIf { !allUserSignatures.contains(it) }
+                        Settings.userFunctionLoader.userSignature.addAll(
+                            allUserSignatures.filter { !Settings.userFunctionLoader.userSignature.contains(it) }
+                        )
+                        Settings.userFunctionLoader.save(AppFiles.UserFunctionsFile)
+
                         Settings.searcher.threadCount.value = coresCount
                         Settings.searcher.fastScan.value = fastScan
                         Settings.searcher.extensions.removeIf { !extensions.contains(it) }
@@ -179,6 +220,14 @@ fun SettingsWindow(
                         Settings.searcher.detectFunctions.removeIf { !detectFunctions.contains(it) }
                         Settings.searcher.detectFunctions.addAll(
                             detectFunctions.filter { !Settings.searcher.detectFunctions.contains(it) }
+                        )
+                        Settings.searcher.userSignature.removeIf { !activeUserSignatures.contains(it) }
+                        Settings.searcher.userSignature.addAll(
+                            activeUserSignatures.filter {
+                                !Settings.searcher.userSignature.contains(it) && Settings.userFunctionLoader.userSignature.contains(
+                                    it
+                                )
+                            }
                         )
                         Settings.searcher.save(AppFiles.SearchSettingsFile)
 
@@ -217,7 +266,7 @@ fun ExtensionSelection(extensions: MutableList<String>) {
         itemsList = allExtensions.map { Pair(Pair(it, it), extensions.contains(it)) },
         itemStateChanged = { item, state ->
             if (state && !extensions.contains(item))
-                extensions.add(item as String)
+                extensions.add(item)
             else if (!state)
                 extensions.remove(item)
         },
@@ -240,7 +289,7 @@ fun DetectFunctionSelection(detectFunctions: MutableList<DetectFunction>) {
         },
         itemStateChanged = { item, state ->
             if (state && !detectFunctions.contains(item))
-                detectFunctions.add(item as DetectFunction)
+                detectFunctions.add(item)
             else if (!state)
                 detectFunctions.remove(item)
         },
@@ -249,13 +298,117 @@ fun DetectFunctionSelection(detectFunctions: MutableList<DetectFunction>) {
 }
 
 @Composable
-fun GroupedCheckbox(
-    itemsList: List<Pair<Pair<Any, String>, Boolean>>,
-    itemStateChanged: (item: Any, state: Boolean) -> Unit,
-    columnsCount: Int = 1
+fun UserSignatureSelection(
+    activeUserSignatures: MutableList<UserSignature>,
+    allUserSignatures: MutableList<UserSignature>,
+    onDelete: (MutableList<UserSignature>) -> Unit
 ) {
 
-    val columnList = (1..columnsCount).map { mutableListOf<Pair<Pair<Any, String>, Boolean>>() }
+    var addDialogVisible by remember { mutableStateOf(false) }
+
+    val dialogState = rememberDialogState(size = DpSize(400.dp, 400.dp))
+    val theme by remember { Settings.ui.theme }
+
+    var signatureName by remember { mutableStateOf("") }
+
+    if(addDialogVisible) {
+        UserSignatureWindow(
+            onCloseRequest = {
+                addDialogVisible = false
+                signatureName = ""
+            },
+            dialogState = dialogState,
+            theme = theme,
+            signatureName = signatureName,
+            allUserSignatures = allUserSignatures,
+            onSave = { sig ->
+                if(signatureName.isNotEmpty()) {
+                    allUserSignatures.removeIf { it.name == signatureName }
+                    allUserSignatures.add(sig)
+                } else {
+                    allUserSignatures.add(sig)
+                    activeUserSignatures.add(sig)
+                }
+
+                addDialogVisible = false
+                signatureName = ""
+            }
+        )
+    }
+
+    Column(
+        Modifier.fillMaxWidth()
+    ) {
+        GroupedCheckbox(
+            itemsList = allUserSignatures.map {
+                Pair(
+                    Pair(
+                        it,
+                        it.writeName
+                    ), activeUserSignatures.contains(it)
+                )
+            },
+            itemStateChanged = { item, state ->
+                if (state && !activeUserSignatures.contains(item))
+                    activeUserSignatures.add(item)
+                else if (!state)
+                    activeUserSignatures.remove(item)
+            },
+            columnsCount = 1,
+            block = {
+                Spacer(Modifier.weight(1f))
+                Row {
+                    IconButton(
+                        onClick = {
+                            signatureName = it.name
+                            addDialogVisible = true
+                        },
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(Icons.Outlined.Settings, contentDescription = null)
+                    }
+                    Spacer(Modifier.width(10.dp))
+                    IconButton(
+                        onClick = {
+                            activeUserSignatures.remove(it)
+                            allUserSignatures.remove(it)
+                            onDelete(allUserSignatures)
+                        },
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(Icons.Outlined.Delete, contentDescription = null, tint = MaterialTheme.colors.error)
+                    }
+                    Spacer(Modifier.width(10.dp))
+                }
+            }
+        )
+
+        OutlinedButton(
+            onClick = {
+
+                addDialogVisible = true
+            },
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color.Transparent,
+                contentColor = MaterialTheme.colors.primary
+            ),
+            border = null
+        ) {
+            Text(stringResource(Res.string.add).uppercase(), fontWeight = FontWeight.W600)
+        }
+    }
+}
+
+
+@Composable
+fun <T : Any> GroupedCheckbox(
+    itemsList: List<Pair<Pair<T, String>, Boolean>>,
+    itemStateChanged: (item: T, state: Boolean) -> Unit,
+    columnsCount: Int = 1,
+    block: @Composable (T) -> Unit = {}
+) {
+
+    val columnList = (1..columnsCount).map { mutableListOf<Pair<Pair<T, String>, Boolean>>() }
     itemsList.forEachIndexed { index, pair ->
         columnList[index % columnsCount].add(pair)
     }
@@ -282,6 +435,7 @@ fun GroupedCheckbox(
                             modifier = Modifier.testTag("checkbox_${item.first.first}")
                         )
                         Text(text = item.first.second)
+                        block(item.first.first)
                     }
                 }
             }

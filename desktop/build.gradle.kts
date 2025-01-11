@@ -47,15 +47,15 @@ compose.desktop {
         mainClass = "ru.packetdima.datascanner.MainKt"
 
         jvmArgs += listOf("-Xmx6g")
-        args += listOf(
-            "-c",
-            "-extensions",
-            "XLSX,Text,DOCX,DOC,TAR",
-            "-path",
-            "C:\\Users\\soulo\\OneDrive\\Документы\\Разное",
-            "-report_encoding",
-            "Windows-1251"
-        )
+//        args += listOf(
+//            "-c",
+//            "-extensions",
+//            "XLSX,Text,DOCX,DOC,TAR",
+//            "-path",
+//            "C:\\Users\\soulo\\OneDrive\\Документы\\Разное",
+//            "-report_encoding",
+//            "Windows-1251"
+//        )
 
         buildTypes.release.proguard {
             version.set("7.4.1")

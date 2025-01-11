@@ -76,4 +76,14 @@
     <string name="settingsContextMenuTitle">Контекстное меню</string>
     <string name="settingsContextMenuText">Файловый проводник</string>
     <string name="contextScanWith">Сканировать при помощи ADS</string>
+    <string name="uiUserSignature">Пользовательские сигнатуры</string>
+    <string name="add">Добавить</string>
+    <string name="name">Наименование</string>
+    <string name="signature">Сигнатура</string>
+    <string name="userSignatureTitle">Пользовательская сигнатура</string>
+    <string name="errorUserSignatureTitle">Ошибка сохранения пользовательской сигнатуры</string>
+    <string name="errorUserSignatureEmpty">Пользовательская сигнатура не может быть пустой</string>
+    <string name="errorUserSignatureNameEmpty">Наименование не может быть пустым</string>
+    <string name="errorUserSignatureSave">Не удалось сохранить пользовательскую сигнатуру</string>
+    <string name="errorUserSignatureAlreadyExist">Пользовательская сигнатура с таким именем уже существует</string>
 </resources>

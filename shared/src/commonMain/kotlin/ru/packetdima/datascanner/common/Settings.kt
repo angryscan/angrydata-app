@@ -5,6 +5,7 @@ import ru.packetdima.datascanner.searcher.properties.Properties
 import ru.packetdima.datascanner.ui.UIProperties
 
 object Settings {
+    lateinit var userFunctionLoader: UserFunctionLoader
     lateinit var searcher: Properties
     lateinit var ui: UIProperties
     var scanningTaskPath = mutableStateOf("")

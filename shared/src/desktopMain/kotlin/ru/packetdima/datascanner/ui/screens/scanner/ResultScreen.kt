@@ -46,7 +46,7 @@ fun ResultScreen(
     onComplete: () -> Unit
 ) {
     val time = Calendar.getInstance().time
-    val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+    val formatter = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss")
     val currentTime = formatter.format(time)
 
     var expandedStat by remember { mutableStateOf(false) }
@@ -159,7 +159,7 @@ fun ResultScreen(
                     }
                     OutlinedButton(
                         onClick = {
-                            if (SearcherResult.saveResult("ADS $currentTime.csv"))
+                            if (SearcherResult.saveResult("ADS_$currentTime.csv"))
                                 onExported()
                         },
                         colors = ButtonDefaults.buttonColors(

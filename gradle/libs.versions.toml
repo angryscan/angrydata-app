@@ -5,6 +5,8 @@ poi = "5.2.5"
 compose = "1.7.1"
 ktor = "2.3.10"
 datascanner = "1.0.1"
+progressbar = "0.10.0"
+log4j = "2.24.2"
 
 [libraries]
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
@@ -13,6 +15,8 @@ exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "e
 
 logging-oshai = { module = "io.github.oshai:kotlin-logging-jvm", version = "6.0.3" }
 logging-logback = { module = "ch.qos.logback:logback-classic", version = "1.5.3" }
+logging-log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }
+
 dorkbox = { module = "com.dorkbox:SystemTray", version = "4.4" }
 
 files-junrar = { module = "com.github.junrar:junrar", version = "7.5.5" }
@@ -33,6 +37,8 @@ ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor"
 ktor-network = { module = "io.ktor:ktor-network", version.ref = "ktor"}
 
 datascanner = { module = "info.downdetector.bigdatascanner:datascanner", version.ref = "datascanner"}
+
+console-progressbar = { module = "me.tongfei:progressbar", version.ref = "progressbar" }
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

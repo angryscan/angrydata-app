@@ -30,7 +30,7 @@ kotlin {
                 api(libs.exposed.dao)
                 api(libs.exposed.jdbc)
 
-                implementation(libs.datascanner)
+                api(libs.datascanner)
 
                 implementation(libs.files.pdfbox)
                 implementation(libs.files.fastexcel)

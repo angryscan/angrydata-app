@@ -1,16 +1,14 @@
 package ru.packetdima.datascanner.searcher
 
-import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.times
 import org.jetbrains.exposed.sql.transactions.transaction
 import ru.packetdima.datascanner.misc.FileSize
+import ru.packetdima.datascanner.misc.OS
 import ru.packetdima.datascanner.searcher.model.*
 import ru.packetdima.datascanner.searcher.model.ResultRow
 import java.io.File
-import java.io.FileOutputStream
-import java.nio.charset.Charset
 import javax.swing.JDialog
 import javax.swing.JFileChooser
 import javax.swing.JOptionPane
@@ -129,6 +127,7 @@ class SearcherResult {
 
             return res
         }
+
         fun saveResult(fileName: String): Boolean {
             val f = JFileChooser()
             f.fileSelectionMode = JFileChooser.FILES_ONLY
@@ -168,31 +167,14 @@ class SearcherResult {
             }
 
 
-        try {
-            FileOutputStream(path, true).bufferedWriter(charset = Charset.forName("Windows-1251")).use { writer ->
-                transaction {
-                    writer.append(
-                        runBlocking {
-                            ResultRows.columns.filter { it.name != "id" }.map { it.readableName()}
-                        }.joinToString(";") + "\r\n"
-                    )
-
-                        val query = ResultRows
-                            .selectAll()
-                            .orderBy(ResultRows.score, SortOrder.DESC)
-                        query.forEach { row ->
-                            writer.append(
-                                listOf(
-                                    row[ResultRows.path].toString(),
-                                    row[ResultRows.score].toString(),
-                                    row[ResultRows.attrCount].toString(),
-                                    row[ResultRows.attrNames].toString(),
-                                    (row[ResultRows.fileSize].toLong() / 1024).toString() + "KB"
-                                ).joinToString(";") + "\r\n"
-                            )
-                        }
+            try {
+                Writer.writeReport(
+                    reportFile = path,
+                    reportEncoding = when (OS.currentOS()) {
+                        OS.WINDOWS -> "Windows-1251"
+                        else -> "UTF-8"
                     }
-                }
+                )
                 return true
             } catch (e: Exception) {
                 JOptionPane.showMessageDialog(null, e.message, "Error", JOptionPane.ERROR_MESSAGE)
@@ -200,8 +182,8 @@ class SearcherResult {
             }
         }
 
-        fun deleteFile(filePath: String): Boolean{
-            return if(File(filePath).delete()){
+        fun deleteFile(filePath: String): Boolean {
+            return if (File(filePath).delete()) {
                 transaction {
                     ResultRows.deleteWhere { path.eq(filePath) }
                 }
@@ -216,8 +198,8 @@ class SearcherResult {
                 ResultRows
                     .select(ResultRows.path)
                     .forEach { row ->
-                        if(File(row[ResultRows.path]).delete()){
-                            deletedFiles ++
+                        if (File(row[ResultRows.path]).delete()) {
+                            deletedFiles++
                         }
                     }
             }

@@ -19,7 +19,6 @@ import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import ru.packetdima.datascanner.common.AppFiles
 import ru.packetdima.datascanner.common.Settings
-import ru.packetdima.datascanner.consoleRun
 import ru.packetdima.datascanner.searcher.properties.Properties
 import ru.packetdima.datascanner.ui.UIProperties
 import ru.packetdima.datascanner.ui.custom.ApplicationErrorWindow
@@ -135,8 +134,14 @@ suspend fun main(args: Array<String>) {
         Connection.TRANSACTION_SERIALIZABLE
 
 
-    if (args.isNotEmpty() && args.first().let { it == "-c" || it == "-console" }) {
-        consoleRun(args) {}
+    if (args.isNotEmpty() &&
+        (args.first().let { it != "-c" && it != "-console" } || args.first() == "-h" || args.first() == "-help")
+    ) {
+        if (args.first().let { it == "-c" || it == "-console" })
+            Console.consoleRun(args)
+        else if (args.first().let { it == "-h" || it == "-help" }) {
+            Console.help()
+        }
     } else {
         if (args.isNotEmpty()) {
             logger.warn { "Started with ${args.size} argument(s):" }

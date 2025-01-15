@@ -48,7 +48,7 @@ class Properties : java.io.Serializable {
         } catch (ex: Exception) {
             this.threadCount = mutableStateOf(
                 max(
-                    Runtime.getRuntime().availableProcessors() - 1,
+                    (Runtime.getRuntime().availableProcessors() - 1) / 2,
                     1
                 )
             )

@@ -78,7 +78,7 @@ fun getContent(
             .select(columns = columnsWithHeader.map { it.value })
 
         if (rowsLimit != 0)
-            dt = dt.limit(n = rowsLimit, offset = page.toLong() * rowsLimit)
+            dt = dt.limit(count = rowsLimit).offset(start = page.toLong() * rowsLimit)
 
         if (sort?.second != null) {
             dt = dt.orderBy(

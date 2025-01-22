@@ -19,6 +19,7 @@ import org.dhatim.fastexcel.reader.ReadableWorkbook
 import org.mozilla.universalchardet.UniversalDetector
 import info.downdetector.bigdatascanner.common.Cleaner
 import info.downdetector.bigdatascanner.common.IDetectFunction
+import org.odftoolkit.simple.TextDocument
 import ru.packetdima.datascanner.common.Settings
 import java.io.BufferedInputStream
 import java.io.File
@@ -291,6 +292,59 @@ enum class FileType(val extensions: List<String>) {
             return res
         }
     },
+    ODT(listOf("odt")) {
+        override suspend fun scanFile(file: File, context: CoroutineContext): Document {
+            val str = StringBuilder()
+            val res = Document(file.length(), file.absolutePath)
+            var sample = 0
+
+
+            try {
+                withContext(Dispatchers.IO) {
+                    TextDocument.loadDocument(file).use { document ->
+                        val parIterator = document.paragraphIterator
+                        while (parIterator.hasNext()) {
+                            val paragraph = parIterator.next()
+
+                            str.append(paragraph.textContent)
+                            if (str.length >= Settings.searcher.sampleLength || !isActive) {
+                                res + withContext(context) { scan(str.toString()) }
+                                str.clear()
+                                sample++
+                                if (isSampleOverload(sample) || !isActive) return@withContext
+                            }
+                        }
+                        str.append("\n")
+
+                        val tableIterator = document.tableList.iterator()
+                        while (tableIterator.hasNext()) {
+                            val table = tableIterator.next()
+
+                            table.rowList.forEach { r ->
+                                for (i in 0..r.cellCount - 1) {
+                                    str.append(r.getCellByIndex(i).displayText).append("\n")
+                                    if (str.length >= Settings.searcher.sampleLength || !isActive) {
+                                        res + withContext(context) { scan(str.toString()) }
+                                        str.clear()
+                                        sample++
+                                        if (isSampleOverload(sample) || !isActive) return@withContext
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                res.skip()
+                return res
+            }
+            if (str.isNotEmpty() && !isSampleOverload(sample)) {
+                res + withContext(context) { scan(str.toString()) }
+            }
+
+            return res
+        }
+    },
     ZIP(listOf("zip")) {
         override suspend fun scanFile(file: File, context: CoroutineContext): Document {
             val res = Document(file.length(), file.absolutePath)
@@ -436,13 +490,15 @@ enum class FileType(val extensions: List<String>) {
         fun getFileType(file: File): FileType? {
             return entries.find { fileType -> fileType.extensions.contains(file.extension) }
         }
+
         private fun selectedExtension(fileName: String): Boolean =
             FileType.entries.filter {
                 Settings.searcher.extensions.contains(it.name)
             }.flatMap {
                 it.extensions
             }.any { fileName.endsWith(it) }
-        private fun isSampleOverload(sample : Int) : Boolean {
+
+        private fun isSampleOverload(sample: Int): Boolean {
             return (Settings.searcher.fastScan.value && sample >= Settings.searcher.sampleCount)
         }
     }

@@ -25,6 +25,8 @@ files-pdfbox = { module = "org.apache.pdfbox:pdfbox", version = "2.0.31" } # Upd
 files-poi-core = { module = "org.apache.poi:poi", version.ref = "poi" }
 files-poi-scratchpad = { module = "org.apache.poi:poi-scratchpad", version.ref = "poi" }
 files-poi-ooxml = { module = "org.apache.poi:poi-ooxml", version.ref = "poi" }
+files-odftoolkit-java = { module = "org.odftoolkit:odfdom-java", version = "0.12.0" }
+files-odftoolkit-simple = {module = "org.odftoolkit:simple-odf", version = "0.9.0"}
 
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.6.3" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version = "0.5.0" }

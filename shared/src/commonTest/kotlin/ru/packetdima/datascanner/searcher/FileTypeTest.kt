@@ -34,8 +34,10 @@ internal class FileTypeTest() {
             "veryLong/very_long.docx",
             "TestText.txt",
             "5.csv",
-            "first.doc",
             "small.xls",
+            "first.doc",
+            "first.docx",
+            "first.odt",
             "first.pdf",
             "first.zip",
             "very_short.xlsx",
@@ -50,7 +52,7 @@ internal class FileTypeTest() {
                         val f = File(path.file)
                         val enumType: FileType? = f.let { FileType.getFileType(it) }
                         enumType?.scanFile(f, currentCoroutineContext()).let { doc ->
-                            Matrix.getMap(filename)?.let { m -> assertEquals(m, doc?.getDocumentFields()) }
+                            Matrix.getMap(filename)?.let { m -> assertEquals(m, doc?.getDocumentFields(), "File: $filename") }
                                 ?: println("Нет данных для $filename")
                         }
                     } catch (e: Exception) {

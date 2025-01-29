@@ -19,6 +19,7 @@ import org.dhatim.fastexcel.reader.ReadableWorkbook
 import org.mozilla.universalchardet.UniversalDetector
 import info.downdetector.bigdatascanner.common.Cleaner
 import info.downdetector.bigdatascanner.common.IDetectFunction
+import org.odftoolkit.simple.PresentationDocument
 import org.odftoolkit.simple.TextDocument
 import ru.packetdima.datascanner.common.Settings
 import java.io.BufferedInputStream
@@ -328,6 +329,89 @@ enum class FileType(val extensions: List<String>) {
                                         str.clear()
                                         sample++
                                         if (isSampleOverload(sample) || !isActive) return@withContext
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                res.skip()
+                return res
+            }
+            if (str.isNotEmpty() && !isSampleOverload(sample)) {
+                res + withContext(context) { scan(str.toString()) }
+            }
+
+            return res
+        }
+    },
+    ODP(listOf("odp")) {
+        override suspend fun scanFile(file: File, context: CoroutineContext): Document {
+            val str = StringBuilder()
+            val res = Document(file.length(), file.absolutePath)
+            var sample = 0
+
+
+            try {
+                withContext(Dispatchers.IO) {
+                    PresentationDocument.loadDocument(file).use { document ->
+                        val slideIterator = document.slides
+                        while (slideIterator.hasNext()) {
+                            val slide = slideIterator.next()
+                            str.append(slide.slideName).append("\n")
+
+                            slide.tableList.forEach { table ->
+                                table.rowList.forEach { r ->
+                                    for (i in 0..r.cellCount - 1) {
+                                        str.append(r.getCellByIndex(i).displayText).append("\n")
+                                        if (str.length >= Settings.searcher.sampleLength || !isActive) {
+                                            res + withContext(context) { scan(str.toString()) }
+                                            str.clear()
+                                            sample++
+                                            if (isSampleOverload(sample) || !isActive) return@withContext
+                                        }
+                                    }
+                                }
+                            }
+
+                            val listIterator = slide.listIterator
+                            while(listIterator.hasNext()) {
+                                val list = listIterator.next()
+                                str.append(list.header)
+                                list.items.forEach {
+                                    str.append(it.textContent).append("\n")
+                                    if (str.length >= Settings.searcher.sampleLength || !isActive) {
+                                        res + withContext(context) { scan(str.toString()) }
+                                        str.clear()
+                                        sample++
+                                        if (isSampleOverload(sample) || !isActive) return@withContext
+                                    }
+                                }
+                            }
+                            val textboxIterator = slide.textboxIterator
+                            while(textboxIterator.hasNext()) {
+                                val textbox = textboxIterator.next()
+                                str.append(textbox.textContent).append("\n")
+                                if (str.length >= Settings.searcher.sampleLength || !isActive) {
+                                    res + withContext(context) { scan(str.toString()) }
+                                    str.clear()
+                                    sample++
+                                    if (isSampleOverload(sample) || !isActive) return@withContext
+                                }
+                            }
+                            val noteListIterator = slide.notesPage?.listIterator
+                            if(noteListIterator != null) {
+                                while(noteListIterator.hasNext()) {
+                                    val noteList = noteListIterator.next()
+                                    noteList.items.forEach {
+                                        str.append(it.textContent).append("\n")
+                                        if (str.length >= Settings.searcher.sampleLength || !isActive) {
+                                            res + withContext(context) { scan(str.toString()) }
+                                            str.clear()
+                                            sample++
+                                            if (isSampleOverload(sample) || !isActive) return@withContext
+                                        }
                                     }
                                 }
                             }

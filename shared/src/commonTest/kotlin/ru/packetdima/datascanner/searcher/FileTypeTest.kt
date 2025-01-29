@@ -38,6 +38,7 @@ internal class FileTypeTest() {
             "first.doc",
             "first.docx",
             "first.odt",
+            "first.odp",
             "first.pdf",
             "first.zip",
             "very_short.xlsx",

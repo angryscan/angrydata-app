@@ -12,6 +12,7 @@ first.zip	            1	    1	    1	        1			1		1			1	1	1				1		1			1				1		1
 first.docx              2	    2	    1	        1			1		2			1	1	1				1		1			1				1		1			1	2		1	1
 first.odt               2	    2	    1	        1			1		2			1	1	1				1		1			1				1		1			1	2		1	1
 first.odp               2	    2	    1	        1			1		2			1	1	1				1		1			1				1		1			1	2		1	1
+first.otp               2	    2	    1	        1			1		2			1	1	1				1		1			1				1		1			1	2		1	1
 very_short.xlsx	        0	    1	    0			0			0		0			0	0	0				0		0			0				0		0			0	0		0	0
 inns/braces.txt	        0	    0	    0			0			0		0			0	3	0				0		0			0				0		0			0	0		0	0
 inns/edge.txt	        0	    0	    0			0			0		0			0	6	0				0		0			0				0		0			0	0		0	0

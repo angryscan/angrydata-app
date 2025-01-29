@@ -176,6 +176,15 @@ enum class FileType(val extensions: List<String>) {
                                         else -> {}
                                     }
                                 }
+                                slide.comments.forEach { comment ->
+                                    str.append(comment.text).append("\n")
+                                    if (str.length >= Settings.searcher.sampleLength || !isActive) {
+                                        res + withContext(context) { scan(str.toString()) }
+                                        str.clear()
+                                        sample++
+                                        if (isSampleOverload(sample) || !isActive) return@withContext
+                                    }
+                                }
                             }
                         }
                     }

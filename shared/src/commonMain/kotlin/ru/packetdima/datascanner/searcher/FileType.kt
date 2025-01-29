@@ -19,6 +19,9 @@ import org.dhatim.fastexcel.reader.ReadableWorkbook
 import org.mozilla.universalchardet.UniversalDetector
 import info.downdetector.bigdatascanner.common.Cleaner
 import info.downdetector.bigdatascanner.common.IDetectFunction
+import org.apache.poi.xslf.usermodel.XMLSlideShow
+import org.apache.poi.xslf.usermodel.XSLFTable
+import org.apache.poi.xslf.usermodel.XSLFTextBox
 import org.odftoolkit.simple.PresentationDocument
 import org.odftoolkit.simple.TextDocument
 import ru.packetdima.datascanner.common.Settings
@@ -127,6 +130,61 @@ enum class FileType(val extensions: List<String>) {
                     return res
                 }
             }
+            if (str.isNotEmpty() && !isSampleOverload(sample)) {
+                res + withContext(context) { scan(str.toString()) }
+            }
+            return res
+        }
+    },
+    PPTX(listOf("pptx", "potx")) {
+        override suspend fun scanFile(file: File, context: CoroutineContext): Document {
+            val str = StringBuilder()
+            val res = Document(file.length(), file.absolutePath)
+            var sample = 0
+            try {
+                withContext(Dispatchers.IO) {
+                    FileInputStream(file).use { fileInputStream ->
+                        XMLSlideShow(fileInputStream).use stream@{ presentation ->
+                            presentation.slides.forEach { slide ->
+                                str.append(slide.slideName).append("\n")
+                                str.append(slide.title).append("\n")
+
+                                slide.shapes.forEach { shape ->
+                                    when (shape) {
+                                        is XSLFTextBox -> {
+                                            str.append(shape.text).append("\n")
+                                            if (str.length >= Settings.searcher.sampleLength || !isActive) {
+                                                res + withContext(context) { scan(str.toString()) }
+                                                str.clear()
+                                                sample++
+                                                if (isSampleOverload(sample) || !isActive) return@withContext
+                                            }
+                                        }
+                                        is XSLFTable -> {
+                                            shape.rows.forEach { row ->
+                                                row.cells.forEach { cell ->
+                                                    str.append(cell.text).append("\n")
+                                                    if (str.length >= Settings.searcher.sampleLength || !isActive) {
+                                                        res + withContext(context) { scan(str.toString()) }
+                                                        str.clear()
+                                                        sample++
+                                                        if (isSampleOverload(sample) || !isActive) return@withContext
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        else -> {}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                res.skip()
+                return res
+            }
+
             if (str.isNotEmpty() && !isSampleOverload(sample)) {
                 res + withContext(context) { scan(str.toString()) }
             }
@@ -376,7 +434,7 @@ enum class FileType(val extensions: List<String>) {
                             }
 
                             val listIterator = slide.listIterator
-                            while(listIterator.hasNext()) {
+                            while (listIterator.hasNext()) {
                                 val list = listIterator.next()
                                 str.append(list.header)
                                 list.items.forEach {
@@ -390,7 +448,7 @@ enum class FileType(val extensions: List<String>) {
                                 }
                             }
                             val textboxIterator = slide.textboxIterator
-                            while(textboxIterator.hasNext()) {
+                            while (textboxIterator.hasNext()) {
                                 val textbox = textboxIterator.next()
                                 str.append(textbox.textContent).append("\n")
                                 if (str.length >= Settings.searcher.sampleLength || !isActive) {
@@ -401,8 +459,8 @@ enum class FileType(val extensions: List<String>) {
                                 }
                             }
                             val noteListIterator = slide.notesPage?.listIterator
-                            if(noteListIterator != null) {
-                                while(noteListIterator.hasNext()) {
+                            if (noteListIterator != null) {
+                                while (noteListIterator.hasNext()) {
                                     val noteList = noteListIterator.next()
                                     noteList.items.forEach {
                                         str.append(it.textContent).append("\n")

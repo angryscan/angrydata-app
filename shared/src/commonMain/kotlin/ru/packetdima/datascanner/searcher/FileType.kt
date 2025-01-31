@@ -136,7 +136,7 @@ enum class FileType(val extensions: List<String>) {
             return res
         }
     },
-    PPTX(listOf("pptx", "potx")) {
+    PPTX(listOf("pptx", "potx", "ppsx")) {
         override suspend fun scanFile(file: File, context: CoroutineContext): Document {
             val str = StringBuilder()
             val res = Document(file.length(), file.absolutePath)

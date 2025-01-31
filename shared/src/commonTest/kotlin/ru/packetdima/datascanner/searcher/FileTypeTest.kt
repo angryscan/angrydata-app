@@ -42,6 +42,7 @@ internal class FileTypeTest() {
             "first.otp",
             "first.pptx",
             "first.potx",
+            "first.ppsx",
             "first.pdf",
             "first.zip",
             "very_short.xlsx",

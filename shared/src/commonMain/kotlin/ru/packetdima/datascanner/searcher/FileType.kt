@@ -19,6 +19,9 @@ import org.dhatim.fastexcel.reader.ReadableWorkbook
 import org.mozilla.universalchardet.UniversalDetector
 import info.downdetector.bigdatascanner.common.Cleaner
 import info.downdetector.bigdatascanner.common.IDetectFunction
+import org.apache.poi.hslf.usermodel.HSLFSlideShow
+import org.apache.poi.hslf.usermodel.HSLFTable
+import org.apache.poi.hslf.usermodel.HSLFTextBox
 import org.apache.poi.xslf.usermodel.XMLSlideShow
 import org.apache.poi.xslf.usermodel.XSLFTable
 import org.apache.poi.xslf.usermodel.XSLFTextBox
@@ -175,6 +178,70 @@ enum class FileType(val extensions: List<String>) {
                                         }
                                         else -> {}
                                     }
+                                }
+                                slide.comments.forEach { comment ->
+                                    str.append(comment.text).append("\n")
+                                    if (str.length >= Settings.searcher.sampleLength || !isActive) {
+                                        res + withContext(context) { scan(str.toString()) }
+                                        str.clear()
+                                        sample++
+                                        if (isSampleOverload(sample) || !isActive) return@withContext
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                res.skip()
+                return res
+            }
+
+            if (str.isNotEmpty() && !isSampleOverload(sample)) {
+                res + withContext(context) { scan(str.toString()) }
+            }
+            return res
+        }
+    },
+    PPT(listOf("ppt", "pps", "pot")) {
+        override suspend fun scanFile(file: File, context: CoroutineContext): Document {
+            val str = StringBuilder()
+            val res = Document(file.length(), file.absolutePath)
+            var sample = 0
+            try {
+                withContext(Dispatchers.IO) {
+                    FileInputStream(file).use { fileInputStream ->
+                        HSLFSlideShow(fileInputStream).use { presentation ->
+                            presentation.slides.forEach { slide ->
+                                str.append(slide.slideName).append("\n")
+                                str.append(slide.title).append("\n")
+
+                                slide.shapes.forEach { shape ->
+                                    when(shape) {
+                                        is HSLFTextBox -> {
+                                            str.append(shape.text).append("\n")
+                                            if (str.length >= Settings.searcher.sampleLength || !isActive) {
+                                                res + withContext(context) { scan(str.toString()) }
+                                                str.clear()
+                                                sample++
+                                                if (isSampleOverload(sample) || !isActive) return@withContext
+                                            }
+                                        }
+                                        is HSLFTable -> {
+                                            for(row in 0..shape.numberOfRows-1) {
+                                                for(col in 0..shape.numberOfColumns-1) {
+                                                    str.append(shape.getCell(row, col).text).append("\n")
+                                                    if (str.length >= Settings.searcher.sampleLength || !isActive) {
+                                                        res + withContext(context) { scan(str.toString()) }
+                                                        str.clear()
+                                                        sample++
+                                                        if (isSampleOverload(sample) || !isActive) return@withContext
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
                                 }
                                 slide.comments.forEach { comment ->
                                     str.append(comment.text).append("\n")

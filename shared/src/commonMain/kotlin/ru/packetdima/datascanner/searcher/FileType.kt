@@ -27,10 +27,12 @@ import org.apache.poi.xslf.usermodel.XMLSlideShow
 import org.apache.poi.xslf.usermodel.XSLFTable
 import org.apache.poi.xslf.usermodel.XSLFTextBox
 import org.odftoolkit.odfdom.doc.OdfSpreadsheetDocument
+import org.odftoolkit.odfdom.doc.OdfTextDocument
 import org.odftoolkit.odfdom.dom.element.table.TableTableCellElement
+import org.odftoolkit.odfdom.dom.element.table.TableTableElement
 import org.odftoolkit.odfdom.dom.element.table.TableTableRowElement
+import org.odftoolkit.odfdom.incubator.doc.text.OdfTextParagraph
 import org.odftoolkit.simple.PresentationDocument
-import org.odftoolkit.simple.TextDocument
 import ru.packetdima.datascanner.common.Settings
 import java.io.BufferedInputStream
 import java.io.File
@@ -446,33 +448,45 @@ enum class FileType(val extensions: List<String>) {
 
             try {
                 withContext(Dispatchers.IO) {
-                    TextDocument.loadDocument(file).use { document ->
-                        val parIterator = document.paragraphIterator
-                        while (parIterator.hasNext()) {
-                            val paragraph = parIterator.next()
-
-                            str.append(paragraph.textContent)
-                            if (str.length >= Settings.searcher.sampleLength || !isActive) {
-                                res + withContext(context) { scan(str.toString()) }
-                                str.clear()
-                                sample++
-                                if (isSampleOverload(sample) || !isActive) return@withContext
-                            }
-                        }
-                        str.append("\n")
-
-                        val tableIterator = document.tableList.iterator()
-                        while (tableIterator.hasNext()) {
-                            val table = tableIterator.next()
-
-                            table.rowList.forEach { r ->
-                                for (i in 0..r.cellCount - 1) {
-                                    str.append(r.getCellByIndex(i).displayText).append("\n")
-                                    if (str.length >= Settings.searcher.sampleLength || !isActive) {
-                                        res + withContext(context) { scan(str.toString()) }
-                                        str.clear()
-                                        sample++
-                                        if (isSampleOverload(sample) || !isActive) return@withContext
+                    OdfTextDocument.loadDocument(file).contentRoot.also { content ->
+                        for(contIt in 0 until content.length) {
+                            val item = content.item(contIt)
+                            when(item) {
+                                is OdfTextParagraph -> {
+                                    if(item.textContent.isNotEmpty()) {
+                                        str.append(item.textContent).append("\n")
+                                        if (str.length >= Settings.searcher.sampleLength || !isActive) {
+                                            res + withContext(context) { scan(str.toString()) }
+                                            str.clear()
+                                            sample++
+                                            if (isSampleOverload(sample) || !isActive) return@withContext
+                                        }
+                                    }
+                                }
+                                is TableTableElement -> {
+                                    for(rowIt in 0 until item.length) {
+                                        item.item(rowIt).also { row ->
+                                            if(row is TableTableRowElement) {
+                                                for(celIt in 0 until row.length) {
+                                                    val celElement = row.item(celIt)
+                                                    if(celElement is TableTableCellElement) {
+                                                        for(celContIt in 0 until celElement.length) {
+                                                            celElement.item(celContIt).textContent.also { text ->
+                                                                if(text.isNotEmpty()) {
+                                                                    str.append(text).append("\n")
+                                                                    if (str.length >= Settings.searcher.sampleLength || !isActive) {
+                                                                        res + withContext(context) { scan(str.toString()) }
+                                                                        str.clear()
+                                                                        sample++
+                                                                        if (isSampleOverload(sample) || !isActive) return@withContext
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }

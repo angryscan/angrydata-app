@@ -1,11 +1,10 @@
 package ru.packetdima.datascanner.searcher
 
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.runBlocking
 import org.apache.poi.openxml4j.util.ZipSecureFile
 import info.downdetector.bigdatascanner.common.Cleaner
 import info.downdetector.bigdatascanner.common.DetectFunction
 import info.downdetector.bigdatascanner.common.IDetectFunction
+import kotlinx.coroutines.*
 import ru.packetdima.datascanner.common.Settings
 import ru.packetdima.datascanner.searcher.properties.Properties
 import ru.packetdima.datascanner.ui.UIProperties
@@ -36,7 +35,9 @@ internal class FileTypeTest() {
             "5.csv",
             "small.xls",
             "first.doc",
+            "first.xls",
             "first.docx",
+            "first.xlsx",
             "first.odt",
             "first.odp",
             "first.otp",
@@ -47,6 +48,7 @@ internal class FileTypeTest() {
             "first.ppt",
             "first.pps",
             "first.pot",
+            "first.ods",
             "first.pdf",
             "first.zip",
             "very_short.xlsx",
@@ -56,14 +58,18 @@ internal class FileTypeTest() {
             .forEach { filename ->
                 runBlocking {
                     try {
+                        print("Scanning file: $filename")
+                        val millis = System.currentTimeMillis()
                         val path = javaClass.getResource("/files/$filename")
                         assertNotNull(path)
                         val f = File(path.file)
                         val enumType: FileType? = f.let { FileType.getFileType(it) }
                         enumType?.scanFile(f, currentCoroutineContext()).let { doc ->
-                            Matrix.getMap(filename)?.let { m -> assertEquals(m, doc?.getDocumentFields(), "File: $filename") }
+                            Matrix.getMap(filename)
+                                ?.let { m -> assertEquals(m, doc?.getDocumentFields(), "File: $filename") }
                                 ?: println("Нет данных для $filename")
                         }
+                        println("; OK; time: ${System.currentTimeMillis() - millis}")
                     } catch (e: Exception) {
                         fail(e.message)
                     }

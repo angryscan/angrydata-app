@@ -20,6 +20,9 @@ first.pptm              2	    2	    1	        1			1		2			1	1	1				1		1			1				1	
 first.ppt               2	    2	    1	        1			1		2			1	1	1				1		1			1				1		1			1	2		1	1
 first.pps               2	    2	    1	        1			1		2			1	1	1				1		1			1				1		1			1	2		1	1
 first.pot               2	    2	    1	        1			1		2			1	1	1				1		1			1				1		1			1	2		1	1
+first.xlsx              2	    2	    1	        1			1		2			1	1	1				1		1			1				1		1			1	2		1	1
+first.xls              2	    2	    1	        1			1		2			1	1	1				1		1			1				1		1			1	2		1	1
+first.ods               2	    2	    1	        1			1		2			1	1	1				1		1			1				1		1			1	2		1	1
 very_short.xlsx	        0	    1	    0			0			0		0			0	0	0				0		0			0				0		0			0	0		0	0
 inns/braces.txt	        0	    0	    0			0			0		0			0	3	0				0		0			0				0		0			0	0		0	0
 inns/edge.txt	        0	    0	    0			0			0		0			0	6	0				0		0			0				0		0			0	0		0	0

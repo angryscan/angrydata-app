@@ -22,9 +22,13 @@ import info.downdetector.bigdatascanner.common.IDetectFunction
 import org.apache.poi.hslf.usermodel.HSLFSlideShow
 import org.apache.poi.hslf.usermodel.HSLFTable
 import org.apache.poi.hslf.usermodel.HSLFTextBox
+import org.apache.poi.ss.usermodel.DataFormatter
 import org.apache.poi.xslf.usermodel.XMLSlideShow
 import org.apache.poi.xslf.usermodel.XSLFTable
 import org.apache.poi.xslf.usermodel.XSLFTextBox
+import org.odftoolkit.odfdom.doc.OdfSpreadsheetDocument
+import org.odftoolkit.odfdom.dom.element.table.TableTableCellElement
+import org.odftoolkit.odfdom.dom.element.table.TableTableRowElement
 import org.odftoolkit.simple.PresentationDocument
 import org.odftoolkit.simple.TextDocument
 import ru.packetdima.datascanner.common.Settings
@@ -163,6 +167,7 @@ enum class FileType(val extensions: List<String>) {
                                                 if (isSampleOverload(sample) || !isActive) return@withContext
                                             }
                                         }
+
                                         is XSLFTable -> {
                                             shape.rows.forEach { row ->
                                                 row.cells.forEach { cell ->
@@ -176,6 +181,7 @@ enum class FileType(val extensions: List<String>) {
                                                 }
                                             }
                                         }
+
                                         else -> {}
                                     }
                                 }
@@ -217,7 +223,7 @@ enum class FileType(val extensions: List<String>) {
                                 str.append(slide.title).append("\n")
 
                                 slide.shapes.forEach { shape ->
-                                    when(shape) {
+                                    when (shape) {
                                         is HSLFTextBox -> {
                                             str.append(shape.text).append("\n")
                                             if (str.length >= Settings.searcher.sampleLength || !isActive) {
@@ -227,9 +233,10 @@ enum class FileType(val extensions: List<String>) {
                                                 if (isSampleOverload(sample) || !isActive) return@withContext
                                             }
                                         }
+
                                         is HSLFTable -> {
-                                            for(row in 0..shape.numberOfRows-1) {
-                                                for(col in 0..shape.numberOfColumns-1) {
+                                            for (row in 0..shape.numberOfRows - 1) {
+                                                for (col in 0..shape.numberOfColumns - 1) {
                                                     str.append(shape.getCell(row, col).text).append("\n")
                                                     if (str.length >= Settings.searcher.sampleLength || !isActive) {
                                                         res + withContext(context) { scan(str.toString()) }
@@ -366,12 +373,15 @@ enum class FileType(val extensions: List<String>) {
                 withContext(Dispatchers.IO) {
                     FileInputStream(file).use { fileInputStream ->
                         HSSFWorkbook(fileInputStream).use { workbook ->
+                            val dataFormatter = DataFormatter()
                             workbook.forEach workbook@{ sheet ->
                                 sheet?.forEach { row ->
                                     row?.forEach { cell ->
                                         if (cell != null) {
                                             when (cell.cellType) {
-                                                CellType.NUMERIC -> str.append(cell.numericCellValue).append("\n")
+                                                CellType.NUMERIC -> str.append(dataFormatter.formatCellValue(cell))
+                                                    .append("\n")
+
                                                 CellType.STRING -> str.append(cell.stringCellValue).append("\n")
                                                 else -> {}
                                             }
@@ -486,7 +496,6 @@ enum class FileType(val extensions: List<String>) {
             val res = Document(file.length(), file.absolutePath)
             var sample = 0
 
-
             try {
                 withContext(Dispatchers.IO) {
                     PresentationDocument.loadDocument(file).use { document ->
@@ -560,6 +569,50 @@ enum class FileType(val extensions: List<String>) {
                 res + withContext(context) { scan(str.toString()) }
             }
 
+            return res
+        }
+    },
+    ODS(listOf("ods")) {
+        override suspend fun scanFile(file: File, context: CoroutineContext): Document {
+            val str = StringBuilder()
+            val res = Document(file.length(), file.absolutePath)
+            var sample = 0
+            try {
+                withContext(Dispatchers.IO) {
+                    OdfSpreadsheetDocument.loadDocument(file).use { document ->
+                        document.spreadsheetTables.forEach { table ->
+                            table.rowElementList.forEach { row ->
+                                if(row is TableTableRowElement) {
+                                    for(celIt in 0 until row.length) {
+                                        val celElement = row.item(celIt)
+                                        if(celElement is TableTableCellElement) {
+                                            for(celContIt in 0 until celElement.length) {
+                                                celElement.item(celContIt).textContent.also { text ->
+                                                    if(text.isNotEmpty()) {
+                                                        str.append(text).append("\n")
+                                                        if (str.length >= Settings.searcher.sampleLength || !isActive) {
+                                                            res + withContext(context) { scan(str.toString()) }
+                                                            str.clear()
+                                                            sample++
+                                                            if (isSampleOverload(sample) || !isActive) return@withContext
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                res.skip()
+                return res
+            }
+            if (str.isNotEmpty() && !isSampleOverload(sample)) {
+                res + withContext(context) { scan(str.toString()) }
+            }
             return res
         }
     },

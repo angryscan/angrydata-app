@@ -29,6 +29,8 @@ kotlin {
                 api(libs.exposed.core)
                 api(libs.exposed.dao)
                 api(libs.exposed.jdbc)
+                api(libs.exposed.json)
+                api(libs.exposed.datetime)
 
                 api(libs.datascanner)
 
@@ -44,7 +46,7 @@ kotlin {
                 implementation(libs.logging.oshai)
                 implementation(libs.logging.logback)
 
-
+                api(libs.koin.core)
             }
         }
         commonTest {

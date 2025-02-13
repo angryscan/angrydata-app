@@ -5,6 +5,7 @@ import java.io.File
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.absolute
+import kotlin.io.path.absolutePathString
 
 @Suppress("Unused")
 object AppFiles {
@@ -24,6 +25,8 @@ object AppFiles {
     val LoggingDir: Path = WorkDirPath.resolve("logs")
 
     val ResultDBFile: File = WorkDirPath.resolve("result.db").toFile()
+    val AppSettingsFile: String = WorkDirPath.resolve("AppSettings.json").absolutePathString()
+    val ScanSettingsFile: String = WorkDirPath.resolve("ScanSettings.json").absolutePathString()
     val SearchSettingsFile: File = WorkDirPath.resolve("properties.json").toFile()
     val UISettingsFile: File = WorkDirPath.resolve("ui.json").toFile()
     val UserFunctionsFile: File = WorkDirPath.resolve("functions.json").toFile()

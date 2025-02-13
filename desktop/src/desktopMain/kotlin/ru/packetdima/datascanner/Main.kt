@@ -17,9 +17,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.TransactionManager
+import org.koin.core.context.startKoin
 import ru.packetdima.datascanner.common.AppFiles
 import ru.packetdima.datascanner.common.Settings
 import ru.packetdima.datascanner.common.UserFunctionLoader
+import ru.packetdima.datascanner.di.databaseModule
+import ru.packetdima.datascanner.di.scanModule
+import ru.packetdima.datascanner.di.settingsModule
 import ru.packetdima.datascanner.searcher.properties.Properties
 import ru.packetdima.datascanner.ui.UIProperties
 import ru.packetdima.datascanner.ui.custom.ApplicationErrorWindow
@@ -119,6 +123,20 @@ suspend fun main(args: Array<String>) {
             logger.error { "Cannot access to database. Check it is in use by another process!" }
             return
         }
+    }
+
+    try {
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
+    } catch (_: Exception) {
+        logger.warn { "Cannot load system look and feel" }
+    }
+
+    startKoin {
+        modules(
+            settingsModule,
+            databaseModule,
+            scanModule
+        )
     }
 
     Settings.userFunctionLoader = UserFunctionLoader(AppFiles.UserFunctionsFile)

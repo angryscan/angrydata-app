@@ -1,7 +1,8 @@
-name: Tests Linux
+name: Build Linux
 
 on:
   release:
+    types: [published]
 
 jobs:
   Tests-Linux:
@@ -9,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      actions: read
+      checks: write
 
     steps:
       - uses: actions/checkout@v4
@@ -60,15 +63,18 @@ jobs:
       - name: Validate gradle wrappers
         uses: gradle/actions/wrapper-validation@v4
 
-      - name: Set verion variable
-        run: export VERSION=${{github.event.release.tag_name}}
+      - name: Get version
+        run: ./gradlew printVersion
+        env:
+          VERSION: ${{github.event.release.tag_name}}
 
       - name: Build with Gradle
         run: ./gradlew packageReleaseDeb
-
-      - name: Get version
-        run: ./gradlew printVersion
+        env:
+          VERSION: ${{github.event.release.tag_name}}
 
       - name: Upload artifact
         run: |
-          gh release upload ${{github.event.release.tag_name}} './desktop/build/compose/binaries/main-release/deb/Big Data Scanner-${{github.event.release.tag_name}}.deb'
+          gh release upload ${{github.event.release.tag_name}} './desktop/build/compose/binaries/main-release/deb/big-data-scanner_${{github.event.release.tag_name}}-1_amd64.deb'
+        env:
+          GH_TOKEN: ${{ github.token }}

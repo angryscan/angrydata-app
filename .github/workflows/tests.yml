@@ -1,11 +1,11 @@
-name: Tests Linux
+name: Tests
 
 on:
   push:
   pull_request:
 
 jobs:
-  Tests-Linux:
+  Linux:
 
     runs-on: ubuntu-latest
     permissions:
@@ -36,7 +36,7 @@ jobs:
       with:
         run: ./gradlew allTests --no-daemon
 
-  Tests-Windows:
+  Windows:
     runs-on: windows-latest
     permissions:
       contents: read

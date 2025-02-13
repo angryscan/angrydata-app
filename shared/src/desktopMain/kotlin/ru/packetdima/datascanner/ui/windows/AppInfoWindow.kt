@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -15,17 +14,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
-import ru.packetdima.datascanner.resources.Res
-import ru.packetdima.datascanner.resources.close
-import ru.packetdima.datascanner.resources.iAbout
-import ru.packetdima.datascanner.resources.iVersion
+import ru.packetdima.datascanner.resources.*
 
 
 fun getAppVersion(): String = System.getProperty("jpackage.app-version") ?: "Debug"
 
-@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun AppInfoWindow(onCloseClick: () -> Unit) {
     val scrollState = rememberScrollState()
@@ -33,7 +27,7 @@ fun AppInfoWindow(onCloseClick: () -> Unit) {
     Box(
         modifier = Modifier
             .size(400.dp, 300.dp)
-            .background(colors.surface, RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colors.surface, RoundedCornerShape(12.dp))
             .border(BorderStroke(1.dp, MaterialTheme.colors.primary), shape = RoundedCornerShape(4.dp))
             .padding(10.dp)
             .testTag("appinfo_window"),
@@ -53,11 +47,16 @@ fun AppInfoWindow(onCloseClick: () -> Unit) {
                 ) {
                     Text(
                         text = "${stringResource(Res.string.iVersion)}: ${getAppVersion()}",
-                        color = colors.onSurface
+                        color = MaterialTheme.colors.onSurface
+                    )
+                    Text(
+                        text = stringResource(Res.string.iCopyright),
+                        color = MaterialTheme.colors.onSurface,
+                        modifier = Modifier.padding(0.dp, 10.dp, 2.dp, 0.dp)
                     )
                     Text(
                         text = stringResource(Res.string.iAbout),
-                        color = colors.onSurface,
+                        color = MaterialTheme.colors.onSurface,
                         modifier = Modifier.padding(0.dp, 10.dp, 2.dp, 0.dp)
                     )
 
@@ -72,7 +71,7 @@ fun AppInfoWindow(onCloseClick: () -> Unit) {
                     onClick = onCloseClick,
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = Color.Transparent,
-                        contentColor = colors.error
+                        contentColor = MaterialTheme.colors.error
                     ),
                     border = null,
                     modifier = Modifier.testTag("close_appinfo_button")

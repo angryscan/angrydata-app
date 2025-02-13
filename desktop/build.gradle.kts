@@ -46,15 +46,8 @@ compose.desktop {
     application {
         mainClass = "ru.packetdima.datascanner.MainKt"
 
-        jvmArgs += listOf("-Xmx6g")
-        args += listOf(
-            "-c",
-            "-extensions",
-            "XLSX,Text,DOCX,DOC,TAR",
-            "-path",
-            "C:\\Users\\soulo\\OneDrive\\Документы\\Разное",
-            "-report_encoding",
-            "Windows-1251"
+        jvmArgs += listOf(
+            "-Xmx6g"
         )
 
         buildTypes.release.proguard {
@@ -66,8 +59,9 @@ compose.desktop {
 
         nativeDistributions {
             packageName = "Big Data Scanner"
-            vendor = "Sber Cybersecurity Algorithms"
+            vendor = "LLC DETECTICUM"
             packageVersion = version.toString()
+            copyright = "© 2024 LLC DETECTICUM"
 
             modules("java.sql", "jdk.charsets", "jdk.unsupported", "java.naming")
 
@@ -77,10 +71,9 @@ compose.desktop {
 
             windows {
                 menuGroup = "start-menu-group"
-                installationPath = "C:\\Program Files\\Big Data Scanner"
+                installationPath = "Big Data Scanner"
                 upgradeUuid = "6e025a94-4f4b-4446-a750-8e5c65d8c523"
                 iconFile.set(project(":shared").file("src\\commonMain\\resources\\icons\\icon.ico"))
-
             }
             linux {
                 debMaintainer = "AAleksKravchenko@sber.ru"

@@ -19,6 +19,7 @@ import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import ru.packetdima.datascanner.common.AppFiles
 import ru.packetdima.datascanner.common.Settings
+import ru.packetdima.datascanner.common.UserFunctionLoader
 import ru.packetdima.datascanner.searcher.properties.Properties
 import ru.packetdima.datascanner.ui.UIProperties
 import ru.packetdima.datascanner.ui.custom.ApplicationErrorWindow
@@ -120,6 +121,7 @@ suspend fun main(args: Array<String>) {
         }
     }
 
+    Settings.userFunctionLoader = UserFunctionLoader(AppFiles.UserFunctionsFile)
     Settings.searcher = Properties(AppFiles.SearchSettingsFile)
     Settings.ui = UIProperties(AppFiles.UISettingsFile)
 
@@ -135,11 +137,11 @@ suspend fun main(args: Array<String>) {
 
 
     if (args.isNotEmpty() &&
-        (args.first().let { it != "-c" && it != "-console" } || args.first() == "-h" || args.first() == "-help")
+        arrayOf("-c", "-console", "-h", "-help").any { args.contains(it) }
     ) {
-        if (args.first().let { it == "-c" || it == "-console" })
+        if (arrayOf("-c", "-console").any { args.contains(it) })
             Console.consoleRun(args)
-        else if (args.first().let { it == "-h" || it == "-help" }) {
+        else if (arrayOf("-h", "-help").any { args.contains(it) }) {
             Console.help()
         }
     } else {

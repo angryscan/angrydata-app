@@ -6,7 +6,7 @@ import org.jetbrains.exposed.sql.JoinType
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import ru.packetdima.datascanner.common.AppFiles
-import info.downdetector.bigdatascanner.common.DetectFunction
+import info.downdetector.bigdatascanner.common.IDetectFunction
 import ru.packetdima.datascanner.common.Settings
 import ru.packetdima.datascanner.misc.FileSize
 import ru.packetdima.datascanner.searcher.model.Attributes
@@ -28,7 +28,7 @@ internal class SensitiveSearcherTest {
 
         inspectDirectory(path)
 
-        val results = mutableMapOf<String, MutableMap<DetectFunction, Int>>()
+        val results = mutableMapOf<String, MutableMap<IDetectFunction, Int>>()
         transaction {
             Reports.join(Attributes, JoinType.INNER, Reports.attribute, Attributes.id)
                 .join(ScannedFiles, JoinType.INNER, Reports.file, ScannedFiles.id)

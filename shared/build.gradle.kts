@@ -38,6 +38,8 @@ kotlin {
                 implementation(libs.files.poi.core)
                 implementation(libs.files.poi.ooxml)
                 implementation(libs.files.poi.scratchpad)
+                implementation(libs.files.odftoolkit.java)
+                implementation(libs.files.odftoolkit.simple)
 
                 implementation(libs.logging.oshai)
                 implementation(libs.logging.logback)

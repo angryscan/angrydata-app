@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import info.downdetector.bigdatascanner.common.DetectFunction
+import ru.packetdima.datascanner.common.UserSignature
 import ru.packetdima.datascanner.searcher.FileType
 import ru.packetdima.datascanner.serializers.MutableStateSerializer
 import java.io.File
@@ -17,6 +18,8 @@ import kotlin.math.min
 class Properties : java.io.Serializable {
     val extensions: MutableList<String> = mutableListOf()
     val detectFunctions: MutableList<DetectFunction> = mutableListOf()
+    @Serializable
+    val userSignature: MutableList<UserSignature> = mutableListOf()
 
     @Serializable(with = MutableStateSerializer::class)
     var threadCount: MutableState<Int>
@@ -45,6 +48,8 @@ class Properties : java.io.Serializable {
             this.fastScan = prop.fastScan
 
             this.detectFunctions.addAll(prop.detectFunctions)
+
+            this.userSignature.addAll(prop.userSignature)
         } catch (ex: Exception) {
             this.threadCount = mutableStateOf(
                 max(

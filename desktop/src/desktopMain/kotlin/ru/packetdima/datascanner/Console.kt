@@ -119,6 +119,7 @@ object Console {
         path = getArg(map, "-path", null)
         val fileExtensions = getArg(map, "-extensions", Settings.searcher.extensions.joinToString(","))
         val detectFunctions = getArg(map, "-detect", Settings.searcher.detectFunctions.joinToString(","))
+        val userSignatures = getArg(map, "-usig_detect", Settings.userFunctionLoader.userSignature.joinToString(","))
         val fastScan = getArg(map, "-fast", Settings.searcher.fastScan.value)
         val fullScan = getArg(map, "-full", !fastScan)
         val threadCount = getArg(map, "threads", Settings.searcher.threadCount.value)
@@ -199,6 +200,18 @@ object Console {
             }
         }
         println("Detect functions: ${Settings.searcher.detectFunctions.joinToString(", ")}")
+
+        if(userSignatures != null) {
+            Settings.searcher.userSignature.clear()
+            userSignatures.split(",").forEach { sig ->
+                val sigo = Settings.userFunctionLoader.userSignature.find { it.name == sig }
+                if (sigo != null)
+                    Settings.searcher.userSignature.add(sigo)
+                else
+                    println("Unknown user detect signature: $sig, skipping...")
+            }
+        }
+        println("User signature functions: ${Settings.searcher.userSignature.joinToString(", ")}")
     }
 
     fun help() {
@@ -208,6 +221,7 @@ Allowed parameters:
 -path [path] - path to scan
 -extensions [extensions] - comma-separated list of file extensions
 -detect [detect functions] - comma-separated list of detect functions
+-usig_detect [user detect signatures] - comma-separated list of user detect signatures
 -fast - fast scan
 -full - full scan
 -console - console mode
@@ -226,6 +240,8 @@ Allowed extensions:
 
 Allowed detect functions: 
         ${DetectFunction.entries.joinToString("\n        ") { "${it.name} (${it.writeName})" }}
+Allowed user detect signatures:
+        ${Settings.userFunctionLoader.userSignature.joinToString("\n        ") { "${it.name} (${it.writeName})" }} 
             """.trimIndent()
         )
     }

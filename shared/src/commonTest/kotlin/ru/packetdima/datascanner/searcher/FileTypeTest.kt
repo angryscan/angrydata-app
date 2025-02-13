@@ -5,6 +5,7 @@ import kotlinx.coroutines.runBlocking
 import org.apache.poi.openxml4j.util.ZipSecureFile
 import info.downdetector.bigdatascanner.common.Cleaner
 import info.downdetector.bigdatascanner.common.DetectFunction
+import info.downdetector.bigdatascanner.common.IDetectFunction
 import ru.packetdima.datascanner.common.Settings
 import ru.packetdima.datascanner.searcher.properties.Properties
 import ru.packetdima.datascanner.ui.UIProperties
@@ -33,8 +34,14 @@ internal class FileTypeTest() {
             "veryLong/very_long.docx",
             "TestText.txt",
             "5.csv",
-            "first.doc",
             "small.xls",
+            "first.doc",
+            "first.docx",
+            "first.odt",
+            "first.odp",
+            "first.otp",
+            "first.pptx",
+            "first.potx",
             "first.pdf",
             "first.zip",
             "very_short.xlsx",
@@ -49,7 +56,7 @@ internal class FileTypeTest() {
                         val f = File(path.file)
                         val enumType: FileType? = f.let { FileType.getFileType(it) }
                         enumType?.scanFile(f, currentCoroutineContext()).let { doc ->
-                            Matrix.getMap(filename)?.let { m -> assertEquals(m, doc?.getDocumentFields()) }
+                            Matrix.getMap(filename)?.let { m -> assertEquals(m, doc?.getDocumentFields(), "File: $filename") }
                                 ?: println("Нет данных для $filename")
                         }
                     } catch (e: Exception) {
@@ -76,7 +83,7 @@ internal class FileTypeTest() {
         )
             .map { filename -> "veryLong/$filename" }
 
-        fun checkScan(filename: String, map: Map<DetectFunction, Int>?, isFastScan: Boolean = false) {
+        fun checkScan(filename: String, map: Map<IDetectFunction, Int>?, isFastScan: Boolean = false) {
             Settings.searcher.fastScan.value = isFastScan
             assertEquals(isFastScan, Settings.searcher.fastScan.value)
 

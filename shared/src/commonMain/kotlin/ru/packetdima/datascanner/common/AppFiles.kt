@@ -26,4 +26,5 @@ object AppFiles {
     val ResultDBFile: File = WorkDirPath.resolve("result.db").toFile()
     val SearchSettingsFile: File = WorkDirPath.resolve("properties.json").toFile()
     val UISettingsFile: File = WorkDirPath.resolve("ui.json").toFile()
+    val UserFunctionsFile: File = WorkDirPath.resolve("functions.json").toFile()
 }

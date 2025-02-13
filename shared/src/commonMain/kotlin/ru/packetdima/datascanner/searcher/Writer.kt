@@ -70,6 +70,13 @@ object Writer {
                         translate = runBlocking { attr.readableName() }
                     }
                 }
+                for (attr in Settings.searcher.userSignature) {
+                    Attribute.new {
+                        name = attr.writeName
+                        factor = 1
+                        translate = runBlocking { attr.writeName }
+                    }
+                }
             }
         }
     }

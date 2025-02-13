@@ -18,7 +18,12 @@ import org.apache.poi.xwpf.usermodel.XWPFTable
 import org.dhatim.fastexcel.reader.ReadableWorkbook
 import org.mozilla.universalchardet.UniversalDetector
 import info.downdetector.bigdatascanner.common.Cleaner
-import info.downdetector.bigdatascanner.common.DetectFunction
+import info.downdetector.bigdatascanner.common.IDetectFunction
+import org.apache.poi.xslf.usermodel.XMLSlideShow
+import org.apache.poi.xslf.usermodel.XSLFTable
+import org.apache.poi.xslf.usermodel.XSLFTextBox
+import org.odftoolkit.simple.PresentationDocument
+import org.odftoolkit.simple.TextDocument
 import ru.packetdima.datascanner.common.Settings
 import java.io.BufferedInputStream
 import java.io.File
@@ -125,6 +130,70 @@ enum class FileType(val extensions: List<String>) {
                     return res
                 }
             }
+            if (str.isNotEmpty() && !isSampleOverload(sample)) {
+                res + withContext(context) { scan(str.toString()) }
+            }
+            return res
+        }
+    },
+    PPTX(listOf("pptx", "potx")) {
+        override suspend fun scanFile(file: File, context: CoroutineContext): Document {
+            val str = StringBuilder()
+            val res = Document(file.length(), file.absolutePath)
+            var sample = 0
+            try {
+                withContext(Dispatchers.IO) {
+                    FileInputStream(file).use { fileInputStream ->
+                        XMLSlideShow(fileInputStream).use stream@{ presentation ->
+                            presentation.slides.forEach { slide ->
+                                str.append(slide.slideName).append("\n")
+                                str.append(slide.title).append("\n")
+
+                                slide.shapes.forEach { shape ->
+                                    when (shape) {
+                                        is XSLFTextBox -> {
+                                            str.append(shape.text).append("\n")
+                                            if (str.length >= Settings.searcher.sampleLength || !isActive) {
+                                                res + withContext(context) { scan(str.toString()) }
+                                                str.clear()
+                                                sample++
+                                                if (isSampleOverload(sample) || !isActive) return@withContext
+                                            }
+                                        }
+                                        is XSLFTable -> {
+                                            shape.rows.forEach { row ->
+                                                row.cells.forEach { cell ->
+                                                    str.append(cell.text).append("\n")
+                                                    if (str.length >= Settings.searcher.sampleLength || !isActive) {
+                                                        res + withContext(context) { scan(str.toString()) }
+                                                        str.clear()
+                                                        sample++
+                                                        if (isSampleOverload(sample) || !isActive) return@withContext
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        else -> {}
+                                    }
+                                }
+                                slide.comments.forEach { comment ->
+                                    str.append(comment.text).append("\n")
+                                    if (str.length >= Settings.searcher.sampleLength || !isActive) {
+                                        res + withContext(context) { scan(str.toString()) }
+                                        str.clear()
+                                        sample++
+                                        if (isSampleOverload(sample) || !isActive) return@withContext
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                res.skip()
+                return res
+            }
+
             if (str.isNotEmpty() && !isSampleOverload(sample)) {
                 res + withContext(context) { scan(str.toString()) }
             }
@@ -291,6 +360,142 @@ enum class FileType(val extensions: List<String>) {
             return res
         }
     },
+    ODT(listOf("odt")) {
+        override suspend fun scanFile(file: File, context: CoroutineContext): Document {
+            val str = StringBuilder()
+            val res = Document(file.length(), file.absolutePath)
+            var sample = 0
+
+
+            try {
+                withContext(Dispatchers.IO) {
+                    TextDocument.loadDocument(file).use { document ->
+                        val parIterator = document.paragraphIterator
+                        while (parIterator.hasNext()) {
+                            val paragraph = parIterator.next()
+
+                            str.append(paragraph.textContent)
+                            if (str.length >= Settings.searcher.sampleLength || !isActive) {
+                                res + withContext(context) { scan(str.toString()) }
+                                str.clear()
+                                sample++
+                                if (isSampleOverload(sample) || !isActive) return@withContext
+                            }
+                        }
+                        str.append("\n")
+
+                        val tableIterator = document.tableList.iterator()
+                        while (tableIterator.hasNext()) {
+                            val table = tableIterator.next()
+
+                            table.rowList.forEach { r ->
+                                for (i in 0..r.cellCount - 1) {
+                                    str.append(r.getCellByIndex(i).displayText).append("\n")
+                                    if (str.length >= Settings.searcher.sampleLength || !isActive) {
+                                        res + withContext(context) { scan(str.toString()) }
+                                        str.clear()
+                                        sample++
+                                        if (isSampleOverload(sample) || !isActive) return@withContext
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                res.skip()
+                return res
+            }
+            if (str.isNotEmpty() && !isSampleOverload(sample)) {
+                res + withContext(context) { scan(str.toString()) }
+            }
+
+            return res
+        }
+    },
+    ODP(listOf("odp", "otp")) {
+        override suspend fun scanFile(file: File, context: CoroutineContext): Document {
+            val str = StringBuilder()
+            val res = Document(file.length(), file.absolutePath)
+            var sample = 0
+
+
+            try {
+                withContext(Dispatchers.IO) {
+                    PresentationDocument.loadDocument(file).use { document ->
+                        val slideIterator = document.slides
+                        while (slideIterator.hasNext()) {
+                            val slide = slideIterator.next()
+                            str.append(slide.slideName).append("\n")
+
+                            slide.tableList.forEach { table ->
+                                table.rowList.forEach { r ->
+                                    for (i in 0..r.cellCount - 1) {
+                                        str.append(r.getCellByIndex(i).displayText).append("\n")
+                                        if (str.length >= Settings.searcher.sampleLength || !isActive) {
+                                            res + withContext(context) { scan(str.toString()) }
+                                            str.clear()
+                                            sample++
+                                            if (isSampleOverload(sample) || !isActive) return@withContext
+                                        }
+                                    }
+                                }
+                            }
+
+                            val listIterator = slide.listIterator
+                            while (listIterator.hasNext()) {
+                                val list = listIterator.next()
+                                str.append(list.header)
+                                list.items.forEach {
+                                    str.append(it.textContent).append("\n")
+                                    if (str.length >= Settings.searcher.sampleLength || !isActive) {
+                                        res + withContext(context) { scan(str.toString()) }
+                                        str.clear()
+                                        sample++
+                                        if (isSampleOverload(sample) || !isActive) return@withContext
+                                    }
+                                }
+                            }
+                            val textboxIterator = slide.textboxIterator
+                            while (textboxIterator.hasNext()) {
+                                val textbox = textboxIterator.next()
+                                str.append(textbox.textContent).append("\n")
+                                if (str.length >= Settings.searcher.sampleLength || !isActive) {
+                                    res + withContext(context) { scan(str.toString()) }
+                                    str.clear()
+                                    sample++
+                                    if (isSampleOverload(sample) || !isActive) return@withContext
+                                }
+                            }
+                            val noteListIterator = slide.notesPage?.listIterator
+                            if (noteListIterator != null) {
+                                while (noteListIterator.hasNext()) {
+                                    val noteList = noteListIterator.next()
+                                    noteList.items.forEach {
+                                        str.append(it.textContent).append("\n")
+                                        if (str.length >= Settings.searcher.sampleLength || !isActive) {
+                                            res + withContext(context) { scan(str.toString()) }
+                                            str.clear()
+                                            sample++
+                                            if (isSampleOverload(sample) || !isActive) return@withContext
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                res.skip()
+                return res
+            }
+            if (str.isNotEmpty() && !isSampleOverload(sample)) {
+                res + withContext(context) { scan(str.toString()) }
+            }
+
+            return res
+        }
+    },
     ZIP(listOf("zip")) {
         override suspend fun scanFile(file: File, context: CoroutineContext): Document {
             val res = Document(file.length(), file.absolutePath)
@@ -419,9 +624,13 @@ enum class FileType(val extensions: List<String>) {
 
     abstract suspend fun scanFile(file: File, context: CoroutineContext): Document
 
-    protected fun scan(text: String): Map<DetectFunction, Int> {
+    protected fun scan(text: String): Map<IDetectFunction, Int> {
         val cleanText = Cleaner.cleanText(text)
         return Settings.searcher.detectFunctions.map { f ->
+            f to f.scan(cleanText).takeIf { it > 0 }
+        }.mapNotNull { p ->
+            p.second?.let { p.first to it }
+        }.toMap() + Settings.searcher.userSignature.map { f ->
             f to f.scan(cleanText).takeIf { it > 0 }
         }.mapNotNull { p ->
             p.second?.let { p.first to it }
@@ -432,13 +641,15 @@ enum class FileType(val extensions: List<String>) {
         fun getFileType(file: File): FileType? {
             return entries.find { fileType -> fileType.extensions.contains(file.extension) }
         }
+
         private fun selectedExtension(fileName: String): Boolean =
             FileType.entries.filter {
                 Settings.searcher.extensions.contains(it.name)
             }.flatMap {
                 it.extensions
             }.any { fileName.endsWith(it) }
-        private fun isSampleOverload(sample : Int) : Boolean {
+
+        private fun isSampleOverload(sample: Int): Boolean {
             return (Settings.searcher.fastScan.value && sample >= Settings.searcher.sampleCount)
         }
     }

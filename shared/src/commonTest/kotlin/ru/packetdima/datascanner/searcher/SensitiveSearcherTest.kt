@@ -8,7 +8,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import ru.packetdima.datascanner.common.AppFiles
 import info.downdetector.bigdatascanner.common.IDetectFunction
 import ru.packetdima.datascanner.common.Settings
-import ru.packetdima.datascanner.misc.FileSize
+import ru.packetdima.datascanner.scan.common.FileSize
 import ru.packetdima.datascanner.searcher.model.Attributes
 import ru.packetdima.datascanner.searcher.model.Reports
 import ru.packetdima.datascanner.searcher.model.ScannedFiles

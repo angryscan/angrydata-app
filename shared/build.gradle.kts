@@ -13,6 +13,7 @@ kotlin {
                 implementation(compose.desktop.common)
                 api(compose.components.resources)
                 implementation(compose.materialIconsExtended)
+                implementation(compose.material3)
 
                 implementation(libs.dorkbox)
 
@@ -47,12 +48,17 @@ kotlin {
                 implementation(libs.logging.logback)
 
                 api(libs.koin.core)
+                api(libs.koin.compose)
+                api(libs.koin.compose.viewmodel)
+                implementation(libs.lifecycle.viewmodel)
             }
         }
         commonTest {
             dependencies {
                 implementation(kotlin("test"))
                 implementation(compose.desktop.uiTestJUnit4)
+                implementation(libs.koin.test)
+                implementation(libs.koin.test.junit4)
             }
         }
         val desktopMain by getting {

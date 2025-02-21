@@ -7,7 +7,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import ru.packetdima.datascanner.searcher.FileType
+import ru.packetdima.datascanner.scan.functions.UserSignature
+import ru.packetdima.datascanner.scan.common.FileType
 import ru.packetdima.datascanner.serializers.MutableStateSerializer
 import java.io.File
 
@@ -17,7 +18,7 @@ class ScanSettings: KoinComponent {
 
     private val settingsFile: ScanSettingsFile by inject()
 
-    val extensions: MutableList<String> = mutableListOf()
+    val extensions: MutableList<FileType> = mutableListOf()
     val detectFunctions: MutableList<DetectFunction> = mutableListOf()
 
     @Serializable
@@ -32,10 +33,6 @@ class ScanSettings: KoinComponent {
         try {
             val prop: ScanSettings = Json.decodeFromString(settingsFile.readText())
 
-
-            if (!FileType.entries.map { it.name }.containsAll(prop.extensions))
-                throw Exception("Not all available")
-
             this.extensions.addAll(prop.extensions)
 
             this.fastScan = prop.fastScan
@@ -45,7 +42,7 @@ class ScanSettings: KoinComponent {
             this.userSignature.addAll(prop.userSignature)
         } catch (ex: Exception) {
             this.extensions.clear()
-            this.extensions.addAll(FileType.entries.map { it.name }.filter { it != "ZIP" })
+            this.extensions.addAll(FileType.entries.filter { it != FileType.ZIP && it != FileType.RAR })
             this.detectFunctions.clear()
             this.detectFunctions.addAll(DetectFunction.entries.toTypedArray())
             this.fastScan = mutableStateOf(false)

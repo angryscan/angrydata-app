@@ -4,8 +4,8 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.times
 import org.jetbrains.exposed.sql.transactions.transaction
-import ru.packetdima.datascanner.misc.FileSize
-import ru.packetdima.datascanner.misc.OS
+import ru.packetdima.datascanner.scan.common.FileSize
+import ru.packetdima.datascanner.common.OS
 import ru.packetdima.datascanner.searcher.model.*
 import ru.packetdima.datascanner.searcher.model.ResultRow
 import java.io.File

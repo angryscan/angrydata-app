@@ -5,6 +5,8 @@ import kotlinx.coroutines.runBlocking
 import info.downdetector.bigdatascanner.common.Cleaner
 import info.downdetector.bigdatascanner.common.DetectFunction
 import ru.packetdima.datascanner.common.Settings
+import ru.packetdima.datascanner.scan.common.Document
+import ru.packetdima.datascanner.scan.common.FileType
 import ru.packetdima.datascanner.searcher.properties.Properties
 import ru.packetdima.datascanner.ui.UIProperties
 import java.io.File

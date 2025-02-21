@@ -1,6 +1,5 @@
 package ru.packetdima.datascanner.common
 
-import ru.packetdima.datascanner.misc.OS
 import java.io.File
 import java.nio.file.Path
 import kotlin.io.path.Path

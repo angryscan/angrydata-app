@@ -7,7 +7,8 @@ ktor = "2.3.10"
 datascanner = "1.0.4"
 progressbar = "0.10.1"
 log4j = "2.24.3"
-koin = "3.5.0"
+koin = "4.0.2"
+viewmodel = "2.8.4"
 
 [libraries]
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
@@ -53,6 +54,8 @@ koin-compose-viewmodel-navigation = { module = "io.insert-koin:koin-compose-view
 koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin" }
 koin-test-junit4 = { module = "io.insert-koin:koin-test-junit4", version.ref = "koin" }
 koin-test-junit5 = { module = "io.insert-koin:koin-test-junit5", version.ref = "koin" }
+
+lifecycle-viewmodel = { module ="org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "viewmodel" }
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

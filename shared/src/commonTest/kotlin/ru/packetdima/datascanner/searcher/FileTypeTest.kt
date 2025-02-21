@@ -6,6 +6,7 @@ import info.downdetector.bigdatascanner.common.DetectFunction
 import info.downdetector.bigdatascanner.common.IDetectFunction
 import kotlinx.coroutines.*
 import ru.packetdima.datascanner.common.Settings
+import ru.packetdima.datascanner.scan.common.FileType
 import ru.packetdima.datascanner.searcher.properties.Properties
 import ru.packetdima.datascanner.ui.UIProperties
 import java.io.File

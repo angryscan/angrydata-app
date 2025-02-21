@@ -2,6 +2,7 @@ package ru.packetdima.datascanner.searcher
 
 import info.downdetector.bigdatascanner.common.DetectFunction
 import info.downdetector.bigdatascanner.common.IDetectFunction
+import ru.packetdima.datascanner.scan.common.Document
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

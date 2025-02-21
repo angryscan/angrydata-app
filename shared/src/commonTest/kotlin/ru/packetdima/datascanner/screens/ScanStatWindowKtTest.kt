@@ -2,7 +2,7 @@ package ru.packetdima.datascanner.screens
 
 import androidx.compose.ui.test.*
 import ru.packetdima.datascanner.common.InitSettingsTest
-import ru.packetdima.datascanner.misc.FilesCounter
+import ru.packetdima.datascanner.scan.common.FilesCounter
 import ru.packetdima.datascanner.ui.windows.ScanStatWindow
 import kotlin.test.Test
 

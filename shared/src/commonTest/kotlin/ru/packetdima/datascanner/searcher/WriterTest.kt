@@ -5,6 +5,7 @@ import org.jetbrains.exposed.sql.Database
 import ru.packetdima.datascanner.common.AppFiles
 import info.downdetector.bigdatascanner.common.DetectFunction
 import ru.packetdima.datascanner.common.Settings
+import ru.packetdima.datascanner.scan.common.Document
 import ru.packetdima.datascanner.searcher.properties.Properties
 import ru.packetdima.datascanner.ui.UIProperties
 import kotlin.test.Test

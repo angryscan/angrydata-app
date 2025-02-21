@@ -1,0 +1,444 @@
+package ru.packetdima.datascanner.deprecated.ui.windows.settings
+
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.rememberDialogState
+import org.jetbrains.compose.resources.stringResource
+import ru.packetdima.datascanner.common.AppFiles
+import info.downdetector.bigdatascanner.common.DetectFunction
+import ru.packetdima.datascanner.common.Settings
+import ru.packetdima.datascanner.scan.functions.UserSignature
+import ru.packetdima.datascanner.scan.common.FileType
+import ru.packetdima.datascanner.store.ContextMenu
+import ru.packetdima.datascanner.ui.CheckboxWithText
+import ru.packetdima.datascanner.ui.custom.ConfirmationDialog
+import ru.packetdima.datascanner.ui.strings.composableName
+import ru.packetdima.datascanner.ui.windows.settings.items.LanguageSelection
+import ru.packetdima.datascanner.ui.windows.settings.items.ThemeSelection
+import ru.packetdima.datascanner.ui.windows.settings.items.ThreadCount
+import ru.packetdima.datascanner.resources.*
+import ru.packetdima.datascanner.ui.windows.settings.items.UserSignatureWindow
+
+@Composable
+fun SettingsWindow(
+    onCloseClick: () -> Unit
+) {
+    val scrollState = rememberScrollState()
+
+    var coresCount by remember { mutableStateOf(Settings.searcher.threadCount.value) }
+
+    var language by remember { mutableStateOf(Settings.ui.language.value) }
+    var theme by remember { mutableStateOf(Settings.ui.theme.value) }
+
+    val extensions by remember { mutableStateOf(Settings.searcher.extensions.toMutableList()) }
+    val detectFunctions by remember { mutableStateOf(Settings.searcher.detectFunctions.toMutableList()) }
+    val activeUserSignatures by remember {
+        mutableStateOf(Settings.searcher.userSignature.filter {
+            Settings.userFunctionLoader.userSignature.contains(
+                it
+            )
+        }.toMutableList())
+    }
+
+    var fastScan by remember { mutableStateOf(Settings.searcher.fastScan.value) }
+
+    var confirmDialog by remember { mutableStateOf(false) }
+    var contextMenu by remember { mutableStateOf(ContextMenu.enabled) }
+    var allUserSignatures by remember { mutableStateOf(Settings.userFunctionLoader.userSignature.toMutableList()) }
+
+    if (confirmDialog) {
+        ConfirmationDialog(
+            title = stringResource(Res.string.settingsChangedTitle),
+            text = stringResource(Res.string.settingsChangedText),
+            onConfirm = { onCloseClick() }
+        )
+    }
+
+    Box(
+        modifier = Modifier
+            .size(300.dp, 460.dp)
+            .background(MaterialTheme.colors.surface, RoundedCornerShape(12.dp))
+            .border(BorderStroke(1.dp, MaterialTheme.colors.primary), shape = RoundedCornerShape(4.dp))
+            .padding(10.dp, 10.dp, 0.dp, 10.dp),
+        contentAlignment = Alignment.TopEnd
+    ) {
+        Column(
+            horizontalAlignment = Alignment.End,
+            modifier = Modifier.padding(0.dp, 0.dp, 10.dp, 0.dp)
+        ) {
+            Text(
+                text = stringResource(Res.string.uiSettings),
+                fontSize = 17.sp,
+                fontWeight = FontWeight.W600,
+                color = MaterialTheme.colors.onBackground
+            )
+            Column(
+                modifier = Modifier.height(385.dp)
+            ) {
+                Column(
+                    modifier = Modifier.verticalScroll(
+                        state = scrollState
+                    )
+                ) {
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    CheckboxWithText(
+                        state = fastScan,
+                        title = stringResource(Res.string.scanQuality),
+                        text = stringResource(Res.string.fastScanCheckBox),
+                        onStateChanged = {
+                            fastScan = it
+                        },
+                        testTag = "fastScanCheckbox"
+                    )
+
+                    ThreadCount(
+                        coresCount = coresCount,
+                        onValueChanged = {
+                            coresCount = it
+                        }
+                    )
+
+                    LanguageSelection(
+                        language = language,
+                        onSelect = {
+                            language = it
+                        }
+                    )
+
+                    ThemeSelection(
+                        theme = theme,
+                        onSelect = {
+                            theme = it
+                        }
+                    )
+
+                    if (ContextMenu.supported()) {
+                        CheckboxWithText(
+                            state = contextMenu,
+                            title = stringResource(Res.string.settingsContextMenuTitle),
+                            text = stringResource(Res.string.settingsContextMenuText),
+                            onStateChanged = {
+                                contextMenu = it
+                            },
+                            testTag = "contextMenuCheckbox"
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Text(
+                        text = stringResource(Res.string.uiExtToScan),
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.W500,
+                        color = MaterialTheme.colors.onSurface
+                    )
+                    ExtensionSelection(extensions)
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Text(
+                        text = stringResource(Res.string.uiDetectFun),
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.W500,
+                        color = MaterialTheme.colors.onSurface
+                    )
+                    DetectFunctionSelection(detectFunctions)
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Text(
+                        text = stringResource(Res.string.uiUserSignature),
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.W500,
+                        color = MaterialTheme.colors.onSurface
+                    )
+
+                    UserSignatureSelection(
+                        activeUserSignatures = activeUserSignatures,
+                        allUserSignatures = allUserSignatures,
+                        onDelete = {
+                            allUserSignatures = it.toMutableList()
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+                }
+
+
+            }
+            Row(
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.Bottom,
+                modifier = Modifier.fillMaxWidth().fillMaxHeight()
+            ) {
+                OutlinedButton(
+                    onClick = onCloseClick,
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = Color.Transparent,
+                        contentColor = MaterialTheme.colors.error
+                    ),
+                    border = null
+                ) {
+                    Text(stringResource(Res.string.close).uppercase(), fontWeight = FontWeight.W600)
+                }
+                OutlinedButton(
+                    onClick = {
+                        Settings.ui.theme.value = theme
+                        if (Settings.ui.language.value != language) {
+                            Settings.ui.language.value = language
+                            confirmDialog = true
+                        }
+
+                        Settings.userFunctionLoader.userSignature.removeIf { !allUserSignatures.contains(it) }
+                        Settings.userFunctionLoader.userSignature.addAll(
+                            allUserSignatures.filter { !Settings.userFunctionLoader.userSignature.contains(it) }
+                        )
+                        Settings.userFunctionLoader.save(AppFiles.UserFunctionsFile)
+
+                        Settings.searcher.threadCount.value = coresCount
+                        Settings.searcher.fastScan.value = fastScan
+                        Settings.searcher.extensions.removeIf { !extensions.contains(it) }
+                        Settings.searcher.extensions.addAll(
+                            extensions.filter { !Settings.searcher.extensions.contains(it) }
+                        )
+                        Settings.searcher.detectFunctions.removeIf { !detectFunctions.contains(it) }
+                        Settings.searcher.detectFunctions.addAll(
+                            detectFunctions.filter { !Settings.searcher.detectFunctions.contains(it) }
+                        )
+                        Settings.searcher.userSignature.removeIf { !activeUserSignatures.contains(it) }
+                        Settings.searcher.userSignature.addAll(
+                            activeUserSignatures.filter {
+                                !Settings.searcher.userSignature.contains(it) && Settings.userFunctionLoader.userSignature.contains(
+                                    it
+                                )
+                            }
+                        )
+                        Settings.searcher.save(AppFiles.SearchSettingsFile)
+
+                        Settings.ui.save(AppFiles.UISettingsFile)
+
+                        if (contextMenu != ContextMenu.enabled) {
+                            ContextMenu.enabled = contextMenu
+                        }
+
+                        if (!confirmDialog)
+                            onCloseClick()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = Color.Transparent,
+                        contentColor = MaterialTheme.colors.primary
+                    ),
+                    border = null
+                ) {
+                    Text(stringResource(Res.string.save).uppercase(), fontWeight = FontWeight.W600)
+                }
+            }
+        }
+
+        VerticalScrollbar(
+            adapter = rememberScrollbarAdapter(scrollState),
+            modifier = Modifier.padding(1.dp, 30.dp, 1.dp, 40.dp).width(8.dp)
+        )
+    }
+}
+
+@Composable
+fun ExtensionSelection(extensions: MutableList<String>) {
+    val allExtensions = FileType.entries
+        .map { it.name }
+    GroupedCheckbox(
+        itemsList = allExtensions.map { Pair(Pair(it, it), extensions.contains(it)) },
+        itemStateChanged = { item, state ->
+            if (state && !extensions.contains(item))
+                extensions.add(item)
+            else if (!state)
+                extensions.remove(item)
+        },
+        columnsCount = 3
+    )
+}
+
+@Composable
+fun DetectFunctionSelection(detectFunctions: MutableList<DetectFunction>) {
+    val allFunctions =
+        DetectFunction.entries.toTypedArray()
+    GroupedCheckbox(
+        itemsList = allFunctions.map {
+            Pair(
+                Pair(
+                    it,
+                    it.composableName()
+                ), detectFunctions.contains(it)
+            )
+        },
+        itemStateChanged = { item, state ->
+            if (state && !detectFunctions.contains(item))
+                detectFunctions.add(item)
+            else if (!state)
+                detectFunctions.remove(item)
+        },
+        columnsCount = 1
+    )
+}
+
+@Composable
+fun UserSignatureSelection(
+    activeUserSignatures: MutableList<UserSignature>,
+    allUserSignatures: MutableList<UserSignature>,
+    onDelete: (MutableList<UserSignature>) -> Unit
+) {
+
+    var addDialogVisible by remember { mutableStateOf(false) }
+
+    val dialogState = rememberDialogState(size = DpSize(400.dp, 400.dp))
+    val theme by remember { Settings.ui.theme }
+
+    var signatureName by remember { mutableStateOf("") }
+
+    if(addDialogVisible) {
+        UserSignatureWindow(
+            onCloseRequest = {
+                addDialogVisible = false
+                signatureName = ""
+            },
+            dialogState = dialogState,
+            theme = theme,
+            signatureName = signatureName,
+            allUserSignatures = allUserSignatures,
+            onSave = { sig ->
+                if(signatureName.isNotEmpty()) {
+                    allUserSignatures.removeIf { it.name == signatureName }
+                    allUserSignatures.add(sig)
+                } else {
+                    allUserSignatures.add(sig)
+                    activeUserSignatures.add(sig)
+                }
+
+                addDialogVisible = false
+                signatureName = ""
+            }
+        )
+    }
+
+    Column(
+        Modifier.fillMaxWidth()
+    ) {
+        GroupedCheckbox(
+            itemsList = allUserSignatures.map {
+                Pair(
+                    Pair(
+                        it,
+                        it.writeName
+                    ), activeUserSignatures.contains(it)
+                )
+            },
+            itemStateChanged = { item, state ->
+                if (state && !activeUserSignatures.contains(item))
+                    activeUserSignatures.add(item)
+                else if (!state)
+                    activeUserSignatures.remove(item)
+            },
+            columnsCount = 1,
+            block = {
+                Spacer(Modifier.weight(1f))
+                Row {
+                    IconButton(
+                        onClick = {
+                            signatureName = it.name
+                            addDialogVisible = true
+                        },
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(Icons.Outlined.Settings, contentDescription = null)
+                    }
+                    Spacer(Modifier.width(10.dp))
+                    IconButton(
+                        onClick = {
+                            activeUserSignatures.remove(it)
+                            allUserSignatures.remove(it)
+                            onDelete(allUserSignatures)
+                        },
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(Icons.Outlined.Delete, contentDescription = null, tint = MaterialTheme.colors.error)
+                    }
+                    Spacer(Modifier.width(10.dp))
+                }
+            }
+        )
+
+        OutlinedButton(
+            onClick = {
+
+                addDialogVisible = true
+            },
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color.Transparent,
+                contentColor = MaterialTheme.colors.primary
+            ),
+            border = null
+        ) {
+            Text(stringResource(Res.string.add).uppercase(), fontWeight = FontWeight.W600)
+        }
+    }
+}
+
+
+@Composable
+fun <T : Any> GroupedCheckbox(
+    itemsList: List<Pair<Pair<T, String>, Boolean>>,
+    itemStateChanged: (item: T, state: Boolean) -> Unit,
+    columnsCount: Int = 1,
+    block: @Composable (T) -> Unit = {}
+) {
+
+    val columnList = (1..columnsCount).map { mutableListOf<Pair<Pair<T, String>, Boolean>>() }
+    itemsList.forEachIndexed { index, pair ->
+        columnList[index % columnsCount].add(pair)
+    }
+    Row(modifier = Modifier.fillMaxWidth()) {
+        columnList.forEach { column ->
+            Column {
+                column.forEach { item ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        val isChecked = remember { mutableStateOf(item.second) }
+
+                        Checkbox(
+                            checked = isChecked.value,
+                            onCheckedChange = {
+                                isChecked.value = it
+                                itemStateChanged(item.first.first, it)
+                            },
+                            colors = CheckboxDefaults.colors(
+                                checkedColor = MaterialTheme.colors.primary,
+                                uncheckedColor = Color.DarkGray
+                            ),
+                            enabled = true,
+                            modifier = Modifier.testTag("checkbox_${item.first.first}")
+                        )
+                        Text(text = item.first.second)
+                        block(item.first.first)
+                    }
+                }
+            }
+        }
+    }
+}

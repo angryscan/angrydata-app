@@ -96,6 +96,17 @@ object WinRegistry {
             key, value, type.toString(), data
         ).runCommand(encoding)?.also { logger.debug { "Set windows registry result: $it" } }?.isNotEmpty() ?: false
     }
+
+    /**
+     * Writes a registry entry without a named value into the Windows registry.
+     *
+     * @param key the registry key path, for example
+     * `HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize`
+     * @param data the data to be written
+     * @param type the registry type, for example `REG_SZ`
+     * @param encoding the charset encoding to be used for the command execution, default is `CP866`
+     * @return `true` if the operation was successful, otherwise `false`
+     */
     fun setWindowsRegistryEntry(
         key: String?,
         data: String?,
@@ -108,6 +119,16 @@ object WinRegistry {
         ).runCommand(encoding)?.also { logger.debug { "Set windows registry result: $it" } }?.isNotEmpty() ?: false
     }
 
+    /**
+     * Deletes a named value from the Windows registry.
+     *
+     * @param key the key, for example
+     * `HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize`
+     * @param value the value, for example `AppsUseLightTheme`
+     * @param type the type, for example `REG_DWORD`
+     * @param encoding the charset encoding to be used for the command execution, default is `CP866`
+     * @return if successful `true`, otherwise `false`
+     */
     @Suppress("unused")
     fun deleteWindowsRegistryEntry(
         key: String?,
@@ -120,6 +141,14 @@ object WinRegistry {
             key, value, type.toString()
         ).runCommand(encoding)?.also { logger.debug { "Delete windows registry entry result: $it" } }?.isNotEmpty() ?: false
     }
+    /**
+     * Deletes a registry key.
+     *
+     * @param key the key, for example `HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize`
+     * @param type the type, for example `REG_DWORD`
+     * @param encoding the charset encoding to be used for the command execution, default is `CP866`
+     * @return if successful `true`, otherwise `false`
+     */
     fun deleteWindowsRegistryKey(
         key: String?,
         type: REG_TYPE,
@@ -139,6 +168,12 @@ object WinRegistry {
         REG_BINARY, REG_DWORD, REG_EXPAND_SZ, REG_MULTI_SZ, REG_SZ
     }
 
+    /**
+     * Executes a command and returns the output.
+     *
+     * @param encoding the charset encoding to be used for the command execution
+     * @return the output of the command, or null on error
+     */
     private fun String.runCommand(encoding: Charset): String? {
         try {
             val parts = this.split("\\s".toRegex())

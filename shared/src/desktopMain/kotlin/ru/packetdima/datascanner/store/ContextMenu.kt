@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.getString
-import ru.packetdima.datascanner.misc.OS
+import ru.packetdima.datascanner.common.OS
 import ru.packetdima.datascanner.resources.Res
 import ru.packetdima.datascanner.resources.contextScanWith
 
@@ -12,7 +12,7 @@ import ru.packetdima.datascanner.resources.contextScanWith
 private val logger = KotlinLogging.logger { }
 
 object ContextMenu {
-    @OptIn(ExperimentalResourceApi::class)
+    
     var enabled: Boolean
         get() = when (OS.currentOS()) {
             OS.WINDOWS -> {
@@ -39,7 +39,6 @@ object ContextMenu {
         else -> false
     }
 
-    @OptIn(ExperimentalResourceApi::class)
     private fun enable() {
         when (OS.currentOS()) {
             OS.WINDOWS -> {

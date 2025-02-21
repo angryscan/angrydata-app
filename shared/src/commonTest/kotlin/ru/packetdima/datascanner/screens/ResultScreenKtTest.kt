@@ -2,7 +2,7 @@ package ru.packetdima.datascanner.screens
 
 import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.use
-import ru.packetdima.datascanner.misc.FilesCounter
+import ru.packetdima.datascanner.scan.common.FilesCounter
 import ru.packetdima.datascanner.searcher.WriterTest
 import ru.packetdima.datascanner.ui.screens.scanner.ResultScreen
 import kotlin.test.Test

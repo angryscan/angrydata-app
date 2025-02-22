@@ -1,7 +1,7 @@
 package ru.packetdima.datascanner.ui
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Surface
+import androidx.compose.material3.Surface
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -20,6 +20,7 @@ import ru.packetdima.datascanner.resources.icon
 import ru.packetdima.datascanner.scan.common.ScanPathHelper
 import ru.packetdima.datascanner.ui.theme.AppTheme
 import ru.packetdima.datascanner.ui.windows.components.MainWindowTitleBar
+import ru.packetdima.datascanner.ui.windows.components.SideMenu
 import java.util.*
 
 @Composable
@@ -68,15 +69,7 @@ fun MainWindow(
                     modifier = Modifier
                         .fillMaxSize()
                 ) {
-                    Surface(
-                        color = MaterialTheme.colorScheme.surface,
-                        shape = MaterialTheme.shapes.medium,
-                        modifier = Modifier
-                            .width(40.dp)
-                            .fillMaxHeight()
-                    ) {
-
-                    }
+                    SideMenu()
                     Column(
                         modifier = Modifier
                             .weight(1f)

@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
 import org.koin.compose.koinInject
 import ru.packetdima.datascanner.common.AppSettings
 
@@ -21,7 +22,8 @@ fun AppTheme(
 ) {
     val appSettings = koinInject<AppSettings>()
     val theme by remember { appSettings.theme }
-    val colors = if (theme == AppSettings.ThemeType.Dark || (theme == AppSettings.ThemeType.System && isSystemInDarkTheme())) {
+    val isDarkTheme = (theme == AppSettings.ThemeType.Dark || (theme == AppSettings.ThemeType.System && isSystemInDarkTheme()))
+    val colors = if (isDarkTheme) {
         DarkColors
     } else {
         LightColors
@@ -29,7 +31,7 @@ fun AppTheme(
 
     val appRippleConfiguration =
         RippleConfiguration(
-            color = MaterialTheme.colorScheme.primary,
+            color = if(isDarkTheme) Color.LightGray else Color.DarkGray,
             rippleAlpha = RippleDefaults.RippleAlpha
         )
 

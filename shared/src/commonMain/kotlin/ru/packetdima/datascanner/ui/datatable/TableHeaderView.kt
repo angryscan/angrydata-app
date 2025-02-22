@@ -2,13 +2,10 @@ package ru.packetdima.datascanner.ui.datatable
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowDownward
 import androidx.compose.material.icons.outlined.ArrowUpward
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
@@ -55,7 +52,7 @@ fun TableHeaderView(
                     Text(
                         modifier = Modifier.weight(1f),
                         text = header.uiText(),
-                        color = MaterialTheme.colors.onSurface,
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.W500
                     )
@@ -83,7 +80,7 @@ fun TableHeaderView(
                 }
             }
             if (headerIterator.hasNext()) {
-                Divider(Modifier.width(1.dp).fillMaxHeight())
+                HorizontalDivider(Modifier.fillMaxHeight(), thickness = 1.dp)
             }
         }
     }

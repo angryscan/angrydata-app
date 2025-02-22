@@ -20,6 +20,7 @@ import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.koin.core.context.startKoin
 import ru.packetdima.datascanner.common.AppFiles
 import ru.packetdima.datascanner.common.AppVersion
+import ru.packetdima.datascanner.common.OS
 import ru.packetdima.datascanner.di.databaseModule
 import ru.packetdima.datascanner.di.scanModule
 import ru.packetdima.datascanner.di.settingsModule
@@ -46,7 +47,16 @@ suspend fun main(args: Array<String>) {
         }
     }?.collect()
 
-    System.setProperty("skiko.renderApi", "OPENGL")
+
+    System.setProperty(
+        "skiko.renderApi",
+        when (OS.currentOS()) {
+            OS.WINDOWS -> "SOFTWARE"
+            OS.LINUX -> "OPENGL"
+            OS.MAC -> "METAL"
+            else -> "OPENGL"
+        }
+    )
 
     try {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())

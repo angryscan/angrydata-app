@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Divider
-import androidx.compose.material.Text
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -96,7 +96,7 @@ fun TableRow(
                 }
             }
             if (iterator.hasNext()) {
-                Divider(Modifier.fillMaxHeight().width(1.dp))
+                HorizontalDivider(Modifier.fillMaxHeight(), thickness = 1.dp)
             }
         }
     }

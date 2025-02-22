@@ -1,4 +1,4 @@
-package ru.packetdima.datascanner.deprecated.ui.windows.items
+package ru.packetdima.datascanner.ui.windows.components
 
 import androidx.compose.foundation.window.WindowDraggableArea
 import androidx.compose.runtime.Composable

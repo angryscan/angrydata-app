@@ -4,10 +4,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 object ScanPathHelper {
-    val _path = MutableStateFlow<String?>(null)
+    private val _path = MutableStateFlow<String?>(null)
     val path = _path.asStateFlow()
 
-    val _focusRequested = MutableStateFlow(false)
+    private val _focusRequested = MutableStateFlow(false)
     val focusRequested = _focusRequested.asStateFlow()
 
     fun setPath(path: String) {

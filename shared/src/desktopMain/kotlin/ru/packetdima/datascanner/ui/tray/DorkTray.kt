@@ -1,4 +1,4 @@
-package ru.packetdima.datascanner.deprecated.ui.custom
+package ru.packetdima.datascanner.ui.tray
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.toAwtImage
@@ -15,7 +15,6 @@ import ru.packetdima.datascanner.resources.*
 fun ApplicationScope.DorkTray(
     mainIsVisible: Boolean,
     mainVisibilitySet: (Boolean) -> Unit,
-    plannerVisibilitySet: (Boolean) -> Unit,
 ) {
     val tray by remember { mutableStateOf(SystemTray.get() ?: throw Exception("Unable to load SystemTray!")) }
 
@@ -31,13 +30,6 @@ fun ApplicationScope.DorkTray(
         tray.menu.add(
             MenuItem(getString(Res.string.trayOpen))
         )
-//        tray.menu.add(
-//            MenuItem(Settings.ui.language.strings.trayPlanner).apply {
-//                setCallback {
-//                    plannerVisibilitySet(true)
-//                }
-//            }
-//        )
         tray.menu.add(
             MenuItem(getString(Res.string.trayExit)).apply {
                 setCallback {

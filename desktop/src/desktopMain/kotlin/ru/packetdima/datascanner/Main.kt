@@ -24,6 +24,9 @@ import ru.packetdima.datascanner.di.databaseModule
 import ru.packetdima.datascanner.di.scanModule
 import ru.packetdima.datascanner.di.settingsModule
 import ru.packetdima.datascanner.scan.common.ScanPathHelper
+import ru.packetdima.datascanner.ui.MainWindow
+import ru.packetdima.datascanner.ui.tray.DorkTray
+import ru.packetdima.datascanner.ui.windows.ApplicationErrorWindow
 import java.awt.event.WindowEvent
 import java.io.File
 import java.net.BindException
@@ -133,8 +136,6 @@ suspend fun main(args: Array<String>) {
         )
     }
 
-    Locale.setDefault(Locale.forLanguageTag(Settings.ui.language.value.locale))
-
     Database.connect(
         "jdbc:sqlite:${AppFiles.ResultDBFile.absolutePath}",
         driver = "org.sqlite.JDBC",
@@ -158,7 +159,7 @@ suspend fun main(args: Array<String>) {
             args.forEach {
                 logger.warn { "Argument: $it" }
             }
-            Settings.scanningTaskPath.value = args.first()
+            ScanPathHelper.setPath(args.first())
         }
         application(exitProcessOnExit = false) {
             CompositionLocalProvider(
@@ -171,16 +172,18 @@ suspend fun main(args: Array<String>) {
                 }
             ) {
                 var mainIsVisible by remember { mutableStateOf(true) }
-                var plannerIsVisible by remember { mutableStateOf(false) }
-                MainWindow(mainIsVisible) { mainIsVisible = it }
-                PlannerWindow(plannerIsVisible) { plannerIsVisible = it }
+
+                MainWindow(
+                    onCloseRequest = ::exitApplication,
+                    onHideRequest = {
+                        mainIsVisible = false
+                    },
+                    isVisible = mainIsVisible
+                )
                 DorkTray(
                     mainIsVisible = mainIsVisible,
                     mainVisibilitySet = {
                         mainIsVisible = it
-                    },
-                    plannerVisibilitySet = {
-                        plannerIsVisible = it
                     }
                 )
             }

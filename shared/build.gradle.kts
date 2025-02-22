@@ -11,7 +11,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(compose.desktop.common)
-                api(compose.components.resources)
+                implementation(compose.components.resources)
                 implementation(compose.materialIconsExtended)
                 implementation(compose.material3)
 

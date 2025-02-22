@@ -56,6 +56,9 @@ class AppSettings : KoinComponent {
     @Serializable(with = MutableStateSerializer::class)
     var language: MutableState<LanguageType>
 
+    @Serializable
+    var hideOnMinimize: MutableState<Boolean>
+
     constructor() {
         try {
             val prop: AppSettings = Json.decodeFromString(settingsFile.readText())
@@ -73,6 +76,7 @@ class AppSettings : KoinComponent {
             this.theme = prop.theme
             this.propertiesList = prop.propertiesList
             this.language = prop.language
+            this.hideOnMinimize = prop.hideOnMinimize
         } catch (e: Exception) {
             this.threadCount = mutableStateOf(
                 max(
@@ -83,6 +87,7 @@ class AppSettings : KoinComponent {
             this.theme = mutableStateOf(ThemeType.Dark)
             this.propertiesList = mutableSetOf()
             this.language = mutableStateOf(LanguageType.Default)
+            this.hideOnMinimize = mutableStateOf(true)
         }
     }
 

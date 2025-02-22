@@ -2,7 +2,6 @@ package ru.packetdima.datascanner.store
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.runBlocking
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.getString
 import ru.packetdima.datascanner.common.OS
 import ru.packetdima.datascanner.resources.Res

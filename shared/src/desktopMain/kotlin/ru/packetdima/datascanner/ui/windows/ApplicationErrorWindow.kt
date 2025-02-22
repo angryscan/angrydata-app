@@ -1,4 +1,4 @@
-package ru.packetdima.datascanner.deprecated.ui.custom
+package ru.packetdima.datascanner.ui.windows
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

@@ -94,8 +94,8 @@ fun SideMenu() {
             SideMenuItem(
                 isSelected = true,
                 expanded = expanded,
-                icon = painterResource(Res.drawable.SideMenuIconMain),
-                text = stringResource(Res.string.appName),
+                icon = painterResource(Res.drawable.SideMenu_IconMainPage),
+                text = stringResource(Res.string.SideMenu_MainPage),
                 onClick = { /*TODO*/ },
             )
         }

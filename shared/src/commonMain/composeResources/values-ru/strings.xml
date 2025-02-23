@@ -87,4 +87,6 @@
     <string name="errorUserSignatureNameEmpty">Наименование не может быть пустым</string>
     <string name="errorUserSignatureSave">Не удалось сохранить пользовательскую сигнатуру</string>
     <string name="errorUserSignatureAlreadyExist">Пользовательская сигнатура с таким именем уже существует</string>
+
+    <string name="SideMenu-MainPage">Главная</string>
 </resources>

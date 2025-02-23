@@ -91,4 +91,6 @@
     <string name="errorUserSignatureNameEmpty">Name can't be empty</string>
     <string name="errorUserSignatureSave">Can't save user signature</string>
     <string name="errorUserSignatureAlreadyExist">User signature with this name already exist</string>
+
+    <string name="SideMenu-MainPage">Main</string>
 </resources>

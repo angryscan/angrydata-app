@@ -1,8 +1,11 @@
 package ru.packetdima.datascanner.ui
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -21,6 +24,7 @@ import ru.packetdima.datascanner.scan.common.ScanPathHelper
 import ru.packetdima.datascanner.ui.theme.AppTheme
 import ru.packetdima.datascanner.ui.windows.components.MainWindowTitleBar
 import ru.packetdima.datascanner.ui.windows.components.SideMenu
+import ru.packetdima.datascanner.ui.windows.screens.MainScreen
 import java.util.*
 
 @Composable
@@ -29,7 +33,7 @@ fun MainWindow(
     onHideRequest: () -> Unit,
     isVisible: Boolean
 ) {
-    val windowState = rememberWindowState(width = 1024.dp, height = 720.dp)
+    val windowState = rememberWindowState(width = 1280.dp, height = 720.dp)
     val focusRemember by ScanPathHelper.focusRequested.collectAsState()
 
     val appSettings = koinInject<AppSettings>()
@@ -73,6 +77,7 @@ fun MainWindow(
                     Column(
                         modifier = Modifier
                             .weight(1f)
+                            .fillMaxHeight()
                     ) {
                         MainWindowTitleBar(
                             windowPlacement = windowState.placement,
@@ -91,6 +96,8 @@ fun MainWindow(
                             },
                             onCloseClick = onCloseRequest
                         )
+
+                        MainScreen()
                     }
                 }
             }

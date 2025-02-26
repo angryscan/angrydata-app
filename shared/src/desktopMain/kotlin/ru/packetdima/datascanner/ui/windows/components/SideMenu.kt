@@ -1,14 +1,17 @@
 package ru.packetdima.datascanner.ui.windows.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,32 +29,25 @@ import ru.packetdima.datascanner.resources.*
 fun SideMenu() {
     var expanded by remember { mutableStateOf(false) }
     Surface(
-        color = MaterialTheme.colorScheme.surface,
         modifier = Modifier
-            .animateContentSize(
-                animationSpec = spring()
-            )
-            .width(
-                if (expanded) 336.dp else 88.dp
-            )
+            .background(MaterialTheme.colorScheme.surface)
+            .animateContentSize()
+            .width(if(expanded) 336.dp else 88.dp)
             .fillMaxHeight()
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .animateContentSize()
+                .fillMaxHeight()
+                .width(IntrinsicSize.Min)
                 .padding(6.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
                 Row(
                     modifier = Modifier
-                        .weight(1f),
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .padding(start = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
@@ -65,30 +61,34 @@ fun SideMenu() {
                                 expanded = !expanded
                             },
                     )
-                    if (expanded) {
-                        Text(
-                            text = stringResource(Res.string.appName),
-                            fontSize = 20.sp
-                        )
+                    AnimatedVisibility(expanded) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.appName),
+                                fontSize = 20.sp,
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(MaterialTheme.shapes.medium)
+                                    .background(MaterialTheme.colorScheme.secondaryContainer)
+                                    .clickable {
+                                        expanded = !expanded
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.ArrowBackIosNew,
+                                    contentDescription = null,
+                                )
+                            }
+                        }
                     }
-                }
-                if (expanded) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(MaterialTheme.shapes.medium)
-                            .background(MaterialTheme.colorScheme.secondaryContainer)
-                            .clickable {
-                                expanded = !expanded
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.ArrowBackIosNew,
-                            contentDescription = null,
-                        )
-                    }
-                }
+
             }
             Spacer(modifier = Modifier.height(30.dp))
             SideMenuItem(
@@ -115,6 +115,7 @@ fun SideMenuItem(
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .height(60.dp)
             .clip(MaterialTheme.shapes.medium)
             .background(
                 color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
@@ -124,7 +125,7 @@ fun SideMenuItem(
                 onClick = onClick
             )
             .padding(14.dp, 6.dp),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.CenterStart
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -135,12 +136,13 @@ fun SideMenuItem(
                 contentDescription = text,
                 modifier = Modifier.size(iconSize),
             )
-            if (expanded) {
+            AnimatedVisibility(
+                expanded
+            ) {
                 Text(
                     text = text,
                     fontSize = 20.sp
                 )
-                Spacer(modifier = Modifier.weight(1f))
             }
         }
     }

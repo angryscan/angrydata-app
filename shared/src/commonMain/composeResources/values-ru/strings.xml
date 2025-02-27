@@ -39,7 +39,6 @@
     <string name="scanReportGenerating">Генерация отчета...</string>
     <string name="scanSelecting">Выбрано %1$d файлов из %2$d</string>
     <string name="scanScanning">Сканирование... (%1$d/%2$d)</string>
-    <string name="selectFolderPlaceholder">Укажите путь для сканирования</string>
     <string name="start">Старт</string>
     <string name="screenSelectPath">Выбор пути</string>
     <string name="screenScanning">Сканирование</string>
@@ -89,4 +88,15 @@
     <string name="errorUserSignatureAlreadyExist">Пользовательская сигнатура с таким именем уже существует</string>
 
     <string name="SideMenu-MainPage">Главная</string>
+    <string name="SideMenu-ScanListPage">Список сканирований</string>
+    <string name="SideMenu-SettingsPage">Параметры</string>
+    <string name="SideMenu-AboutPage">О программе</string>
+
+    <string name="MainScreen-SelectPathPlaceholder">Укажите путь для сканирования</string>
+    <string name="MainScreen-ScanStartButton">Сканировать</string>
+    <string name="MainScreen-ScanCurrentState">Текущие сканирования (%1$d)</string>
+
+    <string name="ScanSettings-FastScan">Быстрое сканирование</string>
+    <string name="ScanSettings-FileExtensions">Расширения файлов</string>
+    <string name="ScanSettings-SelectAll">Выбрать все</string>
 </resources>

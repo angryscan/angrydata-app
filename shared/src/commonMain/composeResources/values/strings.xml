@@ -43,7 +43,6 @@
     <string name="scanReportGenerating">Report are generating...</string>
     <string name="scanSelecting">Selected %1$d files from %2$d</string>
     <string name="scanScanning">Scanning... (%1$d/%2$d)</string>
-    <string name="selectFolderPlaceholder">Choose folder to scanFile</string>
     <string name="start">Start</string>
     <string name="screenSelectPath">Select path</string>
     <string name="screenScanning">Scanning</string>
@@ -93,4 +92,15 @@
     <string name="errorUserSignatureAlreadyExist">User signature with this name already exist</string>
 
     <string name="SideMenu-MainPage">Main</string>
+    <string name="SideMenu-ScanListPage">Scans</string>
+    <string name="SideMenu-SettingsPage">Settings</string>
+    <string name="SideMenu-AboutPage">About</string>
+
+    <string name="MainScreen-SelectPathPlaceholder">Choose folder to scanFile</string>
+    <string name="MainScreen-ScanStartButton">Scan</string>
+    <string name="MainScreen-ScanCurrentState">Current scans (%1$d)</string>
+
+    <string name="ScanSettings-FastScan">Fast scan</string>
+    <string name="ScanSettings-FileExtensions">File extensions</string>
+    <string name="ScanSettings-SelectAll">Select all</string>
 </resources>

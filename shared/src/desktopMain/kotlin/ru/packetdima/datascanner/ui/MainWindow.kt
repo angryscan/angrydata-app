@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -24,7 +25,7 @@ import ru.packetdima.datascanner.scan.common.ScanPathHelper
 import ru.packetdima.datascanner.ui.theme.AppTheme
 import ru.packetdima.datascanner.ui.windows.components.MainWindowTitleBar
 import ru.packetdima.datascanner.ui.windows.components.SideMenu
-import ru.packetdima.datascanner.ui.windows.screens.MainScreen
+import ru.packetdima.datascanner.ui.windows.screens.main.MainScreen
 import java.util.*
 
 @Composable
@@ -67,7 +68,9 @@ fun MainWindow(
                 color = MaterialTheme.colorScheme.background,
                 modifier = Modifier
                     .fillMaxSize(),
-                shape = MaterialTheme.shapes.medium
+                shape = MaterialTheme.shapes.medium,
+                shadowElevation = 3.dp,
+                tonalElevation = 3.dp
             ) {
                 Row(
                     modifier = Modifier
@@ -77,7 +80,8 @@ fun MainWindow(
                     Column(
                         modifier = Modifier
                             .weight(1f)
-                            .fillMaxHeight()
+                            .fillMaxHeight(),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         MainWindowTitleBar(
                             windowPlacement = windowState.placement,

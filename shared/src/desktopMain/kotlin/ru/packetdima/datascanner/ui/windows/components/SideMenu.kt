@@ -41,7 +41,8 @@ fun SideMenu() {
                 .fillMaxHeight()
                 .width(IntrinsicSize.Min)
                 .padding(6.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
                 Row(
                     modifier = Modifier
@@ -49,7 +50,7 @@ fun SideMenu() {
                         .height(56.dp)
                         .padding(start = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Image(
                         painter = painterResource(Res.drawable.icon),
@@ -90,12 +91,34 @@ fun SideMenu() {
                     }
 
             }
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(18.dp))
             SideMenuItem(
                 isSelected = true,
                 expanded = expanded,
                 icon = painterResource(Res.drawable.SideMenu_IconMainPage),
                 text = stringResource(Res.string.SideMenu_MainPage),
+                onClick = { /*TODO*/ },
+            )
+            SideMenuItem(
+                isSelected = false,
+                expanded = expanded,
+                icon = painterResource(Res.drawable.SideMenu_IconScans),
+                text = stringResource(Res.string.SideMenu_ScanListPage),
+                onClick = { /*TODO*/ },
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            SideMenuItem(
+                isSelected = false,
+                expanded = expanded,
+                icon = painterResource(Res.drawable.SideMenu_IconSettings),
+                text = stringResource(Res.string.SideMenu_SettingsPage),
+                onClick = { /*TODO*/ },
+            )
+            SideMenuItem(
+                isSelected = false,
+                expanded = expanded,
+                icon = painterResource(Res.drawable.SideMenu_IconAbout),
+                text = stringResource(Res.string.SideMenu_AboutPage),
                 onClick = { /*TODO*/ },
             )
         }
@@ -121,14 +144,14 @@ fun SideMenuItem(
                 color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
             )
             .clickable(
-                enabled = enabled,
+                enabled = enabled && !isSelected,
                 onClick = onClick
             )
             .padding(14.dp, 6.dp),
         contentAlignment = Alignment.CenterStart
     ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(

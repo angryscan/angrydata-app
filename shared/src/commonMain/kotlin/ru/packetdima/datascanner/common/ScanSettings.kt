@@ -49,7 +49,7 @@ class ScanSettings: KoinComponent {
         }
     }
 
-    fun save(file: File) {
-        file.writeText(Json.encodeToString(this))
+    fun save() {
+        settingsFile.writeText(Json.encodeToString(this))
     }
 }

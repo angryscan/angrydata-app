@@ -13,24 +13,7 @@
     <string name="iVersion">Version</string>
     <string name="iCopyright">Copyright © LLC "Detecticum", 2024</string>
     <string name="iAbout">Big Data Scanner is a personal software to quickly check the presence of personal data and card numbers in files. Big Data Scanner supports the following file formats: .xlsx, .docx, .txt, .csv, .xml, .json, .log, .doc, .xls, .pdf, .zip.\n\Big Data Scanner does not make any changes into the files it scans and it requires read-only access to the file.\n\nScan results are advisory and may require additional verification from the user.</string>
-    <string name="dfEmails">Email</string>
-    <string name="dfPhones">Phone</string>
-    <string name="dfCardNumbers">Card number</string>
-    <string name="dfCarNumber">Car number</string>
-    <string name="dfSNILS">SNILS</string>
-    <string name="dfPassport">Passport</string>
-    <string name="dfOMS">OMS</string>
-    <string name="dfINN">INN</string>
-    <string name="dfAccountNumber">Account number</string>
-    <string name="dfAddress">Address</string>
-    <string name="dfBlackList">Black list</string>
-    <string name="dfValuableInfo">Valuable info</string>
-    <string name="dfLogin">Login</string>
-    <string name="dfPassword">Password</string>
-    <string name="dfCVV">CVV</string>
-    <string name="dfName">Full name</string>
-    <string name="dfIP">IP</string>
-    <string name="dfIPv6">IPv6</string>
+
     <string name="save">Save</string>
     <string name="close">Close</string>
     <string name="stop">Stop</string>
@@ -91,6 +74,7 @@
     <string name="errorUserSignatureSave">Can't save user signature</string>
     <string name="errorUserSignatureAlreadyExist">User signature with this name already exist</string>
 
+
     <string name="SideMenu-MainPage">Main</string>
     <string name="SideMenu-ScanListPage">Scans</string>
     <string name="SideMenu-SettingsPage">Settings</string>
@@ -102,5 +86,26 @@
 
     <string name="ScanSettings-FastScan">Fast scan</string>
     <string name="ScanSettings-FileExtensions">File extensions</string>
+    <string name="ScanSettings-DetectFunctions">Detect functions</string>
+    <string name="ScanSettings-UserSignatures">User signatures</string>
     <string name="ScanSettings-SelectAll">Select all</string>
+
+    <string name="DetectFunction-Emails">Email</string>
+    <string name="DetectFunction-Phones">Phone</string>
+    <string name="DetectFunction-CardNumbers">Card number</string>
+    <string name="DetectFunction-CarNumber">Car number</string>
+    <string name="DetectFunction-SNILS">SNILS</string>
+    <string name="DetectFunction-Passport">Passport</string>
+    <string name="DetectFunction-OMS">OMS</string>
+    <string name="DetectFunction-INN">INN</string>
+    <string name="DetectFunction-AccountNumber">Account number</string>
+    <string name="DetectFunction-Address">Address</string>
+    <string name="DetectFunction-BlackList">Black list</string>
+    <string name="DetectFunction-ValuableInfo">Valuable info</string>
+    <string name="DetectFunction-Login">Login</string>
+    <string name="DetectFunction-Password">Password</string>
+    <string name="DetectFunction-CVV">CVV</string>
+    <string name="DetectFunction-Name">Full name</string>
+    <string name="DetectFunction-IP">IP</string>
+    <string name="DetectFunction-IPv6">IPv6</string>
 </resources>

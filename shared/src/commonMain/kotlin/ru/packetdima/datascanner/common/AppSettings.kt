@@ -2,7 +2,9 @@ package ru.packetdima.datascanner.common
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -13,6 +15,8 @@ import kotlin.math.max
 
 @Serializable
 class AppSettings : KoinComponent {
+    @Transient
+    private val logger = KotlinLogging.logger {  }
     class AppSettingsFile(path: String) : File(path)
 
     enum class ThemeType {
@@ -78,6 +82,9 @@ class AppSettings : KoinComponent {
             this.language = prop.language
             this.hideOnMinimize = prop.hideOnMinimize
         } catch (e: Exception) {
+            logger.error {
+                "Failed to load app settings. Loading defaults."
+            }
             this.threadCount = mutableStateOf(
                 max(
                     Runtime.getRuntime().availableProcessors() /2,

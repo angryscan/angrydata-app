@@ -74,7 +74,7 @@ object Writer: KoinComponent {
                         translate = runBlocking { attr.readableName() }
                     }
                 }
-                for (attr in scanSettings.userSignature) {
+                for (attr in scanSettings.userSignatures) {
                     Attribute.new {
                         name = attr.writeName
                         factor = 1

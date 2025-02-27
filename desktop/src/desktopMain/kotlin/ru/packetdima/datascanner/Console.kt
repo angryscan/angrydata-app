@@ -8,6 +8,7 @@ import org.koin.core.component.inject
 import ru.packetdima.datascanner.common.AppFiles
 import ru.packetdima.datascanner.common.AppSettings
 import ru.packetdima.datascanner.common.ScanSettings
+import ru.packetdima.datascanner.common.UserSignatureSettings
 import ru.packetdima.datascanner.scan.common.FileType
 import ru.packetdima.datascanner.searcher.ConsoleFilesCounter
 import ru.packetdima.datascanner.searcher.SensitiveSearcher
@@ -121,11 +122,12 @@ object Console: KoinComponent {
 
         val scanSettings: ScanSettings by inject()
         val appSettings: AppSettings by inject()
+        val userSignaturesSettings: UserSignatureSettings by inject()
 
         path = getArg(map, "-path", null)
         val fileExtensions = getArg(map, "-extensions", scanSettings.extensions.joinToString(","))
         val detectFunctions = getArg(map, "-detect", scanSettings.detectFunctions.joinToString(","))
-        val userSignatures = getArg(map, "-usig_detect", scanSettings.userSignature.joinToString(","))
+        val userSignatures = getArg(map, "-usig_detect", scanSettings.userSignatures.joinToString(","))
         val fastScan = getArg(map, "-fast", scanSettings.fastScan.value)
         val fullScan = getArg(map, "-full", !fastScan)
         val threadCount = getArg(map, "threads", appSettings.threadCount.value)
@@ -209,20 +211,21 @@ object Console: KoinComponent {
         println("Detect functions: ${scanSettings.detectFunctions.joinToString(", ")}")
 
         if(userSignatures != null) {
-            scanSettings.userSignature.clear()
+            scanSettings.userSignatures.clear()
             userSignatures.split(",").forEach { sig ->
-                val sigo = scanSettings.userSignature.find { it.name == sig }
+                val sigo = userSignaturesSettings.userSignatures.find { it.name == sig }
                 if (sigo != null)
-                    scanSettings.userSignature.add(sigo)
+                    scanSettings.userSignatures.add(sigo)
                 else
                     println("Unknown user detect signature: $sig, skipping...")
             }
         }
-        println("User signature functions: ${scanSettings.userSignature.joinToString(", ")}")
+        println("User signature functions: ${scanSettings.userSignatures.joinToString(", ")}")
     }
 
     fun help() {
         val scanSettings: ScanSettings by inject()
+        val userSignatureSettings: UserSignatureSettings by inject()
         println(
             """
 Allowed parameters:
@@ -249,7 +252,7 @@ Allowed extensions:
 Allowed detect functions: 
         ${DetectFunction.entries.joinToString("\n        ") { "${it.name} (${it.writeName})" }}
 Allowed user detect signatures:
-        ${scanSettings.userSignature.joinToString("\n        ") { "${it.name} (${it.writeName})" }} 
+        ${userSignatureSettings.userSignatures.joinToString("\n        ") { "${it.name} (${it.writeName})" }} 
             """.trimIndent()
         )
     }

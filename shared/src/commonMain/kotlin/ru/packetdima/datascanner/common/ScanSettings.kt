@@ -1,9 +1,12 @@
 package ru.packetdima.datascanner.common
 
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import info.downdetector.bigdatascanner.common.DetectFunction
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -14,15 +17,26 @@ import java.io.File
 
 @Serializable
 class ScanSettings: KoinComponent {
-    class ScanSettingsFile(path: String): File(path)
+    @Transient
+    private val logger = KotlinLogging.logger{}
+    class SettingsFile(path: String): File(path)
 
-    private val settingsFile: ScanSettingsFile by inject()
-
-    val extensions: MutableList<FileType> = mutableListOf()
-    val detectFunctions: MutableList<DetectFunction> = mutableListOf()
+    private val settingsFile: SettingsFile by inject()
 
     @Serializable
-    val userSignature: MutableList<UserSignature> = mutableListOf()
+    val extensions: MutableList<FileType> = mutableStateListOf()
+    @Serializable(with = MutableStateSerializer::class)
+    var extensionsExpanded: MutableState<Boolean>
+
+    @Serializable
+    val detectFunctions: MutableList<DetectFunction> = mutableStateListOf()
+    @Serializable(with = MutableStateSerializer::class)
+    var detectFunctionsExpanded: MutableState<Boolean>
+
+    @Serializable
+    val userSignatures: MutableList<UserSignature> = mutableStateListOf()
+    @Serializable(with = MutableStateSerializer::class)
+    var userSignatureExpanded: MutableState<Boolean>
 
     @Serializable(with = MutableStateSerializer::class)
     var fastScan: MutableState<Boolean>
@@ -34,18 +48,27 @@ class ScanSettings: KoinComponent {
             val prop: ScanSettings = Json.decodeFromString(settingsFile.readText())
 
             this.extensions.addAll(prop.extensions)
+            this.extensionsExpanded = prop.extensionsExpanded
 
             this.fastScan = prop.fastScan
 
             this.detectFunctions.addAll(prop.detectFunctions)
+            this.detectFunctionsExpanded = prop.detectFunctionsExpanded
 
-            this.userSignature.addAll(prop.userSignature)
+            this.userSignatures.addAll(prop.userSignatures)
+            this.userSignatureExpanded = prop.userSignatureExpanded
         } catch (ex: Exception) {
+            logger.error {
+                "Failed to load ScanSettings. Loading default."
+            }
             this.extensions.clear()
             this.extensions.addAll(FileType.entries.filter { it != FileType.ZIP && it != FileType.RAR })
+            this.extensionsExpanded = mutableStateOf(false)
             this.detectFunctions.clear()
             this.detectFunctions.addAll(DetectFunction.entries.toTypedArray())
+            this.detectFunctionsExpanded = mutableStateOf(false)
             this.fastScan = mutableStateOf(false)
+            this.userSignatureExpanded = mutableStateOf(false)
         }
     }
 

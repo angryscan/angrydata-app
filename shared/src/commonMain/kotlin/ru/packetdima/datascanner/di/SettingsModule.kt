@@ -5,10 +5,13 @@ import org.koin.dsl.module
 import ru.packetdima.datascanner.common.AppFiles
 import ru.packetdima.datascanner.common.AppSettings
 import ru.packetdima.datascanner.common.ScanSettings
+import ru.packetdima.datascanner.common.UserSignatureSettings
 
 val settingsModule = module {
-    single { AppSettings.AppSettingsFile(AppFiles.AppSettingsFile)}
+    single { UserSignatureSettings.SettingsFile(AppFiles.UserSignaturesFiles) }
+    singleOf(::UserSignatureSettings)
+    single { AppSettings.AppSettingsFile(AppFiles.AppSettingsFile) }
     singleOf(::AppSettings)
-    single { ScanSettings.ScanSettingsFile(AppFiles.ScanSettingsFile)}
+    single { ScanSettings.SettingsFile(AppFiles.ScanSettingsFile) }
     singleOf(::ScanSettings)
 }

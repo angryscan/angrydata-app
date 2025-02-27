@@ -38,15 +38,6 @@ fun SettingsBox(transition: Transition<Boolean>) {
 
     var fastScan by remember { scanSettings.fastScan }
 
-    var fileExtensionsExpanded by remember { mutableStateOf(false) }
-    val fileExtensionIconRotation = remember { Animatable(90f) }
-
-    var extensions = remember { scanSettings.extensions }
-
-    LaunchedEffect(fileExtensionsExpanded) {
-        fileExtensionIconRotation.animateTo(if (fileExtensionsExpanded) 90f else 270f)
-    }
-
     LaunchedEffect(fastScan) {
         scanSettings.save()
     }
@@ -64,8 +55,6 @@ fun SettingsBox(transition: Transition<Boolean>) {
                 .padding(6.dp)
                 .fillMaxWidth()
         ) {
-
-
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
@@ -100,99 +89,13 @@ fun SettingsBox(transition: Transition<Boolean>) {
                 }
 
                 // File extensions selection
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Surface(
-                        modifier = Modifier
-                            .background(MaterialTheme.colorScheme.surface)
-                            .height(34.dp)
-                            .fillMaxWidth()
-                            .clip(MaterialTheme.shapes.medium)
-                            .clickable {
-                                fileExtensionsExpanded = !fileExtensionsExpanded
-                            },
-                        shape = MaterialTheme.shapes.medium,
-                        tonalElevation = 2.dp
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 12.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.ScanSettings_FileExtensions),
-                                fontSize = 16.sp
-                            )
-                            Icon(
-                                imageVector = Icons.Outlined.ArrowBackIosNew,
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .rotate(fileExtensionIconRotation.value)
-                            )
-                        }
-                    }
-                    AnimatedVisibility(fileExtensionsExpanded) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        ) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Checkbox(
-                                    checked = extensions.containsAll(FileType.entries),
-                                    onCheckedChange = { checked ->
-                                        extensions = if(checked) {
-                                            FileType.entries.toMutableList()
-                                        } else {
-                                            mutableListOf()
-                                        }
-                                    }
-                                )
-                                CompositionLocalProvider(LocalRippleConfiguration provides null) {
-                                    Text(
-                                        text = stringResource(Res.string.ScanSettings_SelectAll),
-                                        fontSize = 14.sp,
-                                        modifier = Modifier.clickable {
-                                            fastScan = !fastScan
-                                        }
-                                    )
-                                }
-                                LazyVerticalGrid(
-                                    columns = GridCells.Fixed(4),
-                                    modifier = Modifier
-                                        .height(200.dp)
-                                        .fillMaxWidth()
-                                ) {
-                                    items(FileType.entries) { fileType ->
-                                        Checkbox(
-                                            checked = extensions.contains(fileType),
-                                            onCheckedChange = { checked ->
-                                                extensions = if(checked)
-                                                    (extensions + fileType).toMutableList()
-                                                else
-                                                    (extensions - fileType).toMutableList()
-                                            }
-                                        )
-                                        CompositionLocalProvider(LocalRippleConfiguration provides null) {
-                                            Text(
-                                                text = fileType.name,
-                                                fontSize = 14.sp,
-                                                modifier = Modifier.clickable {
-                                                    fastScan = !fastScan
-                                                }
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                SettingsBoxExtensionsSelection(scanSettings)
+
+                // Detect functions selection
+                SettingsBoxDetectFunctions(scanSettings)
+
+                // User signatures selection
+                SettingsBoxUserSignature(scanSettings)
             }
         }
     }

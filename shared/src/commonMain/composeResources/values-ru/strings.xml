@@ -12,21 +12,6 @@
     <string name="iVersion">Версия программы</string>
     <string name="iCopyright">Авторские права © ООО "Детектикум", 2024</string>
     <string name="iAbout">Big Data Scanner — персональное программное обеспечение для экспресс-проверки наличия в файлах персональных данных и номеров банковских карт. Big Data Scanner работает со следующими форматами файлов: .xlsx, .docx, .txt, .csv, .xml, .json, .log, .doc, .xls, .pdf, .zip.\n\Big Data Scanner не вносит никаких изменений в проверяемые файлы, требуется доступ только для чтения файла.\n\nРезультат работы программы носит рекомендательный характер, может требоваться дополнительная верификация со стороны пользователя.</string>
-    <string name="dfEmails">Эл. адрес</string>
-    <string name="dfPhones">Телефон</string>
-    <string name="dfCardNumbers">Номер карты</string>
-    <string name="dfCarNumber">Номер авто</string>
-    <string name="dfSNILS">СНИЛС</string>
-    <string name="dfPassport">Паспорт</string>
-    <string name="dfOMS">ОМС</string>
-    <string name="dfINN">ИНН</string>
-    <string name="dfAccountNumber">Номер счета</string>
-    <string name="dfAddress">Адрес</string>
-    <string name="dfBlackList">Черный список</string>
-    <string name="dfValuableInfo">Ценная информация</string>
-    <string name="dfLogin">Логин</string>
-    <string name="dfPassword">Пароль</string>
-    <string name="dfName">ФИО</string>
     <string name="save">Сохранить</string>
     <string name="close">Закрыть</string>
     <string name="stop">Стоп</string>
@@ -87,6 +72,7 @@
     <string name="errorUserSignatureSave">Не удалось сохранить пользовательскую сигнатуру</string>
     <string name="errorUserSignatureAlreadyExist">Пользовательская сигнатура с таким именем уже существует</string>
 
+
     <string name="SideMenu-MainPage">Главная</string>
     <string name="SideMenu-ScanListPage">Список сканирований</string>
     <string name="SideMenu-SettingsPage">Параметры</string>
@@ -98,5 +84,23 @@
 
     <string name="ScanSettings-FastScan">Быстрое сканирование</string>
     <string name="ScanSettings-FileExtensions">Расширения файлов</string>
+    <string name="ScanSettings-DetectFunctions">Функции детектирования</string>
+    <string name="ScanSettings-UserSignatures">Пользовательские сигнатуры</string>
     <string name="ScanSettings-SelectAll">Выбрать все</string>
+
+    <string name="DetectFunction-Emails">Эл. адрес</string>
+    <string name="DetectFunction-Phones">Телефон</string>
+    <string name="DetectFunction-CardNumbers">Номер карты</string>
+    <string name="DetectFunction-CarNumber">Номер авто</string>
+    <string name="DetectFunction-SNILS">СНИЛС</string>
+    <string name="DetectFunction-Passport">Паспорт</string>
+    <string name="DetectFunction-OMS">ОМС</string>
+    <string name="DetectFunction-INN">ИНН</string>
+    <string name="DetectFunction-AccountNumber">Номер счета</string>
+    <string name="DetectFunction-Address">Адрес</string>
+    <string name="DetectFunction-BlackList">Черный список</string>
+    <string name="DetectFunction-ValuableInfo">Ценная информация</string>
+    <string name="DetectFunction-Login">Логин</string>
+    <string name="DetectFunction-Password">Пароль</string>
+    <string name="DetectFunction-Name">ФИО</string>
 </resources>

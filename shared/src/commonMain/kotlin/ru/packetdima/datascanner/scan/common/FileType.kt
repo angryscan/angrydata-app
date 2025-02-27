@@ -877,7 +877,7 @@ enum class FileType(val extensions: List<String>): KoinComponent {
             f to f.scan(cleanText).takeIf { it > 0 }
         }.mapNotNull { p ->
             p.second?.let { p.first to it }
-        }.toMap() + scanSettings.userSignature.map { f ->
+        }.toMap() + scanSettings.userSignatures.map { f ->
             f to f.scan(cleanText).takeIf { it > 0 }
         }.mapNotNull { p ->
             p.second?.let { p.first to it }

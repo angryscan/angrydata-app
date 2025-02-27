@@ -103,4 +103,14 @@
     <string name="DetectFunction-Login">Логин</string>
     <string name="DetectFunction-Password">Пароль</string>
     <string name="DetectFunction-Name">ФИО</string>
+
+    <string name="SettingsScreen-ThreadsCount">Количество потоков</string>
+    <string name="SettingsScreen-ContextMenu">Контекстное меню</string>
+    <string name="SettingsScreen-ContextMenuExplorer">Файловый проводник</string>
+    <string name="SettingsScreen-Language">Язык</string>
+    <string name="SettingsScreen-Theme">Тема</string>
+
+    <string name="ThemeType-Light">Светлая</string>
+    <string name="ThemeType-Dark">Тёмная</string>
+    <string name="ThemeType-System">Системная</string>
 </resources>

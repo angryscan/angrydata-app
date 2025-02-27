@@ -1,10 +1,9 @@
 package ru.packetdima.datascanner.ui.strings
 
 import androidx.compose.runtime.Composable
-import org.jetbrains.compose.resources.ExperimentalResourceApi
+import info.downdetector.bigdatascanner.common.DetectFunction
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
-import info.downdetector.bigdatascanner.common.DetectFunction
 import ru.packetdima.datascanner.resources.*
 
 suspend fun DetectFunction.readableName(): String {

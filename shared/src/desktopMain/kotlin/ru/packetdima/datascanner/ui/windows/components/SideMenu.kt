@@ -21,18 +21,27 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import ru.packetdima.datascanner.navigation.AppScreens
 import ru.packetdima.datascanner.resources.*
 
 @Composable
-fun SideMenu() {
+fun SideMenu(navController: NavController) {
     var expanded by remember { mutableStateOf(false) }
+
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentScreen = AppScreens.valueOf(
+        backStackEntry?.destination?.route ?: AppScreens.Main.name
+    )
+
     Surface(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.surface)
             .animateContentSize()
-            .width(if(expanded) 336.dp else 88.dp)
+            .width(if (expanded) 336.dp else 88.dp)
             .fillMaxHeight()
     ) {
         Column(
@@ -44,82 +53,82 @@ fun SideMenu() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-                Row(
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .padding(start = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Image(
+                    painter = painterResource(Res.drawable.icon),
+                    contentDescription = null,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .padding(start = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Image(
-                        painter = painterResource(Res.drawable.icon),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(56.dp)
-                            .clip(MaterialTheme.shapes.medium)
-                            .clickable {
-                                expanded = !expanded
-                            },
-                    )
-                    AnimatedVisibility(expanded) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.fillMaxWidth()
+                        .size(56.dp)
+                        .clip(MaterialTheme.shapes.medium)
+                        .clickable {
+                            expanded = !expanded
+                        },
+                )
+                AnimatedVisibility(expanded) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.appName),
+                            fontSize = 20.sp,
+                        )
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(MaterialTheme.shapes.medium)
+                                .background(MaterialTheme.colorScheme.secondaryContainer)
+                                .clickable {
+                                    expanded = !expanded
+                                },
+                            contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                text = stringResource(Res.string.appName),
-                                fontSize = 20.sp,
+                            Icon(
+                                imageVector = Icons.Outlined.ArrowBackIosNew,
+                                contentDescription = null,
                             )
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .clip(MaterialTheme.shapes.medium)
-                                    .background(MaterialTheme.colorScheme.secondaryContainer)
-                                    .clickable {
-                                        expanded = !expanded
-                                    },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.ArrowBackIosNew,
-                                    contentDescription = null,
-                                )
-                            }
                         }
                     }
+                }
 
             }
             Spacer(modifier = Modifier.height(18.dp))
             SideMenuItem(
-                isSelected = true,
+                isSelected = currentScreen == AppScreens.Main,
                 expanded = expanded,
                 icon = painterResource(Res.drawable.SideMenu_IconMainPage),
                 text = stringResource(Res.string.SideMenu_MainPage),
-                onClick = { /*TODO*/ },
+                onClick = { navController.navigate(AppScreens.Main.name) },
             )
             SideMenuItem(
-                isSelected = false,
+                isSelected = currentScreen == AppScreens.Scans,
                 expanded = expanded,
                 icon = painterResource(Res.drawable.SideMenu_IconScans),
                 text = stringResource(Res.string.SideMenu_ScanListPage),
-                onClick = { /*TODO*/ },
+                onClick = { navController.navigate(AppScreens.Scans.name) },
             )
             Spacer(modifier = Modifier.weight(1f))
             SideMenuItem(
-                isSelected = false,
+                isSelected = currentScreen == AppScreens.Settings,
                 expanded = expanded,
                 icon = painterResource(Res.drawable.SideMenu_IconSettings),
                 text = stringResource(Res.string.SideMenu_SettingsPage),
-                onClick = { /*TODO*/ },
+                onClick = { navController.navigate(AppScreens.Settings.name) },
             )
             SideMenuItem(
-                isSelected = false,
+                isSelected = currentScreen == AppScreens.About,
                 expanded = expanded,
                 icon = painterResource(Res.drawable.SideMenu_IconAbout),
                 text = stringResource(Res.string.SideMenu_AboutPage),
-                onClick = { /*TODO*/ },
+                onClick = { navController.navigate(AppScreens.About.name) },
             )
         }
     }

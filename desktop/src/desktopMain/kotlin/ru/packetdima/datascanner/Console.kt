@@ -224,7 +224,6 @@ object Console: KoinComponent {
     }
 
     fun help() {
-        val scanSettings: ScanSettings by inject()
         val userSignatureSettings: UserSignatureSettings by inject()
         println(
             """

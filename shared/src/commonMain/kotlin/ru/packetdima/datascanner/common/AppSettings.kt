@@ -36,9 +36,9 @@ class AppSettings : KoinComponent {
         ),
         Default(
             text = when (Locale.getDefault().language) {
-                "ru" -> "Русский"
-                "en" -> "English"
-                else -> "Русский"
+                "ru" -> "По умолчанию (RU)"
+                "en" -> "Default (EN)"
+                else -> "По умолчанию (RU)"
             },
             locale = when (Locale.getDefault().language) {
                 "ru" -> "ru"
@@ -55,12 +55,11 @@ class AppSettings : KoinComponent {
 
     @Serializable(with = MutableStateSerializer::class)
     var theme: MutableState<ThemeType>
-    var propertiesList: MutableSet<String>
 
     @Serializable(with = MutableStateSerializer::class)
     var language: MutableState<LanguageType>
 
-    @Serializable
+    @Serializable(with = MutableStateSerializer::class)
     var hideOnMinimize: MutableState<Boolean>
 
     constructor() {
@@ -78,7 +77,6 @@ class AppSettings : KoinComponent {
             )
 
             this.theme = prop.theme
-            this.propertiesList = prop.propertiesList
             this.language = prop.language
             this.hideOnMinimize = prop.hideOnMinimize
         } catch (e: Exception) {
@@ -92,7 +90,6 @@ class AppSettings : KoinComponent {
                 )
             )
             this.theme = mutableStateOf(ThemeType.Dark)
-            this.propertiesList = mutableSetOf()
             this.language = mutableStateOf(LanguageType.Default)
             this.hideOnMinimize = mutableStateOf(true)
         }

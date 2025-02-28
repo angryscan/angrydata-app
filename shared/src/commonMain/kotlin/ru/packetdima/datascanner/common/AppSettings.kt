@@ -20,20 +20,12 @@ class AppSettings : KoinComponent {
     class AppSettingsFile(path: String) : File(path)
 
     enum class ThemeType {
+        System,
         Dark,
         Light,
-        System
     }
 
     enum class LanguageType(val text: String, val locale: String) {
-        RU(
-            text = "Русский",
-            locale = "ru"
-        ),
-        EN(
-            text = "English",
-            locale = "en"
-        ),
         Default(
             text = when (Locale.getDefault().language) {
                 "ru" -> "По умолчанию (RU)"
@@ -45,7 +37,15 @@ class AppSettings : KoinComponent {
                 "en" -> "en"
                 else -> "ru"
             }
-        )
+        ),
+        RU(
+            text = "Русский",
+            locale = "ru"
+        ),
+        EN(
+            text = "English",
+            locale = "en"
+        ),
     }
 
     private val settingsFile: AppSettingsFile by inject()

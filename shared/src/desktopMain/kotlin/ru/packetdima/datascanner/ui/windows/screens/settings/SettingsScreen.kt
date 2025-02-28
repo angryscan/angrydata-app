@@ -24,7 +24,6 @@ import ru.packetdima.datascanner.store.ContextMenu
 import ru.packetdima.datascanner.ui.icons.icon
 import ru.packetdima.datascanner.ui.strings.composableName
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SettingsScreen() {
     val appSettings = koinInject<AppSettings>()
@@ -42,7 +41,7 @@ fun SettingsScreen() {
     Surface(
         shape = MaterialTheme.shapes.medium,
         modifier = Modifier
-            .width(700.dp),
+            .width(760.dp),
         color = MaterialTheme.colorScheme.surface
     ) {
         Column(
@@ -94,7 +93,7 @@ fun SettingsScreen() {
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = stringResource(Res.string.SettingsScreen_ContextMenu))
+                    Text(text = stringResource(Res.string.SettingsScreen_ContextMenuExplorer))
 
                     Switch(
                         checked = contextMenuEnabled,

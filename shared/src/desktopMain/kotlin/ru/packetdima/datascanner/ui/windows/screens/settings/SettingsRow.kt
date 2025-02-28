@@ -26,7 +26,7 @@ fun SettingsRow(
                 .height(32.dp),
             shape = MaterialTheme.shapes.medium,
             color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 5.dp,
+            tonalElevation = 10.dp,
             shadowElevation = 1.dp
         ) {
             Row(
@@ -42,7 +42,13 @@ fun SettingsRow(
                 )
             }
         }
-        block()
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp)
+        ) {
+            block()
+        }
     }
 
 }

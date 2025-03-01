@@ -93,7 +93,7 @@ class ScanService : KoinComponent {
         extensions: List<FileType>? = null,
         detectFunctions: List<IDetectFunction>? = null,
         fastScan: Boolean? = null
-    ) {
+    ): TaskEntityViewModel {
         return database.transaction {
             val task = Task.new {
                 this.path = path
@@ -132,7 +132,9 @@ class ScanService : KoinComponent {
                 }
             }
 
-            tasks.add(TaskEntityViewModel(task))
+            val taskEntity = TaskEntityViewModel(task)
+            tasks.add(taskEntity)
+            taskEntity
         }
     }
 

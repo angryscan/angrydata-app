@@ -17,5 +17,6 @@ val DarkColors = darkColorScheme(
     secondary = Color(0xFF0F4A84),
     onPrimary = Color(0xFFF0F0F0),
     onSecondary = Color(0xFFF0F0F0),
-    error = Color(0xFFA01010)
+    error = Color(0xFFA01010),
+    tertiary = Color(0xFF269336)
 )

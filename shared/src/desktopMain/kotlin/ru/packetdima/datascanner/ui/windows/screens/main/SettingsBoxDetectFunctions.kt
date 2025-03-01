@@ -46,7 +46,7 @@ fun SettingsBoxDetectFunctions(scanSettings: ScanSettings) {
     ) {
         val rows = FileType.entries.size / 3 + if (FileType.entries.size % 3 > 0) 1 else 0
 
-        val height = (24 * rows + (6 * (rows - 1))).dp + 52.dp
+        val height = (24 * rows + (6 * (rows - 1))).dp + 52.dp + 24.dp
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),

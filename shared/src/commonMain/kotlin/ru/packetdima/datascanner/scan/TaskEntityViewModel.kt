@@ -98,6 +98,7 @@ class TaskEntityViewModel(
                 _foundFiles.value = foundFiles
         }
         _id.value = dbTask.id.value
+        checkProgress()
     }
 
     fun addFoundAttribute(detectFunction: IDetectFunction) {
@@ -123,25 +124,26 @@ class TaskEntityViewModel(
                             }
                             .count()
                     }
-                }
 
-                _skippedFiles.value = TaskFiles
-                    .selectAll()
-                    .where {
-                        TaskFiles.task.eq(dbTask.id) and TaskFiles.state.eq(TaskState.FAILED)
-                    }
-                    .count()
 
-                _scannedFiles.value = TaskFiles
-                    .selectAll()
-                    .where {
-                        TaskFiles.task.eq(dbTask.id) and TaskFiles.state.eq(TaskState.COMPLETED)
-                    }
-                    .count()
+                    _skippedFiles.value = TaskFiles
+                        .selectAll()
+                        .where {
+                            TaskFiles.task.eq(dbTask.id) and TaskFiles.state.eq(TaskState.FAILED)
+                        }
+                        .count()
 
-                if (_selectedFiles.value == _scannedFiles.value + _skippedFiles.value) {
-                    if (_state.value != TaskState.COMPLETED) {
-                        setState(TaskState.COMPLETED)
+                    _scannedFiles.value = TaskFiles
+                        .selectAll()
+                        .where {
+                            TaskFiles.task.eq(dbTask.id) and TaskFiles.state.eq(TaskState.COMPLETED)
+                        }
+                        .count()
+
+                    if (_selectedFiles.value == _scannedFiles.value + _skippedFiles.value) {
+                        if (_state.value != TaskState.COMPLETED) {
+                            setState(TaskState.COMPLETED)
+                        }
                     }
                 }
 
@@ -161,6 +163,7 @@ class TaskEntityViewModel(
                 when (state) {
                     TaskState.SEARCHING -> {
                         dbTask.startedAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+                        dbTask.finishedAt = null
                     }
 
                     TaskState.COMPLETED -> {
@@ -178,6 +181,7 @@ class TaskEntityViewModel(
                         ) {
                             it[TaskFiles.state] = TaskState.STOPPED
                         }
+                        dbTask.finishedAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
                     }
 
                     TaskState.SCANNING -> {
@@ -190,6 +194,7 @@ class TaskEntityViewModel(
                         ) {
                             it[TaskFiles.state] = TaskState.SEARCHING
                         }
+                        dbTask.finishedAt = null
                     }
 
                     else -> {}
@@ -233,9 +238,12 @@ class TaskEntityViewModel(
 
     fun start(rescan: Boolean = false) {
         val path = dbTask.path
-        val extensions = dbTask.extensions.flatMap { it.extension.extensions }
 
         taskScope.launch {
+
+            val extensions = database.transaction {
+                dbTask.extensions.flatMap { it.extension.extensions }
+            }
             while (_state.value == TaskState.LOADING) {
                 delay(500)
             }
@@ -259,7 +267,7 @@ class TaskEntityViewModel(
                         database.transaction {
                             TaskFile.new {
                                 this.task = dbTask
-                                this.path = path
+                                this.path = item.path
                                 this.state = TaskState.PENDING
                                 this.size = item.length()
                             }

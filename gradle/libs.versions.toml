@@ -32,7 +32,7 @@ files-poi-ooxml = { module = "org.apache.poi:poi-ooxml", version.ref = "poi" }
 files-odftoolkit-java = { module = "org.odftoolkit:odfdom-java", version = "0.12.0" }
 files-odftoolkit-simple = {module = "org.odftoolkit:simple-odf", version = "0.9.0"}
 
-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.6.3" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.8.0" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version = "0.6.2" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.8.0" }
 
@@ -59,7 +59,6 @@ lifecycle-viewmodel = { module ="org.jetbrains.androidx.lifecycle:lifecycle-view
 
 [plugins]
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
-#kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlin-jpa = { id = "org.jetbrains.kotlin.plugin.jpa", version.ref = "kotlin" }
 compose = { id = "org.jetbrains.compose", version.ref = "compose" }

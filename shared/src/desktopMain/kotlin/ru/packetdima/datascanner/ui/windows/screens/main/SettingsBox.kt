@@ -4,8 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -32,6 +31,8 @@ fun SettingsBox(transition: Transition<Boolean>) {
         scanSettings.save()
     }
 
+    val scrollState = rememberScrollState()
+
     AnimatedVisibility(
         transition.currentState,
         enter = expandVertically(),
@@ -47,6 +48,14 @@ fun SettingsBox(transition: Transition<Boolean>) {
         ) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier
+                    .padding(
+                        end = if (scrollState.canScrollBackward || scrollState.canScrollForward)
+                            30.dp
+                        else
+                            0.dp
+                    )
+                    .verticalScroll(scrollState)
             ) {
                 // Fast scan checkbox
                 Row(
@@ -87,6 +96,15 @@ fun SettingsBox(transition: Transition<Boolean>) {
                 // User signatures selection
                 SettingsBoxUserSignature(scanSettings)
             }
+
+            VerticalScrollbar(
+                adapter = rememberScrollbarAdapter(scrollState),
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .fillMaxHeight()
+                    .padding(end = 6.dp)
+                    .width(12.dp)
+            )
         }
     }
 }

@@ -1,6 +1,5 @@
 package ru.packetdima.datascanner.ui.windows.screens.main
 
-import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,21 +12,21 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
-import ru.packetdima.datascanner.db.models.TaskState
-import ru.packetdima.datascanner.resources.MainScreen_ScanCurrentState
+import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.resources.MainScreen_ScanStartButton
 import ru.packetdima.datascanner.resources.MainScreen_SelectPathPlaceholder
 import ru.packetdima.datascanner.resources.Res
 import ru.packetdima.datascanner.scan.ScanService
 import ru.packetdima.datascanner.scan.common.ScanPathHelper
+import ru.packetdima.datascanner.ui.windows.screens.main.tasks.MainScreenTasks
 import java.io.File
 import javax.swing.JFileChooser
 
@@ -37,26 +36,25 @@ fun MainScreen() {
 
     val scanService = koinInject<ScanService>()
 
+    val scanSettings = koinInject<ScanSettings>()
+
     val helperPath = ScanPathHelper.path.collectAsState()
 
     var path by remember { mutableStateOf(helperPath.value) }
 
-    var settingExpanded by remember { mutableStateOf(false) }
+    var settingsExpanded by remember { mutableStateOf(false) }
 
     var scanStateExpanded by remember { mutableStateOf(false) }
 
-    val settingsButtonTransition = updateTransition(settingExpanded)
+    val settingsButtonTransition = updateTransition(settingsExpanded)
 
-    val settingsBoxTransition = updateTransition(settingExpanded)
+    val settingsBoxTransition = updateTransition(settingsExpanded)
 
     var selectPathError by remember { mutableStateOf(false) }
     var scanNotCorrectPath by remember { mutableStateOf(false) }
 
-    val scanStateIconRotation = remember { Animatable(270f) }
 
-    LaunchedEffect(scanStateExpanded) {
-        scanStateIconRotation.animateTo(if (scanStateExpanded) 270f else 90f)
-    }
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(scanNotCorrectPath) {
         if (scanNotCorrectPath) {
@@ -155,8 +153,16 @@ fun MainScreen() {
                 Row {
                     Button(
                         onClick = {
-                            if(File(path).exists()) {
-                                /*TODO*/
+                            if (File(path).exists()) {
+                                coroutineScope.launch {
+                                    val task = scanService.createTask(
+                                        path = path,
+                                        extensions = scanSettings.extensions,
+                                        detectFunctions = scanSettings.detectFunctions + scanSettings.userSignatures,
+                                        fastScan = scanSettings.fastScan.value
+                                    )
+                                    scanService.startTask(task)
+                                }
                             } else {
                                 scanNotCorrectPath = true
                             }
@@ -177,11 +183,11 @@ fun MainScreen() {
                     SettingsButton(
                         transition = settingsButtonTransition,
                         onClick = {
-                            if(!settingExpanded) {
+                            if (!settingsExpanded) {
                                 scanStateExpanded = false
-                                settingExpanded = true
+                                settingsExpanded = true
                             } else {
-                                settingExpanded = false
+                                settingsExpanded = false
                             }
                         }
                     )
@@ -195,68 +201,15 @@ fun MainScreen() {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Column(
-            modifier = Modifier
-                .width(IntrinsicSize.Min)
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(700.dp)
-                    .height(63.dp)
-                    .clip(MaterialTheme.shapes.medium.copy(
-                        bottomEnd = CornerSize(0.dp),
-                        bottomStart = CornerSize(0.dp)
-                    ))
-                    .background(MaterialTheme.colorScheme.surface)
-                    .clickable {
-                        if(settingExpanded) {
-                            settingExpanded = false
-                        }
-                        scanStateExpanded = !scanStateExpanded
-                    }
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp)
-                ) {
-                    Text(
-                        text = stringResource(
-                            Res.string.MainScreen_ScanCurrentState,
-                            scanService.tasks.tasks.value.filter {
-                                it.state.value == TaskState.SCANNING ||
-                                it.state.value == TaskState.SEARCHING ||
-                                it.state.value == TaskState.PENDING
-                            }.size
-                        ),
-                        fontSize = 24.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Icon(
-                        imageVector = Icons.Outlined.ArrowBackIosNew,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .rotate(scanStateIconRotation.value)
-                    )
+        MainScreenTasks(
+            expanded = scanStateExpanded,
+            onExpandedClick = {
+                if (!scanStateExpanded) {
+                    settingsExpanded = false
                 }
+                scanStateExpanded = !scanStateExpanded
             }
-            AnimatedVisibility(
-                visible = scanStateExpanded,
-                enter = expandVertically(),
-                exit = shrinkVertically()
-            ) {
-                Box(
-                    modifier = Modifier
-                        .background(MaterialTheme.colorScheme.surface)
-                        .fillMaxSize()
-                ) {
-
-                }
-            }
-        }
-
+        )
     }
 }
 

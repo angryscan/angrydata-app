@@ -1,6 +1,5 @@
 package ru.packetdima.datascanner.ui.windows.screens.settings
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,6 +19,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import ru.packetdima.datascanner.common.AppSettings
 import ru.packetdima.datascanner.resources.*
+import ru.packetdima.datascanner.scan.ScanService
 import ru.packetdima.datascanner.store.ContextMenu
 import ru.packetdima.datascanner.ui.icons.icon
 import ru.packetdima.datascanner.ui.strings.composableName
@@ -27,6 +27,7 @@ import ru.packetdima.datascanner.ui.strings.composableName
 @Composable
 fun SettingsScreen() {
     val appSettings = koinInject<AppSettings>()
+    val scanService = koinInject<ScanService>()
 
     var sliderPosition by remember { mutableStateOf(appSettings.threadCount.value.toFloat()) }
     var threadCount by remember { appSettings.threadCount }
@@ -62,6 +63,7 @@ fun SettingsScreen() {
                         onValueChangeFinished = {
                             threadCount = sliderPosition.toInt()
                             appSettings.save()
+                            scanService.setThreadsCount()
                         },
                         modifier = Modifier
                             .sizeIn(maxWidth = 600.dp)

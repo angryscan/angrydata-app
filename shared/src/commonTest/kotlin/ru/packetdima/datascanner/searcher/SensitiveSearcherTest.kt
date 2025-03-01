@@ -7,13 +7,10 @@ import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import ru.packetdima.datascanner.common.AppFiles
 import info.downdetector.bigdatascanner.common.IDetectFunction
-import ru.packetdima.datascanner.common.Settings
 import ru.packetdima.datascanner.scan.common.FileSize
 import ru.packetdima.datascanner.searcher.model.Attributes
 import ru.packetdima.datascanner.searcher.model.Reports
 import ru.packetdima.datascanner.searcher.model.ScannedFiles
-import ru.packetdima.datascanner.searcher.properties.Properties
-import ru.packetdima.datascanner.ui.UIProperties
 import java.io.File
 import kotlin.io.path.createTempDirectory
 import kotlin.test.Test
@@ -70,12 +67,6 @@ internal class SensitiveSearcherTest {
         }
     }
     fun inspectDirectory(path : String) = runBlocking {
-        val uiPath = javaClass.getResource("/common/ui.json")
-        val searcherPath = javaClass.getResource("/common/properties.json")
-        assertNotNull(uiPath)
-        assertNotNull(searcherPath)
-        Settings.ui = UIProperties(uiPath.file)
-        Settings.searcher = Properties(searcherPath.file)
         val onProgressChange: (Pair<Long, FileSize>) -> Unit = {}
         val onFileFound: (Long) -> Unit = {}
         val onSkipSelectFile: (Long) -> Unit = {}

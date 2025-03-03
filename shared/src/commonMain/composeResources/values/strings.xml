@@ -138,4 +138,9 @@
     <string name="Result-ColumnCount">Count</string>
     <string name="Result-ColumnSize">Size</string>
     <string name="Result-ColumnScore">Score</string>
+
+    <string name="FileSave-AlreadyExistTitle">File already exist!</string>
+    <string name="FileSave-AlreadyExistText">File with this name already exist. Do you want to replace it?</string>
+    <string name="FileSave-ErrorTitle">Error saving file!</string>
+    <string name="FileSave-ErrorText">Cannot save file. Check it is in use by another process!</string>
 </resources>

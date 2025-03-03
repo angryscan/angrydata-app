@@ -26,9 +26,13 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.char
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 import ru.packetdima.datascanner.db.models.TaskState
 import ru.packetdima.datascanner.resources.*
 import ru.packetdima.datascanner.scan.ScanService
+import ru.packetdima.datascanner.scan.TaskFilesViewModel
+import ru.packetdima.datascanner.scan.common.ResultWriter
 import ru.packetdima.datascanner.ui.extensions.color
 import ru.packetdima.datascanner.ui.extensions.icon
 
@@ -40,6 +44,9 @@ fun ScanResultScreen(
 ) {
     val scanService = koinInject<ScanService>()
     val task = scanService.tasks.tasks.value.first { it.id.value == taskId }
+
+    val taskFilesViewModel = koinViewModel<TaskFilesViewModel> { parametersOf(task.dbTask) }
+    val taskFiles by taskFilesViewModel.taskFiles.collectAsState()
 
     val clipboardManager = LocalClipboardManager.current
 
@@ -80,6 +87,20 @@ fun ScanResultScreen(
         char(':')
         minute()
         char(':')
+        second()
+    }
+
+    val fileDateFormat = LocalDateTime.Format {
+        year()
+        char('-')
+        monthNumber()
+        char('-')
+        dayOfMonth()
+        char('_')
+        hour()
+        char('-')
+        minute()
+        char('-')
         second()
     }
 
@@ -144,7 +165,7 @@ fun ScanResultScreen(
                                 }
                         )
 
-                        if(fastScan) {
+                        if (fastScan) {
                             Icon(
                                 imageVector = Icons.Outlined.RocketLaunch,
                                 contentDescription = null,
@@ -174,7 +195,14 @@ fun ScanResultScreen(
                                     .clip(MaterialTheme.shapes.medium)
                                     .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
                                     .clickable {
-
+                                        coroutineScope.launch {
+                                            ResultWriter.saveResult(
+                                                fileName = "BDS_${fileDateFormat.format(finishedAt!!)}.csv",
+                                                result = taskFiles.sortedWith(
+                                                    SortColumn.Score.comparator()
+                                                )
+                                            )
+                                        }
                                     },
                                 contentAlignment = Alignment.Center
                             ) {
@@ -206,7 +234,7 @@ fun ScanResultScreen(
                 }
             }
 
-            if(state != TaskState.COMPLETED) {
+            if (state != TaskState.COMPLETED) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(14.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -220,6 +248,7 @@ fun ScanResultScreen(
                                 when (state) {
                                     TaskState.SEARCHING, TaskState.SCANNING, TaskState.LOADING, TaskState.PENDING ->
                                         scanService.stopTask(task)
+
                                     TaskState.STOPPED -> scanService.startTask(task)
                                     else -> scanService.rescanTask(task)
                                 }
@@ -242,7 +271,7 @@ fun ScanResultScreen(
                         color = state.color(),
                         modifier = Modifier.width(600.dp),
                         strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
-                        trackColor =  MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
 
                     )
                 }
@@ -398,7 +427,10 @@ fun ScanResultScreen(
                 }
             }
 
-            ResultTable(task = task)
+            ResultTable(
+                taskFilesViewModel = taskFilesViewModel,
+                task = task
+            )
         }
     }
 }

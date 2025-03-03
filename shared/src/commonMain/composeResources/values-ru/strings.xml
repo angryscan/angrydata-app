@@ -133,4 +133,9 @@
     <string name="Result-ColumnCount">Кол-во</string>
     <string name="Result-ColumnSize">Размер</string>
     <string name="Result-ColumnScore">Оценка</string>
+
+    <string name="FileSave-AlreadyExistTitle">Файл уже существует!</string>
+    <string name="FileSave-AlreadyExistText">Файл с таким именем уже существует! Вы уверены, что хотите перезаписать его?</string>
+    <string name="FileSave-ErrorTitle">Ошибка сохранения файла!</string>
+    <string name="FileSave-ErrorText">Не удалось сохранить файл. Проверьте, что файл не занят другим процессом!</string>
 </resources>

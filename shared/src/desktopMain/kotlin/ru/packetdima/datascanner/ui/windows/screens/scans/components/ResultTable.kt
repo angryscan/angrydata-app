@@ -16,8 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.viewmodel.koinViewModel
-import org.koin.core.parameter.parametersOf
 import ru.packetdima.datascanner.resources.*
 import ru.packetdima.datascanner.scan.TaskEntityViewModel
 import ru.packetdima.datascanner.scan.TaskFileResult
@@ -25,8 +23,7 @@ import ru.packetdima.datascanner.scan.TaskFilesViewModel
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun ResultTable(task: TaskEntityViewModel) {
-    val taskFilesViewModel = koinViewModel<TaskFilesViewModel> { parametersOf(task.dbTask) }
+fun ResultTable(taskFilesViewModel: TaskFilesViewModel, task: TaskEntityViewModel) {
 
     val taskFiles by taskFilesViewModel.taskFiles.collectAsState()
 

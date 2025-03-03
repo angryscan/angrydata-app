@@ -133,6 +133,7 @@
     <string name="Result-ColumnCount">Кол-во</string>
     <string name="Result-ColumnSize">Размер</string>
     <string name="Result-ColumnScore">Оценка</string>
+    <string name="Result-DeleteFiles">Удалить файлов: %1$d</string>
 
     <string name="FileSave-AlreadyExistTitle">Файл уже существует!</string>
     <string name="FileSave-AlreadyExistText">Файл с таким именем уже существует! Вы уверены, что хотите перезаписать его?</string>

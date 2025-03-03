@@ -1,4 +1,4 @@
-package ru.packetdima.datascanner.ui.windows.screens.scans.components
+package ru.packetdima.datascanner.ui.windows.screens.scans
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -35,6 +35,10 @@ import ru.packetdima.datascanner.scan.TaskFilesViewModel
 import ru.packetdima.datascanner.scan.common.ResultWriter
 import ru.packetdima.datascanner.ui.extensions.color
 import ru.packetdima.datascanner.ui.extensions.icon
+import ru.packetdima.datascanner.ui.windows.screens.scans.components.AttributeCard
+import ru.packetdima.datascanner.ui.windows.screens.scans.components.ResultTable
+import ru.packetdima.datascanner.ui.windows.screens.scans.components.SortColumn
+import ru.packetdima.datascanner.ui.windows.screens.scans.components.comparator
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable

@@ -9,21 +9,26 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowDownward
 import androidx.compose.material.icons.outlined.ArrowUpward
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import ru.packetdima.datascanner.resources.*
 import ru.packetdima.datascanner.scan.TaskEntityViewModel
 import ru.packetdima.datascanner.scan.TaskFileResult
 import ru.packetdima.datascanner.scan.TaskFilesViewModel
+import java.io.File
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ResultTable(taskFilesViewModel: TaskFilesViewModel, task: TaskEntityViewModel) {
+
+    val coroutineScope = rememberCoroutineScope()
 
     val taskFiles by taskFilesViewModel.taskFiles.collectAsState()
 
@@ -40,6 +45,8 @@ fun ResultTable(taskFilesViewModel: TaskFilesViewModel, task: TaskEntityViewMode
 
     val selectedFiles = remember { mutableStateListOf<Int>() }
 
+    val filesExists = remember { mutableStateListOf<Int>() }
+
     val scrollState = rememberLazyListState()
 
     val scanned by task.scannedFiles.collectAsState()
@@ -51,6 +58,15 @@ fun ResultTable(taskFilesViewModel: TaskFilesViewModel, task: TaskEntityViewMode
     val progress = (scanned + skipped).toFloat() / selected
 
     var prevProgress by remember { mutableStateOf(progress) }
+
+    LaunchedEffect(state) {
+        filesExists.clear()
+        filesExists.addAll(
+            taskFiles
+                .filter { File(it.path).exists() }
+                .map { it.id }
+        )
+    }
 
 
     LaunchedEffect(progress) {
@@ -66,7 +82,7 @@ fun ResultTable(taskFilesViewModel: TaskFilesViewModel, task: TaskEntityViewMode
 
 
 
-    Box(
+    Scaffold(
         modifier = Modifier
             .clip(
                 MaterialTheme.shapes.medium.copy(
@@ -74,272 +90,313 @@ fun ResultTable(taskFilesViewModel: TaskFilesViewModel, task: TaskEntityViewMode
                     bottomEnd = CornerSize(0.dp)
                 )
             )
-            .background(MaterialTheme.colorScheme.surface)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(end = if (scrollState.canScrollBackward || scrollState.canScrollForward) 30.dp else 0.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier
-                    .padding(horizontal = 4.dp)
-            ) {
-                Checkbox(
-                    checked = selectedFiles.isNotEmpty() && selectedFiles.containsAll(sortedFiles.map { it.id }),
-                    onCheckedChange = { checkState ->
-                        if (checkState) {
-                            selectedFiles.addAll(
-                                sortedFiles.map { it.id }.filter { id -> !selectedFiles.contains(id) }
-                            )
-                        } else {
+            .background(MaterialTheme.colorScheme.surface),
+        floatingActionButton = {
+            if (selectedFiles.isNotEmpty()) {
+                FloatingActionButton(
+                    onClick = {
+                        coroutineScope.launch {
+                            val filesDeleted = taskFiles.filter { it.id in selectedFiles }.map { file ->
+                                File(file.path).delete()
+                            }.count { it }
+
+                            taskFiles.filter { it.id in selectedFiles }.forEach {
+                                if(!File(it.path).exists()) {
+                                    filesExists.remove(it.id)
+                                }
+                            }
+
                             selectedFiles.clear()
                         }
-                    },
-                    modifier = Modifier.size(40.dp),
-                    colors = CheckboxDefaults.colors().copy(
-                        checkedBorderColor = MaterialTheme.colorScheme.primary,
-                        uncheckedBorderColor = MaterialTheme.colorScheme.primary
-                    )
-                )
-                Box(
-                    modifier = Modifier
-                        .weight(0.5f)
-                        .clip(shape = MaterialTheme.shapes.small)
-                        .clickable {
-                            if (sortColumn == SortColumn.Path) {
-                                sortDescending = !sortDescending
-                            } else {
-                                sortColumn = SortColumn.Path
-                                sortDescending = false
-                            }
-                        }
-                        .padding(2.dp),
-                    contentAlignment = Alignment.CenterStart
+                    }
                 ) {
                     Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.Result_ColumnFile),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        if(sortColumn == SortColumn.Path) {
-                            Icon(
-                                imageVector = if (sortDescending) Icons.Outlined.ArrowUpward else Icons.Outlined.ArrowDownward,
-                                contentDescription = "Sort",
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier
-                                    .size(20.dp)
-                            )
-                        }
-                    }
-                }
-                Box(
-                    modifier = Modifier
-                        .weight(0.5f)
-                        .clip(shape = MaterialTheme.shapes.small)
-                        .clickable {
-                            if (sortColumn == SortColumn.Attribute) {
-                                sortDescending = !sortDescending
-                            } else {
-                                sortColumn = SortColumn.Attribute
-                                sortDescending = false
-                            }
-                        }
-                        .padding(2.dp),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.Result_ColumnAttributes),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        if (sortColumn == SortColumn.Attribute) {
-                            Icon(
-                                imageVector = if (sortDescending) Icons.Outlined.ArrowUpward else Icons.Outlined.ArrowDownward,
-                                contentDescription = "Sort",
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier
-                                    .size(20.dp)
-                            )
-                        }
-                    }
-                }
-                Box(
-                    modifier = Modifier
-                        .weight(0.1f)
-                        .clip(shape = MaterialTheme.shapes.small)
-                        .clickable {
-                            if (sortColumn == SortColumn.Score) {
-                                sortDescending = !sortDescending
-                            } else {
-                                sortColumn = SortColumn.Score
-                                sortDescending = false
-                            }
-                        }
-                        .padding(2.dp),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.Result_ColumnScore),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        if (sortColumn == SortColumn.Score) {
-                            Icon(
-                                imageVector = if (sortDescending) Icons.Outlined.ArrowUpward else Icons.Outlined.ArrowDownward,
-                                contentDescription = "Sort",
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier
-                                    .size(20.dp)
-                            )
-                        }
-                    }
-                }
-                Box(
-                    modifier = Modifier
-                        .weight(0.1f)
-                        .clip(shape = MaterialTheme.shapes.small)
-                        .clickable {
-                            if (sortColumn == SortColumn.Count) {
-                                sortDescending = !sortDescending
-                            } else {
-                                sortColumn = SortColumn.Count
-                                sortDescending = false
-                            }
-                        }
-                        .padding(2.dp),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.Result_ColumnCount),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        if (sortColumn == SortColumn.Count) {
-                            Icon(
-                                imageVector = if (sortDescending) Icons.Outlined.ArrowUpward else Icons.Outlined.ArrowDownward,
-                                contentDescription = "Sort",
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier
-                                    .size(20.dp)
-                            )
-                        }
-                    }
-                }
-                Box(
-                    modifier = Modifier
-                        .weight(0.1f)
-                        .clip(shape = MaterialTheme.shapes.small)
-                        .clickable {
-                            if (sortColumn == SortColumn.Size) {
-                                sortDescending = !sortDescending
-                            } else {
-                                sortColumn = SortColumn.Size
-                                sortDescending = false
-                            }
-                        }
-                        .padding(2.dp),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.Result_ColumnSize),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        if (sortColumn == SortColumn.Size) {
-                            Icon(
-                                imageVector = if (sortDescending) Icons.Outlined.ArrowUpward else Icons.Outlined.ArrowDownward,
-                                contentDescription = "Sort",
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier
-                                    .size(20.dp)
-                            )
-                        }
-                    }
-                }
-            }
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                state = scrollState
-            ) {
-                items(sortedFiles) { file ->
-                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
                         modifier = Modifier
-                            .clip(MaterialTheme.shapes.medium)
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .padding(4.dp)
+                            .padding(horizontal = 10.dp)
                     ) {
-                        Checkbox(
-                            checked = selectedFiles.contains(file.id),
-                            onCheckedChange = { checkState ->
-                                if (checkState) {
-                                    selectedFiles.add(file.id)
-                                } else {
-                                    selectedFiles.remove(file.id)
-                                }
-                            },
-                            modifier = Modifier.size(40.dp),
-                            colors = CheckboxDefaults.colors().copy(
-                                checkedBorderColor = MaterialTheme.colorScheme.primary,
-                                uncheckedBorderColor = MaterialTheme.colorScheme.primary
-                            )
-                        )
-                        Text(
-                            text = file.path.replace(task.path.value, "").substring(1),
-                            modifier = Modifier.weight(0.5f),
-                        )
-                        FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            modifier = Modifier
-                                .weight(0.5f)
-                        ) {
-                            file.foundAttributes.forEach { attr ->
-                                AttributeCard(attr)
-                            }
-                        }
-                        Text(
-                            text = file.score.toString(),
-                            modifier = Modifier.weight(0.1f)
-                        )
-                        Text(
-                            text = file.count.toString(),
-                            modifier = Modifier.weight(0.1f)
-                        )
-                        Text(
-                            text = file.size.toString(),
-                            modifier = Modifier.weight(0.1f)
+                        Text(text = stringResource(Res.string.Result_DeleteFiles, selectedFiles.size))
+                        Icon(
+                            imageVector = Icons.Outlined.Delete,
+                            contentDescription = null
                         )
                     }
                 }
             }
         }
-
-        VerticalScrollbar(
-            adapter = rememberScrollbarAdapter(scrollState),
+    ) {
+        Box(
             modifier = Modifier
-                .padding(10.dp)
-                .width(10.dp)
-                .align(Alignment.CenterEnd),
-            style = LocalScrollbarStyle.current.copy(
-                unhoverColor = MaterialTheme.colorScheme.secondary,
-                hoverColor = MaterialTheme.colorScheme.primary
+                .fillMaxSize()
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(end = if (scrollState.canScrollBackward || scrollState.canScrollForward) 30.dp else 0.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier
+                        .padding(horizontal = 4.dp)
+                ) {
+                    Checkbox(
+                        checked = selectedFiles.isNotEmpty() && selectedFiles.containsAll(sortedFiles.map { it.id }),
+                        onCheckedChange = { checkState ->
+                            if (checkState) {
+                                selectedFiles.addAll(
+                                    sortedFiles.map { it.id }.filter { id -> !selectedFiles.contains(id) }
+                                )
+                            } else {
+                                selectedFiles.clear()
+                            }
+                        },
+                        modifier = Modifier.size(40.dp),
+                        colors = CheckboxDefaults.colors().copy(
+                            checkedBorderColor = MaterialTheme.colorScheme.primary,
+                            uncheckedBorderColor = MaterialTheme.colorScheme.primary
+                        )
+                    )
+                    Box(
+                        modifier = Modifier
+                            .weight(0.5f)
+                            .clip(shape = MaterialTheme.shapes.small)
+                            .clickable {
+                                if (sortColumn == SortColumn.Path) {
+                                    sortDescending = !sortDescending
+                                } else {
+                                    sortColumn = SortColumn.Path
+                                    sortDescending = false
+                                }
+                            }
+                            .padding(2.dp),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.Result_ColumnFile),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            if (sortColumn == SortColumn.Path) {
+                                Icon(
+                                    imageVector = if (sortDescending) Icons.Outlined.ArrowUpward else Icons.Outlined.ArrowDownward,
+                                    contentDescription = "Sort",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier
+                                        .size(20.dp)
+                                )
+                            }
+                        }
+                    }
+                    Box(
+                        modifier = Modifier
+                            .weight(0.5f)
+                            .clip(shape = MaterialTheme.shapes.small)
+                            .clickable {
+                                if (sortColumn == SortColumn.Attribute) {
+                                    sortDescending = !sortDescending
+                                } else {
+                                    sortColumn = SortColumn.Attribute
+                                    sortDescending = false
+                                }
+                            }
+                            .padding(2.dp),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.Result_ColumnAttributes),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            if (sortColumn == SortColumn.Attribute) {
+                                Icon(
+                                    imageVector = if (sortDescending) Icons.Outlined.ArrowUpward else Icons.Outlined.ArrowDownward,
+                                    contentDescription = "Sort",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier
+                                        .size(20.dp)
+                                )
+                            }
+                        }
+                    }
+                    Box(
+                        modifier = Modifier
+                            .weight(0.1f)
+                            .clip(shape = MaterialTheme.shapes.small)
+                            .clickable {
+                                if (sortColumn == SortColumn.Score) {
+                                    sortDescending = !sortDescending
+                                } else {
+                                    sortColumn = SortColumn.Score
+                                    sortDescending = false
+                                }
+                            }
+                            .padding(2.dp),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.Result_ColumnScore),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            if (sortColumn == SortColumn.Score) {
+                                Icon(
+                                    imageVector = if (sortDescending) Icons.Outlined.ArrowUpward else Icons.Outlined.ArrowDownward,
+                                    contentDescription = "Sort",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier
+                                        .size(20.dp)
+                                )
+                            }
+                        }
+                    }
+                    Box(
+                        modifier = Modifier
+                            .weight(0.1f)
+                            .clip(shape = MaterialTheme.shapes.small)
+                            .clickable {
+                                if (sortColumn == SortColumn.Count) {
+                                    sortDescending = !sortDescending
+                                } else {
+                                    sortColumn = SortColumn.Count
+                                    sortDescending = false
+                                }
+                            }
+                            .padding(2.dp),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.Result_ColumnCount),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            if (sortColumn == SortColumn.Count) {
+                                Icon(
+                                    imageVector = if (sortDescending) Icons.Outlined.ArrowUpward else Icons.Outlined.ArrowDownward,
+                                    contentDescription = "Sort",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier
+                                        .size(20.dp)
+                                )
+                            }
+                        }
+                    }
+                    Box(
+                        modifier = Modifier
+                            .weight(0.1f)
+                            .clip(shape = MaterialTheme.shapes.small)
+                            .clickable {
+                                if (sortColumn == SortColumn.Size) {
+                                    sortDescending = !sortDescending
+                                } else {
+                                    sortColumn = SortColumn.Size
+                                    sortDescending = false
+                                }
+                            }
+                            .padding(2.dp),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.Result_ColumnSize),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            if (sortColumn == SortColumn.Size) {
+                                Icon(
+                                    imageVector = if (sortDescending) Icons.Outlined.ArrowUpward else Icons.Outlined.ArrowDownward,
+                                    contentDescription = "Sort",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier
+                                        .size(20.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    state = scrollState
+                ) {
+                    items(sortedFiles) { file ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier
+                                .clip(MaterialTheme.shapes.medium)
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                                .padding(4.dp)
+                        ) {
+
+                            Checkbox(
+                                checked = selectedFiles.contains(file.id),
+                                onCheckedChange = { checkState ->
+                                    if (checkState) {
+                                        selectedFiles.add(file.id)
+                                    } else {
+                                        selectedFiles.remove(file.id)
+                                    }
+                                },
+                                modifier = Modifier.size(40.dp),
+                                colors = CheckboxDefaults.colors().copy(
+                                    checkedBorderColor = MaterialTheme.colorScheme.primary,
+                                    uncheckedBorderColor = MaterialTheme.colorScheme.primary
+                                ),
+                                enabled = filesExists.contains(file.id)
+                            )
+                            Text(
+                                text = file.path.replace(task.path.value, "").substring(1),
+                                modifier = Modifier.weight(0.5f),
+                            )
+                            FlowRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier = Modifier
+                                    .weight(0.5f)
+                            ) {
+                                file.foundAttributes.forEach { attr ->
+                                    AttributeCard(attr)
+                                }
+                            }
+                            Text(
+                                text = file.score.toString(),
+                                modifier = Modifier.weight(0.1f)
+                            )
+                            Text(
+                                text = file.count.toString(),
+                                modifier = Modifier.weight(0.1f)
+                            )
+                            Text(
+                                text = file.size.toString(),
+                                modifier = Modifier.weight(0.1f)
+                            )
+                        }
+                    }
+                }
+            }
+
+            VerticalScrollbar(
+                adapter = rememberScrollbarAdapter(scrollState),
+                modifier = Modifier
+                    .padding(10.dp)
+                    .width(10.dp)
+                    .align(Alignment.CenterEnd),
+                style = LocalScrollbarStyle.current.copy(
+                    unhoverColor = MaterialTheme.colorScheme.secondary,
+                    hoverColor = MaterialTheme.colorScheme.primary
+                )
             )
-        )
+        }
     }
 }
 

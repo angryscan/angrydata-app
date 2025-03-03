@@ -37,7 +37,7 @@ import ru.packetdima.datascanner.ui.windows.components.SideMenu
 import ru.packetdima.datascanner.ui.windows.screens.about.AboutScreen
 import ru.packetdima.datascanner.ui.windows.screens.main.MainScreen
 import ru.packetdima.datascanner.ui.windows.screens.scans.ScansScreen
-import ru.packetdima.datascanner.ui.windows.screens.scans.components.ScanResultScreen
+import ru.packetdima.datascanner.ui.windows.screens.scans.ScanResultScreen
 import ru.packetdima.datascanner.ui.windows.screens.settings.SettingsScreen
 import java.util.*
 

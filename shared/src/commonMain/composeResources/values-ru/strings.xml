@@ -122,4 +122,9 @@
     <string name="Task-FoundFiles">Найдено файлов</string>
     <string name="Task-FolderSize">Размер папки</string>
     <string name="Task-FoundAttributes">Найденные атрибуты:</string>
+
+    <string name="TaskStateChipFilter-Active">Активные</string>
+    <string name="TaskStateChipFilter-Paused">На паузе</string>
+    <string name="TaskStateChipFilter-Error">Ошибка</string>
+    <string name="TaskStateChipFilter-Completed">Завершенные</string>
 </resources>

@@ -127,4 +127,9 @@
     <string name="Task-FoundFiles">Found files</string>
     <string name="Task-FolderSize">Folder size</string>
     <string name="Task-FoundAttributes">Found attributes:</string>
+
+    <string name="TaskStateChipFilter-Active">Active</string>
+    <string name="TaskStateChipFilter-Paused">Paused</string>
+    <string name="TaskStateChipFilter-Error">Error</string>
+    <string name="TaskStateChipFilter-Completed">Completed</string>
 </resources>

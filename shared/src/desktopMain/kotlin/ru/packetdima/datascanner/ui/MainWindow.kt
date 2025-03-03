@@ -1,9 +1,13 @@
 package ru.packetdima.datascanner.ui
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
@@ -21,6 +25,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import ru.packetdima.datascanner.common.AppSettings
+import ru.packetdima.datascanner.common.OS
 import ru.packetdima.datascanner.navigation.AppScreens
 import ru.packetdima.datascanner.resources.Res
 import ru.packetdima.datascanner.resources.appName
@@ -63,6 +68,12 @@ fun MainWindow(
 
     val navController = rememberNavController()
 
+    //On windows not working window shapes with OPENGL
+    val windowShapes = if (OS.currentOS() == OS.WINDOWS)
+        MaterialTheme.shapes.medium.copy(CornerSize(0.dp))
+    else
+        MaterialTheme.shapes.medium
+
     Window(
         onCloseRequest = onCloseRequest,
         title = stringResource(Res.string.appName),
@@ -78,7 +89,7 @@ fun MainWindow(
                 color = MaterialTheme.colorScheme.background,
                 modifier = Modifier
                     .fillMaxSize(),
-                shape = MaterialTheme.shapes.medium,
+                shape = windowShapes,
                 shadowElevation = 3.dp,
                 tonalElevation = 3.dp
             ) {
@@ -97,7 +108,7 @@ fun MainWindow(
                             windowPlacement = windowState.placement,
                             expanded = windowState.placement == WindowPlacement.Maximized,
                             onMinimizeClick = {
-                                if(hideOnMinimize)
+                                if (hideOnMinimize)
                                     onHideRequest()
                                 else
                                     windowState.isMinimized = true
@@ -112,7 +123,31 @@ fun MainWindow(
                         )
                         NavHost(
                             navController = navController,
-                            startDestination = AppScreens.Main.name
+                            startDestination = AppScreens.Main.name,
+                            enterTransition = {
+                                slideInVertically (
+                                    initialOffsetY = { it },
+                                    animationSpec = tween(durationMillis = 700, easing = LinearOutSlowInEasing)
+                                )
+                            },
+                            exitTransition = {
+                                slideOutVertically(
+                                    targetOffsetY = { -it * 3 / 2 },
+                                    animationSpec = tween(durationMillis = 700, easing = LinearOutSlowInEasing)
+                                )
+                            },
+                            popEnterTransition = {
+                                slideInVertically(
+                                    initialOffsetY = { -it * 3 / 2 },
+                                    animationSpec = tween(durationMillis = 700, easing = LinearOutSlowInEasing)
+                                )
+                            },
+                            popExitTransition = {
+                                slideOutVertically(
+                                    targetOffsetY = { it },
+                                    animationSpec = tween(durationMillis = 700, easing = LinearOutSlowInEasing)
+                                )
+                            }
                         ) {
                             composable(route = AppScreens.Main.name) {
                                 MainScreen()

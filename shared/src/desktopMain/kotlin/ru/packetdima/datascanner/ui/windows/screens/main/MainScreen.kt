@@ -79,137 +79,144 @@ fun MainScreen() {
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxHeight()
-            .width(IntrinsicSize.Min),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.TopCenter
     ) {
-        Spacer(modifier = Modifier.height(12.dp))
+
 
         Column(
-            verticalArrangement = Arrangement.spacedBy(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(IntrinsicSize.Min),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            OutlinedTextField(
-                modifier = Modifier
-                    .height(80.dp)
-                    .width(700.dp),
-                value = path,
-                onValueChange = { path = it },
-                placeholder = { Text(text = stringResource(Res.string.MainScreen_SelectPathPlaceholder)) },
-                singleLine = true,
-                shape = MaterialTheme.shapes.medium,
-                isError = selectPathError,
-                leadingIcon = {
-                    Box(
-                        modifier = Modifier
-                            .height(48.dp)
-                            .width(64.dp)
-                            .size(48.dp)
-                            .padding(start = 8.dp, top = 4.dp, bottom = 4.dp, end = 8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            modifier = Modifier
-                                .fillMaxSize(),
-                            imageVector = Icons.Outlined.Search,
-                            contentDescription = null
-                        )
-                    }
-                },
-                trailingIcon = {
-                    Row {
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                OutlinedTextField(
+                    modifier = Modifier
+                        .height(80.dp)
+                        .width(700.dp),
+                    value = path,
+                    onValueChange = { path = it },
+                    placeholder = { Text(text = stringResource(Res.string.MainScreen_SelectPathPlaceholder)) },
+                    singleLine = true,
+                    shape = MaterialTheme.shapes.medium,
+                    isError = selectPathError,
+                    leadingIcon = {
                         Box(
                             modifier = Modifier
-                                .size(56.dp)
-                                .clip(MaterialTheme.shapes.large)
-                                .background(MaterialTheme.colorScheme.onBackground)
-                                .pointerHoverIcon(PointerIcon.Hand)
-                                .clickable {
-                                    val f = JFileChooser()
-                                    f.fileSelectionMode = JFileChooser.FILES_AND_DIRECTORIES
-                                    f.isMultiSelectionEnabled = false
-                                    if (f.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                                        path = f.selectedFile.absolutePath
-                                    }
-                                },
+                                .height(48.dp)
+                                .width(64.dp)
+                                .size(48.dp)
+                                .padding(start = 8.dp, top = 4.dp, bottom = 4.dp, end = 8.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = Icons.Outlined.Folder,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.background
+                                modifier = Modifier
+                                    .fillMaxSize(),
+                                imageVector = Icons.Outlined.Search,
+                                contentDescription = null
                             )
                         }
-                        Spacer(modifier = Modifier.width(16.dp))
-                    }
-                }
-            )
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Row {
-                    Button(
-                        onClick = {
-                            if (File(path).exists()) {
-                                coroutineScope.launch {
-                                    val task = scanService.createTask(
-                                        path = path,
-                                        extensions = scanSettings.extensions,
-                                        detectFunctions = scanSettings.detectFunctions + scanSettings.userSignatures,
-                                        fastScan = scanSettings.fastScan.value
-                                    )
-                                    scanService.startTask(task)
-                                }
-                            } else {
-                                scanNotCorrectPath = true
+                    },
+                    trailingIcon = {
+                        Row {
+                            Box(
+                                modifier = Modifier
+                                    .size(56.dp)
+                                    .clip(MaterialTheme.shapes.large)
+                                    .background(MaterialTheme.colorScheme.onBackground)
+                                    .pointerHoverIcon(PointerIcon.Hand)
+                                    .clickable {
+                                        val f = JFileChooser()
+                                        f.fileSelectionMode = JFileChooser.FILES_AND_DIRECTORIES
+                                        f.isMultiSelectionEnabled = false
+                                        if (f.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                                            path = f.selectedFile.absolutePath
+                                        }
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Folder,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.background
+                                )
                             }
-                        },
-                        modifier = Modifier
-                            .width(268.dp)
-                            .height(56.dp),
-                        shape = MaterialTheme.shapes.medium.copy(
-                            topEnd = CornerSize(0.dp),
-                            bottomEnd = CornerSize(0.dp)
-                        )
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.MainScreen_ScanStartButton),
-                            fontSize = 24.sp
-                        )
-                    }
-                    SettingsButton(
-                        transition = settingsButtonTransition,
-                        onClick = {
-                            if (!settingsExpanded) {
-                                scanStateExpanded = false
-                                settingsExpanded = true
-                            } else {
-                                settingsExpanded = false
-                            }
+                            Spacer(modifier = Modifier.width(16.dp))
                         }
+                    }
+                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Row {
+                        Button(
+                            onClick = {
+                                if (File(path).exists()) {
+                                    coroutineScope.launch {
+                                        val task = scanService.createTask(
+                                            path = path,
+                                            extensions = scanSettings.extensions,
+                                            detectFunctions = scanSettings.detectFunctions + scanSettings.userSignatures,
+                                            fastScan = scanSettings.fastScan.value
+                                        )
+                                        scanService.startTask(task)
+                                    }
+                                } else {
+                                    scanNotCorrectPath = true
+                                }
+                            },
+                            modifier = Modifier
+                                .width(268.dp)
+                                .height(56.dp),
+                            shape = MaterialTheme.shapes.medium.copy(
+                                topEnd = CornerSize(0.dp),
+                                bottomEnd = CornerSize(0.dp)
+                            )
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.MainScreen_ScanStartButton),
+                                fontSize = 24.sp
+                            )
+                        }
+                        SettingsButton(
+                            transition = settingsButtonTransition,
+                            onClick = {
+                                if (!settingsExpanded) {
+                                    scanStateExpanded = false
+                                    settingsExpanded = true
+                                } else {
+                                    settingsExpanded = false
+                                }
+                            }
+                        )
+                    }
+                    SettingsBox(
+                        transition = settingsBoxTransition
                     )
                 }
-                SettingsBox(
-                    transition = settingsBoxTransition
-                )
+
             }
 
-        }
+            Spacer(modifier = Modifier.height(12.dp))
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        MainScreenTasks(
-            expanded = scanStateExpanded,
-            onExpandedClick = {
-                if (!scanStateExpanded) {
-                    settingsExpanded = false
+            MainScreenTasks(
+                expanded = scanStateExpanded,
+                onExpandedClick = {
+                    if (!scanStateExpanded) {
+                        settingsExpanded = false
+                    }
+                    scanStateExpanded = !scanStateExpanded
                 }
-                scanStateExpanded = !scanStateExpanded
-            }
-        )
+            )
+        }
     }
 }
 

@@ -37,6 +37,7 @@ fun ScansScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .padding(horizontal = 30.dp)
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -94,17 +95,21 @@ fun ScansScreen() {
                 }
             )
         }
-        Box() {
+        Box {
             val state = rememberLazyListState()
             LazyColumn(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(30.dp),
+                    .fillMaxWidth(),
                 state = state,
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 items(filteredTasks) { task ->
-                    ScanTaskCard(task)
+                    ScanTaskCard(
+                        taskEntity = task,
+                        onClick = {
+                            //TODO
+                        }
+                    )
                 }
             }
 

@@ -51,7 +51,7 @@ suspend fun main(args: Array<String>) {
     System.setProperty(
         "skiko.renderApi",
         when (OS.currentOS()) {
-            OS.WINDOWS -> "SOFTWARE"
+            OS.WINDOWS -> "OPENGL"
             OS.LINUX -> "OPENGL"
             OS.MAC -> "METAL"
             else -> "OPENGL"

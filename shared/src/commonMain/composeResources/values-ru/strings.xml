@@ -9,9 +9,6 @@
     <string name="uiDetectFun">Функции детектирования</string>
     <string name="scanQuality">Качество сканирования</string>
     <string name="fastScanCheckBox">Быстрое сканирование</string>
-    <string name="iVersion">Версия программы</string>
-    <string name="iCopyright">Авторские права © ООО "Детектикум", 2024</string>
-    <string name="iAbout">Big Data Scanner — персональное программное обеспечение для экспресс-проверки наличия в файлах персональных данных и номеров банковских карт. Big Data Scanner работает со следующими форматами файлов: .xlsx, .docx, .txt, .csv, .xml, .json, .log, .doc, .xls, .pdf, .zip.\n\Big Data Scanner не вносит никаких изменений в проверяемые файлы, требуется доступ только для чтения файла.\n\nРезультат работы программы носит рекомендательный характер, может требоваться дополнительная верификация со стороны пользователя.</string>
     <string name="save">Сохранить</string>
     <string name="close">Закрыть</string>
     <string name="stop">Стоп</string>
@@ -139,4 +136,8 @@
     <string name="Signature-Title">Пользовательская сигнатура</string>
     <string name="Signature-ErrorTitle">Ошибка сохранения</string>
     <string name="Signature-ErrorMessage">Пользовательская сигнатура с таким именем уже существует</string>
+
+    <string name="AboutScreen-Version">Версия программы: %1$s</string>
+    <string name="AboutScren-Copyright">Авторские права © ООО "Детектикум", 2024</string>
+    <string name="AboutScreen-Description">Big Data Scanner — персональное программное обеспечение для экспресс-проверки наличия в файлах персональных данных и номеров банковских карт. Big Data Scanner работает со следующими форматами файлов: .xlsx, .docx, .txt, .csv, .xml, .json, .log, .doc, .xls, .pdf, .zip.\nBig Data Scanner не вносит никаких изменений в проверяемые файлы, требуется доступ только для чтения файла.\n\nРезультат работы программы носит рекомендательный характер, может требоваться дополнительная верификация со стороны пользователя.</string>
 </resources>

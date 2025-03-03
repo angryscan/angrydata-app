@@ -10,9 +10,6 @@
     <string name="uiDetectFun">Detect functions</string>
     <string name="scanQuality">Scan quality</string>
     <string name="fastScanCheckBox">Fast scan</string>
-    <string name="iVersion">Version</string>
-    <string name="iCopyright">Copyright © LLC "Detecticum", 2024</string>
-    <string name="iAbout">Big Data Scanner is a personal software to quickly check the presence of personal data and card numbers in files. Big Data Scanner supports the following file formats: .xlsx, .docx, .txt, .csv, .xml, .json, .log, .doc, .xls, .pdf, .zip.\n\Big Data Scanner does not make any changes into the files it scans and it requires read-only access to the file.\n\nScan results are advisory and may require additional verification from the user.</string>
 
     <string name="save">Save</string>
     <string name="close">Close</string>
@@ -144,4 +141,8 @@
     <string name="Signature-Title">User signature</string>
     <string name="Signature-ErrorTitle">User signature save error</string>
     <string name="Signature-ErrorMessage">User signature with this name already exist</string>
+
+    <string name="AboutScreen-Version">Version: %1$s</string>
+    <string name="AboutScren-Copyright">Copyright © LLC "Detecticum", 2024</string>
+    <string name="AboutScreen-Description">Big Data Scanner is a personal software to quickly check the presence of personal data and card numbers in files. Big Data Scanner supports the following file formats: .xlsx, .docx, .txt, .csv, .xml, .json, .log, .doc, .xls, .pdf, .zip.\nBig Data Scanner does not make any changes into the files it scans and it requires read-only access to the file.\n\nScan results are advisory and may require additional verification from the user.</string>
 </resources>

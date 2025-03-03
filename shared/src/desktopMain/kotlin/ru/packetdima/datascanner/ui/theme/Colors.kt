@@ -9,6 +9,8 @@ val LightColors = lightColorScheme(
     secondary = Color(0xFF0F4A84),
     tertiary = Color(0xFF269336),
     onSecondary = Color(0xFFF0F0F0),
+    surface = Color(0xFFaabfe6),
+    surfaceVariant = Color(0xFFaed0fc),
 )
 
 val DarkColors = darkColorScheme(

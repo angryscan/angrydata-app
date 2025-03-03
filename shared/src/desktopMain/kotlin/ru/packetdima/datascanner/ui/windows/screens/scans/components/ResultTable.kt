@@ -15,8 +15,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+import ru.packetdima.datascanner.resources.*
 import ru.packetdima.datascanner.scan.TaskEntityViewModel
 import ru.packetdima.datascanner.scan.TaskFileResult
 import ru.packetdima.datascanner.scan.TaskFilesViewModel
@@ -124,7 +126,7 @@ fun ResultTable(task: TaskEntityViewModel) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "File",
+                            text = stringResource(Res.string.Result_ColumnFile),
                             color = MaterialTheme.colorScheme.primary
                         )
                         if(sortColumn == SortColumn.Path) {
@@ -157,7 +159,7 @@ fun ResultTable(task: TaskEntityViewModel) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Attributes",
+                            text = stringResource(Res.string.Result_ColumnAttributes),
                             color = MaterialTheme.colorScheme.primary
                         )
                         if (sortColumn == SortColumn.Attribute) {
@@ -190,7 +192,7 @@ fun ResultTable(task: TaskEntityViewModel) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Score",
+                            text = stringResource(Res.string.Result_ColumnScore),
                             color = MaterialTheme.colorScheme.primary
                         )
                         if (sortColumn == SortColumn.Score) {
@@ -223,7 +225,7 @@ fun ResultTable(task: TaskEntityViewModel) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Count",
+                            text = stringResource(Res.string.Result_ColumnCount),
                             color = MaterialTheme.colorScheme.primary
                         )
                         if (sortColumn == SortColumn.Count) {
@@ -256,7 +258,7 @@ fun ResultTable(task: TaskEntityViewModel) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Size",
+                            text = stringResource(Res.string.Result_ColumnSize),
                             color = MaterialTheme.colorScheme.primary
                         )
                         if (sortColumn == SortColumn.Size) {

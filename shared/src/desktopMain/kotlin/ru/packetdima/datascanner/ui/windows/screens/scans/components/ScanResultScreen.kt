@@ -1,5 +1,6 @@
 package ru.packetdima.datascanner.ui.windows.screens.scans.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -164,20 +165,24 @@ fun ScanResultScreen(
                         horizontalArrangement = Arrangement.spacedBy(14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(MaterialTheme.shapes.medium)
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
-                                .clickable {
-
-                                },
-                            contentAlignment = Alignment.Center
+                        AnimatedVisibility(
+                            visible = state == TaskState.COMPLETED,
                         ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Download,
-                                contentDescription = null
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(MaterialTheme.shapes.medium)
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+                                    .clickable {
+
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Download,
+                                    contentDescription = null
+                                )
+                            }
                         }
                         Box(
                             modifier = Modifier

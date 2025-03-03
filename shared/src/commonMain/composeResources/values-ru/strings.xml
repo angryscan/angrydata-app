@@ -127,4 +127,10 @@
     <string name="TaskStateChipFilter-Paused">На паузе</string>
     <string name="TaskStateChipFilter-Error">Ошибка</string>
     <string name="TaskStateChipFilter-Completed">Завершенные</string>
+
+    <string name="Result-ColumnFile">Файл</string>
+    <string name="Result-ColumnAttributes">Аттрибуты</string>
+    <string name="Result-ColumnCount">Кол-во</string>
+    <string name="Result-ColumnSize">Размер</string>
+    <string name="Result-ColumnScore">Оценка</string>
 </resources>

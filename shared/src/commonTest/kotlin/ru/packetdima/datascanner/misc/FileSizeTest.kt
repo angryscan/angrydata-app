@@ -1,5 +1,6 @@
 package ru.packetdima.datascanner.misc
 
+import ru.packetdima.datascanner.scan.common.FileSize
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

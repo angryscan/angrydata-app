@@ -3,10 +3,14 @@ package ru.packetdima.datascanner
 import info.downdetector.bigdatascanner.common.DetectFunction
 import kotlinx.coroutines.*
 import me.tongfei.progressbar.ProgressBar
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import ru.packetdima.datascanner.common.AppFiles
-import ru.packetdima.datascanner.common.Settings
-import ru.packetdima.datascanner.misc.FilesCounter
-import ru.packetdima.datascanner.searcher.FileType
+import ru.packetdima.datascanner.common.AppSettings
+import ru.packetdima.datascanner.common.ScanSettings
+import ru.packetdima.datascanner.common.UserSignatureSettings
+import ru.packetdima.datascanner.scan.common.FileType
+import ru.packetdima.datascanner.searcher.ConsoleFilesCounter
 import ru.packetdima.datascanner.searcher.SensitiveSearcher
 import ru.packetdima.datascanner.searcher.Writer
 import java.io.File
@@ -14,7 +18,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.system.exitProcess
 
-object Console {
+object Console: KoinComponent {
     lateinit var progressBar: ProgressBar
 
     private var path: String? = null
@@ -26,7 +30,7 @@ object Console {
         val searcher = SensitiveSearcher()
 
         var scanStarted = false
-        val filesCounter = FilesCounter()
+        val filesCounter = ConsoleFilesCounter()
 
         parseArgs(args)
 
@@ -116,13 +120,17 @@ object Console {
             exitProcess(1)
         }
 
+        val scanSettings: ScanSettings by inject()
+        val appSettings: AppSettings by inject()
+        val userSignaturesSettings: UserSignatureSettings by inject()
+
         path = getArg(map, "-path", null)
-        val fileExtensions = getArg(map, "-extensions", Settings.searcher.extensions.joinToString(","))
-        val detectFunctions = getArg(map, "-detect", Settings.searcher.detectFunctions.joinToString(","))
-        val userSignatures = getArg(map, "-usig_detect", Settings.userFunctionLoader.userSignature.joinToString(","))
-        val fastScan = getArg(map, "-fast", Settings.searcher.fastScan.value)
+        val fileExtensions = getArg(map, "-extensions", scanSettings.extensions.joinToString(","))
+        val detectFunctions = getArg(map, "-detect", scanSettings.detectFunctions.joinToString(","))
+        val userSignatures = getArg(map, "-usig_detect", scanSettings.userSignatures.joinToString(","))
+        val fastScan = getArg(map, "-fast", scanSettings.fastScan.value)
         val fullScan = getArg(map, "-full", !fastScan)
-        val threadCount = getArg(map, "threads", Settings.searcher.threadCount.value)
+        val threadCount = getArg(map, "threads", appSettings.threadCount.value)
         val reportPath = getArg(map, "-report", null)
         val encoding = getArg(map, "-report_encoding", null)
 
@@ -160,61 +168,63 @@ object Console {
             println("Report path not specified, using default: ${reportDir.absolutePath}")
         }
 
-        Settings.searcher.fastScan.value = !fullScan
-        if(Settings.searcher.fastScan.value)
+        scanSettings.fastScan.value = !fullScan
+        if(scanSettings.fastScan.value)
             println("Fast scan enabled")
         else
             println("Full scan enabled")
         if(threadCount > Runtime.getRuntime().availableProcessors()){
             println("Thread count can't be greater than available processors (${Runtime.getRuntime().availableProcessors()})")
             println("Using ${Runtime.getRuntime().availableProcessors()} instead")
-            Settings.searcher.threadCount.value = Runtime.getRuntime().availableProcessors()
+            appSettings.threadCount.value = Runtime.getRuntime().availableProcessors()
         } else if (threadCount < 1) {
             println("Thread count can't be less than 1")
             println("Using 1 instead")
-            Settings.searcher.threadCount.value = 1
+            appSettings.threadCount.value = 1
         } else {
             println("Thread count: $threadCount. Max: ${Runtime.getRuntime().availableProcessors()}")
-            Settings.searcher.threadCount.value = threadCount
+            appSettings.threadCount.value = threadCount
         }
 
         if (fileExtensions != null) {
-            Settings.searcher.extensions.clear()
+            scanSettings.extensions.clear()
             fileExtensions.split(",").forEach { ext ->
-                if (FileType.entries.map { it.name }.contains(ext))
-                    Settings.searcher.extensions.add(ext)
+                val extension = FileType.entries.find { it.name == ext }
+                if (extension != null)
+                    scanSettings.extensions.add(extension)
                 else
                     println("Unknown file extension: $ext, skipping...")
             }
         }
-        println("Extensions: ${Settings.searcher.extensions.joinToString(", ")}")
+        println("Extensions: ${scanSettings.extensions.joinToString(", ")}")
 
         if (detectFunctions != null) {
-            Settings.searcher.detectFunctions.clear()
+            scanSettings.detectFunctions.clear()
             detectFunctions.split(",").forEach { df ->
                 val dfo = DetectFunction.entries.find { it.name == df }
                 if (dfo != null)
-                    Settings.searcher.detectFunctions.add(dfo)
+                    scanSettings.detectFunctions.add(dfo)
                 else
                     println("Unknown detect function: $df, skipping...")
             }
         }
-        println("Detect functions: ${Settings.searcher.detectFunctions.joinToString(", ")}")
+        println("Detect functions: ${scanSettings.detectFunctions.joinToString(", ")}")
 
         if(userSignatures != null) {
-            Settings.searcher.userSignature.clear()
+            scanSettings.userSignatures.clear()
             userSignatures.split(",").forEach { sig ->
-                val sigo = Settings.userFunctionLoader.userSignature.find { it.name == sig }
+                val sigo = userSignaturesSettings.userSignatures.find { it.name == sig }
                 if (sigo != null)
-                    Settings.searcher.userSignature.add(sigo)
+                    scanSettings.userSignatures.add(sigo)
                 else
                     println("Unknown user detect signature: $sig, skipping...")
             }
         }
-        println("User signature functions: ${Settings.searcher.userSignature.joinToString(", ")}")
+        println("User signature functions: ${scanSettings.userSignatures.joinToString(", ")}")
     }
 
     fun help() {
+        val userSignatureSettings: UserSignatureSettings by inject()
         println(
             """
 Allowed parameters:
@@ -241,7 +251,7 @@ Allowed extensions:
 Allowed detect functions: 
         ${DetectFunction.entries.joinToString("\n        ") { "${it.name} (${it.writeName})" }}
 Allowed user detect signatures:
-        ${Settings.userFunctionLoader.userSignature.joinToString("\n        ") { "${it.name} (${it.writeName})" }} 
+        ${userSignatureSettings.userSignatures.joinToString("\n        ") { "${it.name} (${it.writeName})" }} 
             """.trimIndent()
         )
     }

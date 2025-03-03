@@ -4,9 +4,8 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.runBlocking
 import info.downdetector.bigdatascanner.common.Cleaner
 import info.downdetector.bigdatascanner.common.DetectFunction
-import ru.packetdima.datascanner.common.Settings
-import ru.packetdima.datascanner.searcher.properties.Properties
-import ru.packetdima.datascanner.ui.UIProperties
+import ru.packetdima.datascanner.scan.common.Document
+import ru.packetdima.datascanner.scan.common.FileType
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -15,17 +14,11 @@ import kotlin.test.assertNotNull
 class DetectorTest {
     @Test
     fun scan() {
-        val uiPath = javaClass.getResource("/common/ui.json")
-        val searcherPath = javaClass.getResource("/common/properties.json")
-        assertNotNull(uiPath)
-        assertNotNull(searcherPath)
-        Settings.ui = UIProperties(uiPath.file)
-        Settings.searcher = Properties(searcherPath.file)
         val sampleText = """Sample text, 4279432112344321 199-510-399 13  
 583410778676
 омс 7755320882002755"""
         val doc = Document(1, "123")
-        Settings.searcher.detectFunctions.map { f ->
+        DetectFunction.entries.map { f ->
             f to f.scan(Cleaner.cleanText(sampleText)).takeIf { it > 0 }
         }.mapNotNull { p ->
             p.second?.let { p.first to it }
@@ -150,16 +143,13 @@ class DetectorTest {
     }
 
     private fun getCountOfAttribute(filePath: String, field: DetectFunction): Int {
-        val searcherPath = javaClass.getResource("/common/properties.json")
-        assertNotNull(searcherPath)
-        Settings.searcher = Properties(searcherPath.file)
 
         val file = File(filePath)
 
         assertEquals(true, file.exists())
 
         val document = runBlocking {
-            FileType.getFileType(file)?.scanFile(file, currentCoroutineContext()).let {
+            FileType.getFileType(file)?.scanFile(file, currentCoroutineContext(), DetectFunction.entries, false).let {
                 assertNotNull(it)
             }
         }

@@ -11,8 +11,9 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(compose.desktop.common)
-                api(compose.components.resources)
+                implementation(compose.components.resources)
                 implementation(compose.materialIconsExtended)
+                implementation(compose.material3)
 
                 implementation(libs.dorkbox)
 
@@ -29,6 +30,8 @@ kotlin {
                 api(libs.exposed.core)
                 api(libs.exposed.dao)
                 api(libs.exposed.jdbc)
+                api(libs.exposed.json)
+                api(libs.exposed.datetime)
 
                 api(libs.datascanner)
 
@@ -44,13 +47,19 @@ kotlin {
                 implementation(libs.logging.oshai)
                 implementation(libs.logging.logback)
 
-
+                api(libs.koin.core)
+                api(libs.koin.compose)
+                api(libs.koin.compose.viewmodel)
+                api(libs.koin.compose.viewmodel.navigation)
+                implementation(libs.lifecycle.viewmodel)
             }
         }
         commonTest {
             dependencies {
                 implementation(kotlin("test"))
                 implementation(compose.desktop.uiTestJUnit4)
+                implementation(libs.koin.test)
+                implementation(libs.koin.test.junit4)
             }
         }
         val desktopMain by getting {

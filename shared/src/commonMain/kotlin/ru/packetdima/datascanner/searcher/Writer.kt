@@ -7,14 +7,17 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
-import ru.packetdima.datascanner.common.Settings
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import ru.packetdima.datascanner.common.ScanSettings
+import ru.packetdima.datascanner.scan.common.Document
 import ru.packetdima.datascanner.searcher.model.*
 import ru.packetdima.datascanner.ui.strings.readableName
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.charset.Charset
 
-object Writer {
+object Writer: KoinComponent {
     suspend fun write(report: List<Document>) {
         if (report.isEmpty())
             return
@@ -45,6 +48,7 @@ object Writer {
     }
 
     suspend fun initDB() {
+        val scanSettings: ScanSettings by inject()
         writeSemaphore.withPermit {
             transaction {
                 SchemaUtils.drop(
@@ -58,7 +62,7 @@ object Writer {
                     Reports
                 )
 
-                for (attr in Settings.searcher.detectFunctions) {
+                for (attr in scanSettings.detectFunctions) {
                     Attribute.new {
                         name = attr.writeName
                         factor = when (attr.writeName) {
@@ -70,7 +74,7 @@ object Writer {
                         translate = runBlocking { attr.readableName() }
                     }
                 }
-                for (attr in Settings.searcher.userSignature) {
+                for (attr in scanSettings.userSignatures) {
                     Attribute.new {
                         name = attr.writeName
                         factor = 1

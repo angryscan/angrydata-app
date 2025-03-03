@@ -1,22 +1,28 @@
 package ru.packetdima.datascanner.ui.theme
 
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-val DarkColors = darkColors(
-    //background = Color(0xFF2F2F2F),
-    //surface = Color(0xFF282828),
+val LightColors = lightColorScheme(
     primary = Color(0xFF1E88E5),
-    onBackground = Color(0xFFDDDDDD),
-    onSurface = Color(0xFFDFDFDF),
-    onPrimary = Color.White
+    secondary = Color(0xFF0F4A84),
+    tertiary = Color(0xFF269336),
+    onSecondary = Color(0xFFF0F0F0),
+    surface = Color(0xFFaabfe6),
+    surfaceVariant = Color(0xFFaed0fc),
 )
 
-val LightColors = lightColors(
-    //surface = Color(0xFFF9F9F9),
+val DarkColors = darkColorScheme(
     primary = Color(0xFF1E88E5),
-    onBackground = Color(0xFF3c3c3c),
-    onSurface = Color(0xFF3c3c3c),
-    onPrimary = Color.White
+    background = Color(0xFF000713),
+    onBackground = Color(0xFFF0F0F0),
+    surface = Color(0xFF000D23),
+    surfaceVariant = Color(0xFF031936),
+    secondaryContainer = Color(0xFF0F4A84),
+    secondary = Color(0xFF0F4A84),
+    onPrimary = Color(0xFFF0F0F0),
+    onSecondary = Color(0xFFF0F0F0),
+    error = Color(0xFFA01010),
+    tertiary = Color(0xFF269336)
 )

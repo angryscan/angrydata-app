@@ -10,27 +10,7 @@
     <string name="uiDetectFun">Detect functions</string>
     <string name="scanQuality">Scan quality</string>
     <string name="fastScanCheckBox">Fast scan</string>
-    <string name="iVersion">Version</string>
-    <string name="iCopyright">Copyright © LLC "Detecticum", 2024</string>
-    <string name="iAbout">Big Data Scanner is a personal software to quickly check the presence of personal data and card numbers in files. Big Data Scanner supports the following file formats: .xlsx, .docx, .txt, .csv, .xml, .json, .log, .doc, .xls, .pdf, .zip.\n\Big Data Scanner does not make any changes into the files it scans and it requires read-only access to the file.\n\nScan results are advisory and may require additional verification from the user.</string>
-    <string name="dfEmails">Email</string>
-    <string name="dfPhones">Phone</string>
-    <string name="dfCardNumbers">Card number</string>
-    <string name="dfCarNumber">Car number</string>
-    <string name="dfSNILS">SNILS</string>
-    <string name="dfPassport">Passport</string>
-    <string name="dfOMS">OMS</string>
-    <string name="dfINN">INN</string>
-    <string name="dfAccountNumber">Account number</string>
-    <string name="dfAddress">Address</string>
-    <string name="dfBlackList">Black list</string>
-    <string name="dfValuableInfo">Valuable info</string>
-    <string name="dfLogin">Login</string>
-    <string name="dfPassword">Password</string>
-    <string name="dfCVV">CVV</string>
-    <string name="dfName">Full name</string>
-    <string name="dfIP">IP</string>
-    <string name="dfIPv6">IPv6</string>
+
     <string name="save">Save</string>
     <string name="close">Close</string>
     <string name="stop">Stop</string>
@@ -43,7 +23,6 @@
     <string name="scanReportGenerating">Report are generating...</string>
     <string name="scanSelecting">Selected %1$d files from %2$d</string>
     <string name="scanScanning">Scanning... (%1$d/%2$d)</string>
-    <string name="selectFolderPlaceholder">Choose folder to scanFile</string>
     <string name="start">Start</string>
     <string name="screenSelectPath">Select path</string>
     <string name="screenScanning">Scanning</string>
@@ -84,11 +63,86 @@
     <string name="uiUserSignature">User signature</string>
     <string name="add">Add</string>
     <string name="name">Name</string>
-    <string name="signature">Signature</string>
-    <string name="userSignatureTitle">User signature</string>
-    <string name="errorUserSignatureTitle">User signature save error</string>
-    <string name="errorUserSignatureEmpty">User signature can't be empty</string>
-    <string name="errorUserSignatureNameEmpty">Name can't be empty</string>
-    <string name="errorUserSignatureSave">Can't save user signature</string>
-    <string name="errorUserSignatureAlreadyExist">User signature with this name already exist</string>
+
+    <string name="SideMenu-MainPage">Main</string>
+    <string name="SideMenu-ScanListPage">Scans</string>
+    <string name="SideMenu-SettingsPage">Settings</string>
+    <string name="SideMenu-AboutPage">About</string>
+
+    <string name="MainScreen-SelectPathPlaceholder">Choose folder to scanFile</string>
+    <string name="MainScreen-ScanStartButton">Scan</string>
+    <string name="MainScreen-ScanCurrentState">Current scans (%1$d)</string>
+
+    <string name="ScanSettings-FastScan">Fast scan</string>
+    <string name="ScanSettings-FileExtensions">File extensions</string>
+    <string name="ScanSettings-DetectFunctions">Detect functions</string>
+    <string name="ScanSettings-UserSignatures">User signatures</string>
+    <string name="ScanSettings-SelectAll">Select all</string>
+
+    <string name="DetectFunction-Emails">Email</string>
+    <string name="DetectFunction-Phones">Phone</string>
+    <string name="DetectFunction-CardNumbers">Card number</string>
+    <string name="DetectFunction-CarNumber">Car number</string>
+    <string name="DetectFunction-SNILS">SNILS</string>
+    <string name="DetectFunction-Passport">Passport</string>
+    <string name="DetectFunction-OMS">OMS</string>
+    <string name="DetectFunction-INN">INN</string>
+    <string name="DetectFunction-AccountNumber">Account number</string>
+    <string name="DetectFunction-Address">Address</string>
+    <string name="DetectFunction-BlackList">Black list</string>
+    <string name="DetectFunction-ValuableInfo">Valuable info</string>
+    <string name="DetectFunction-Login">Login</string>
+    <string name="DetectFunction-Password">Password</string>
+    <string name="DetectFunction-CVV">CVV</string>
+    <string name="DetectFunction-Name">Full name</string>
+    <string name="DetectFunction-IP">IP</string>
+    <string name="DetectFunction-IPv6">IPv6</string>
+
+    <string name="SettingsScreen-ThreadsCount">Threads count</string>
+    <string name="SettingsScreen-ContextMenu">Context menu</string>
+    <string name="SettingsScreen-ContextMenuExplorer">File explorer</string>
+    <string name="SettingsScreen-Language">Language</string>
+    <string name="SettingsScreen-Theme">Theme</string>
+
+    <string name="ThemeType-Light">Light</string>
+    <string name="ThemeType-Dark">Dark</string>
+    <string name="ThemeType-System">System</string>
+
+    <string name="Task-StartedAt">Started: %1$s</string>
+    <string name="Task-FinishedAt">Finished: %1$s</string>
+    <string name="Task-Progress">Progress: %1$s%</string>
+    <string name="Task-TotalFiles">Total files</string>
+    <string name="Task-SelectedFiles">Selected files</string>
+    <string name="Task-FoundFiles">Found files</string>
+    <string name="Task-FolderSize">Folder size</string>
+    <string name="Task-FoundAttributes">Found attributes:</string>
+
+    <string name="TaskStateChipFilter-Active">Active</string>
+    <string name="TaskStateChipFilter-Paused">Paused</string>
+    <string name="TaskStateChipFilter-Error">Error</string>
+    <string name="TaskStateChipFilter-Completed">Completed</string>
+
+    <string name="Result-ColumnFile">File</string>
+    <string name="Result-ColumnAttributes">Attributes</string>
+    <string name="Result-ColumnCount">Count</string>
+    <string name="Result-ColumnSize">Size</string>
+    <string name="Result-ColumnScore">Score</string>
+    <string name="Result-DeleteFiles">Delete files: %1$d</string>
+    <string name="Result-DeletedFiles">Deleted files: %1$d</string>
+    <string name="Result-NotDeletedFiles">Cannot delete files: %1$d</string>
+
+    <string name="FileSave-AlreadyExistTitle">File already exist!</string>
+    <string name="FileSave-AlreadyExistText">File with this name already exist. Do you want to replace it?</string>
+    <string name="FileSave-ErrorTitle">Error saving file!</string>
+    <string name="FileSave-ErrorText">Cannot save file. Check it is in use by another process!</string>
+
+    <string name="Signature-Name">Signature name</string>
+    <string name="Signature-Signature">User signature</string>
+    <string name="Signature-Title">User signature</string>
+    <string name="Signature-ErrorTitle">User signature save error</string>
+    <string name="Signature-ErrorMessage">User signature with this name already exist</string>
+
+    <string name="AboutScreen-Version">Version: %1$s</string>
+    <string name="AboutScren-Copyright">Copyright © LLC "Detecticum", 2024</string>
+    <string name="AboutScreen-Description">Big Data Scanner is a personal software to quickly check the presence of personal data and card numbers in files. Big Data Scanner supports the following file formats: .xlsx, .docx, .txt, .csv, .xml, .json, .log, .doc, .xls, .pdf, .zip.\nBig Data Scanner does not make any changes into the files it scans and it requires read-only access to the file.\n\nScan results are advisory and may require additional verification from the user.</string>
 </resources>

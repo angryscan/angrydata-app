@@ -5,21 +5,13 @@ import info.downdetector.bigdatascanner.common.Cleaner
 import info.downdetector.bigdatascanner.common.DetectFunction
 import info.downdetector.bigdatascanner.common.IDetectFunction
 import kotlinx.coroutines.*
-import ru.packetdima.datascanner.common.Settings
-import ru.packetdima.datascanner.searcher.properties.Properties
-import ru.packetdima.datascanner.ui.UIProperties
+import ru.packetdima.datascanner.scan.common.FileType
 import java.io.File
 import java.io.FileWriter
 import kotlin.test.*
 
 internal class FileTypeTest() {
     init {
-        val uiPath = javaClass.getResource("/common/ui.json")
-        val searcherPath = javaClass.getResource("/common/properties.json")
-        assertNotNull(uiPath)
-        assertNotNull(searcherPath)
-        Settings.ui = UIProperties(uiPath.file)
-        Settings.searcher = Properties(searcherPath.file)
         ZipSecureFile.setMinInflateRatio(-1.0) // отключение срабатывания исключения для zip-бомбы
     }
 
@@ -64,7 +56,7 @@ internal class FileTypeTest() {
                         assertNotNull(path)
                         val f = File(path.file)
                         val enumType: FileType? = f.let { FileType.getFileType(it) }
-                        enumType?.scanFile(f, currentCoroutineContext()).let { doc ->
+                        enumType?.scanFile(f, currentCoroutineContext(), DetectFunction.entries, false).let { doc ->
                             Matrix.getMap(filename)
                                 ?.let { m -> assertEquals(m, doc?.getDocumentFields(), "File: $filename") }
                                 ?: println("Нет данных для $filename")
@@ -95,8 +87,6 @@ internal class FileTypeTest() {
             .map { filename -> "veryLong/$filename" }
 
         fun checkScan(filename: String, map: Map<IDetectFunction, Int>?, isFastScan: Boolean = false) {
-            Settings.searcher.fastScan.value = isFastScan
-            assertEquals(isFastScan, Settings.searcher.fastScan.value)
 
             val path = javaClass.getResource("/files/$filename")
             assertNotNull(path)
@@ -104,7 +94,7 @@ internal class FileTypeTest() {
             val enumType: FileType? = f.let { FileType.getFileType(it) }
 
             runBlocking {
-                enumType?.scanFile(f, currentCoroutineContext()).let {
+                enumType?.scanFile(f, currentCoroutineContext(), DetectFunction.entries, isFastScan).let {
                     assertNotNull(it)
                     assertEquals(map, it.getDocumentFields())
                 }
@@ -139,7 +129,7 @@ internal class FileTypeTest() {
         runBlocking {
             try {
                 val enumType: FileType? = FileType.getFileType(f)
-                enumType?.scanFile(f, currentCoroutineContext()).let {
+                enumType?.scanFile(f, currentCoroutineContext(), DetectFunction.entries, false).let {
                     assertEquals(mapOf(), it?.getDocumentFields())
                     assertTrue(it?.skipped() == true)
                 }
@@ -161,7 +151,7 @@ internal class FileTypeTest() {
 
         runBlocking {
             try {
-                FileType.ZIP.scanFile(f, currentCoroutineContext()).let {
+                FileType.ZIP.scanFile(f, currentCoroutineContext(), DetectFunction.entries, false).let {
                     assertEquals(0, it.length())
                     assertEquals(mapOf(), it.getDocumentFields())
                 }
@@ -184,7 +174,7 @@ internal class FileTypeTest() {
 
         runBlocking {
             try {
-                FileType.DOC.scanFile(f, currentCoroutineContext()).let {
+                FileType.DOC.scanFile(f, currentCoroutineContext(), DetectFunction.entries, false).let {
                     assertEquals(0, it.length())
                     assertEquals(mapOf(), it.getDocumentFields())
                 }

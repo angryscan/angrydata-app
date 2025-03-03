@@ -17,16 +17,17 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.TransactionManager
+import org.koin.core.context.startKoin
 import ru.packetdima.datascanner.common.AppFiles
-import ru.packetdima.datascanner.common.Settings
-import ru.packetdima.datascanner.common.UserFunctionLoader
-import ru.packetdima.datascanner.searcher.properties.Properties
-import ru.packetdima.datascanner.ui.UIProperties
-import ru.packetdima.datascanner.ui.custom.ApplicationErrorWindow
-import ru.packetdima.datascanner.ui.custom.DorkTray
-import ru.packetdima.datascanner.ui.windows.MainWindow
-import ru.packetdima.datascanner.ui.windows.PlannerWindow
-import ru.packetdima.datascanner.ui.windows.getAppVersion
+import ru.packetdima.datascanner.common.AppVersion
+import ru.packetdima.datascanner.common.OS
+import ru.packetdima.datascanner.di.databaseModule
+import ru.packetdima.datascanner.di.scanModule
+import ru.packetdima.datascanner.di.settingsModule
+import ru.packetdima.datascanner.scan.common.ScanPathHelper
+import ru.packetdima.datascanner.ui.MainWindow
+import ru.packetdima.datascanner.ui.tray.DorkTray
+import ru.packetdima.datascanner.ui.windows.ApplicationErrorWindow
 import java.awt.event.WindowEvent
 import java.io.File
 import java.net.BindException
@@ -46,7 +47,16 @@ suspend fun main(args: Array<String>) {
         }
     }?.collect()
 
-    System.setProperty("skiko.renderApi", "OPENGL")
+
+    System.setProperty(
+        "skiko.renderApi",
+        when (OS.currentOS()) {
+            OS.WINDOWS -> "OPENGL"
+            OS.LINUX -> "OPENGL"
+            OS.MAC -> "METAL"
+            else -> "OPENGL"
+        }
+    )
 
     try {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
@@ -56,6 +66,7 @@ suspend fun main(args: Array<String>) {
 
     val port = 10201
     val selectorManager = SelectorManager(Dispatchers.IO)
+
     try {
         val serverSocket = aSocket(selectorManager).tcp().bind("127.0.0.1", port)
         logger.info { "Server started at port $port" }
@@ -68,9 +79,9 @@ suspend fun main(args: Array<String>) {
                     val path = input.readUTF8Line()
                     socket.close()
                     if (path != null && File(path).exists()) {
-                        Settings.scanningTaskPath.value = path
+                        ScanPathHelper.setPath(path)
                         logger.debug { "Path received: $path" }
-                        Settings.focusRequested.value = true
+                        ScanPathHelper.requestFocus()
                     }
                 } catch (e: Exception) {
                     logger.error { "Error when receiving data from client: ${e.message}" }
@@ -103,7 +114,7 @@ suspend fun main(args: Array<String>) {
     var lastError: Throwable? by mutableStateOf(null)
 
     val password =
-        if (getAppVersion() == "Debug")
+        if (AppVersion == "Debug")
             ""
         else
             UUID.randomUUID().toString()
@@ -121,11 +132,19 @@ suspend fun main(args: Array<String>) {
         }
     }
 
-    Settings.userFunctionLoader = UserFunctionLoader(AppFiles.UserFunctionsFile)
-    Settings.searcher = Properties(AppFiles.SearchSettingsFile)
-    Settings.ui = UIProperties(AppFiles.UISettingsFile)
+    try {
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
+    } catch (_: Exception) {
+        logger.warn { "Cannot load system look and feel" }
+    }
 
-    Locale.setDefault(Locale.forLanguageTag(Settings.ui.language.value.locale))
+    startKoin {
+        modules(
+            settingsModule,
+            databaseModule,
+            scanModule
+        )
+    }
 
     Database.connect(
         "jdbc:sqlite:${AppFiles.ResultDBFile.absolutePath}",
@@ -150,7 +169,7 @@ suspend fun main(args: Array<String>) {
             args.forEach {
                 logger.warn { "Argument: $it" }
             }
-            Settings.scanningTaskPath.value = args.first()
+            ScanPathHelper.setPath(args.first())
         }
         application(exitProcessOnExit = false) {
             CompositionLocalProvider(
@@ -163,16 +182,18 @@ suspend fun main(args: Array<String>) {
                 }
             ) {
                 var mainIsVisible by remember { mutableStateOf(true) }
-                var plannerIsVisible by remember { mutableStateOf(false) }
-                MainWindow(mainIsVisible) { mainIsVisible = it }
-                PlannerWindow(plannerIsVisible) { plannerIsVisible = it }
+
+                MainWindow(
+                    onCloseRequest = ::exitApplication,
+                    onHideRequest = {
+                        mainIsVisible = false
+                    },
+                    isVisible = mainIsVisible
+                )
                 DorkTray(
                     mainIsVisible = mainIsVisible,
                     mainVisibilitySet = {
                         mainIsVisible = it
-                    },
-                    plannerVisibilitySet = {
-                        plannerIsVisible = it
                     }
                 )
             }

@@ -1,18 +1,11 @@
 package ru.packetdima.datascanner.searcher
 
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.times
 import org.jetbrains.exposed.sql.transactions.transaction
-import ru.packetdima.datascanner.misc.FileSize
-import ru.packetdima.datascanner.misc.OS
+import ru.packetdima.datascanner.scan.common.FileSize
 import ru.packetdima.datascanner.searcher.model.*
 import ru.packetdima.datascanner.searcher.model.ResultRow
-import java.io.File
-import javax.swing.JDialog
-import javax.swing.JFileChooser
-import javax.swing.JOptionPane
-import javax.swing.filechooser.FileNameExtensionFilter
 
 class SearcherResult {
     companion object {
@@ -126,84 +119,6 @@ class SearcherResult {
             }
 
             return res
-        }
-
-        fun saveResult(fileName: String): Boolean {
-            val f = JFileChooser()
-            f.fileSelectionMode = JFileChooser.FILES_ONLY
-            f.isMultiSelectionEnabled = false
-            f.fileFilter = FileNameExtensionFilter("CSV (*.csv)", "csv")
-            f.selectedFile = File(fileName)
-            val resDialog = f.showSaveDialog(null)
-            if (resDialog != JFileChooser.APPROVE_OPTION)
-                return false
-            var path = f.selectedFile.absolutePath
-
-            if (!path.endsWith(".csv"))
-                path += ".csv"
-
-
-            if (File(path).exists()) {
-                JDialog.setDefaultLookAndFeelDecorated(true)
-                val response = JOptionPane.showConfirmDialog(
-                    null,
-                    "File already exists! Do you want to replace it?",
-                    "File Already Exist!",
-                    JOptionPane.YES_NO_CANCEL_OPTION,
-                    JOptionPane.QUESTION_MESSAGE
-                )
-                if (response == JOptionPane.YES_OPTION) {
-                    if (!File(path).delete()) {
-                        JOptionPane.showMessageDialog(
-                            null,
-                            "Cannot save file. Check it is in use by another process!",
-                            "Error!",
-                            JOptionPane.ERROR_MESSAGE
-                        )
-                        return false
-                    }
-                } else
-                    return false
-            }
-
-
-            try {
-                Writer.writeReport(
-                    reportFile = path,
-                    reportEncoding = when (OS.currentOS()) {
-                        OS.WINDOWS -> "Windows-1251"
-                        else -> "UTF-8"
-                    }
-                )
-                return true
-            } catch (e: Exception) {
-                JOptionPane.showMessageDialog(null, e.message, "Error", JOptionPane.ERROR_MESSAGE)
-                return false
-            }
-        }
-
-        fun deleteFile(filePath: String): Boolean {
-            return if (File(filePath).delete()) {
-                transaction {
-                    ResultRows.deleteWhere { path.eq(filePath) }
-                }
-                true
-            } else
-                false
-        }
-
-        fun deleteAllFiles(): Int {
-            var deletedFiles = 0
-            transaction {
-                ResultRows
-                    .select(ResultRows.path)
-                    .forEach { row ->
-                        if (File(row[ResultRows.path]).delete()) {
-                            deletedFiles++
-                        }
-                    }
-            }
-            return deletedFiles
         }
     }
 }

@@ -1,4 +1,4 @@
-package ru.packetdima.datascanner.ui.windows.screens.main
+package ru.packetdima.datascanner.ui.windows.screens.main.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -141,7 +141,8 @@ fun UserSignatureEditor(
                             name = it
                         },
                         placeholder = { Text(text = stringResource(Res.string.Signature_Name)) },
-                        modifier = Modifier.width(350.dp)
+                        modifier = Modifier.width(350.dp),
+                        enabled = userSignature == null
                     )
                     Row(
                         verticalAlignment = Alignment.CenterVertically,

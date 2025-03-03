@@ -19,6 +19,7 @@ import org.koin.core.component.inject
 import ru.packetdima.datascanner.db.DatabaseConnector
 import ru.packetdima.datascanner.db.models.*
 import ru.packetdima.datascanner.scan.common.FilesCounter
+import ru.packetdima.datascanner.scan.functions.UserSignature
 import java.io.File
 
 class TaskEntityViewModel(
@@ -123,7 +124,12 @@ class TaskEntityViewModel(
     }
 
     fun addFoundAttribute(detectFunction: IDetectFunction) {
-        _foundAttributes.value += detectFunction
+        //Check if user signature already added
+        if (
+            detectFunction !is UserSignature ||
+            _foundAttributes.value.filter { it.name == detectFunction.name }.isEmpty()
+        )
+            _foundAttributes.value += detectFunction
     }
 
     fun incrementFoundFiles() {

@@ -1,4 +1,4 @@
-package ru.packetdima.datascanner.ui.windows.screens.main
+package ru.packetdima.datascanner.ui.windows.screens.main.settings
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable

@@ -26,6 +26,8 @@ import ru.packetdima.datascanner.resources.MainScreen_SelectPathPlaceholder
 import ru.packetdima.datascanner.resources.Res
 import ru.packetdima.datascanner.scan.ScanService
 import ru.packetdima.datascanner.scan.common.ScanPathHelper
+import ru.packetdima.datascanner.ui.windows.screens.main.settings.SettingsBox
+import ru.packetdima.datascanner.ui.windows.screens.main.settings.SettingsButton
 import ru.packetdima.datascanner.ui.windows.screens.main.tasks.MainScreenTasks
 import java.io.File
 import javax.swing.JFileChooser

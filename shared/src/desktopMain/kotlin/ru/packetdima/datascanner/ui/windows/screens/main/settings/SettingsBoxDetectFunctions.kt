@@ -1,4 +1,4 @@
-package ru.packetdima.datascanner.ui.windows.screens.main
+package ru.packetdima.datascanner.ui.windows.screens.main.settings
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,36 +18,38 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import info.downdetector.bigdatascanner.common.DetectFunction
 import org.jetbrains.compose.resources.stringResource
 import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.resources.Res
-import ru.packetdima.datascanner.resources.ScanSettings_FileExtensions
+import ru.packetdima.datascanner.resources.ScanSettings_DetectFunctions
 import ru.packetdima.datascanner.resources.ScanSettings_SelectAll
 import ru.packetdima.datascanner.scan.common.FileType
+import ru.packetdima.datascanner.ui.strings.composableName
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsBoxExtensionsSelection(scanSettings: ScanSettings) {
-    val extensions = remember { scanSettings.extensions }
-    var expanded by remember { scanSettings.extensionsExpanded }
+fun SettingsBoxDetectFunctions(scanSettings: ScanSettings) {
+    val detectFunctions = remember { scanSettings.detectFunctions }
+    var expanded by remember { scanSettings.detectFunctionsExpanded }
 
-    LaunchedEffect(extensions, expanded) {
+    LaunchedEffect(detectFunctions, expanded) {
         scanSettings.save()
     }
 
     SettingsBoxSpan(
-        text = stringResource(Res.string.ScanSettings_FileExtensions),
+        text = stringResource(Res.string.ScanSettings_DetectFunctions),
         expanded = expanded,
         onExpandClick = {
             expanded = !expanded
         }
     ) {
-        val rows = FileType.entries.size / 5 + if (FileType.entries.size % 5 > 0) 1 else 0
+        val rows = FileType.entries.size / 3 + if (FileType.entries.size % 3 > 0) 1 else 0
 
-        val height = (24 * rows + (6 * (rows - 1))).dp + 52.dp
+        val height = (24 * rows + (6 * (rows - 1))).dp + 52.dp + 24.dp
 
         LazyVerticalGrid(
-            columns = GridCells.Fixed(5),
+            columns = GridCells.Fixed(3),
             verticalArrangement = Arrangement.spacedBy(5.dp),
             modifier = Modifier
                 .height(height)
@@ -60,12 +62,12 @@ fun SettingsBoxExtensionsSelection(scanSettings: ScanSettings) {
                     modifier = Modifier.height(42.dp)
                 ) {
                     Checkbox(
-                        checked = extensions.containsAll(FileType.entries),
+                        checked = detectFunctions.containsAll(DetectFunction.entries),
                         onCheckedChange = { checked ->
                             if (checked) {
-                                extensions.addAll(FileType.entries.filter { !extensions.contains(it) })
+                                detectFunctions.addAll(DetectFunction.entries.filter { !detectFunctions.contains(it) })
                             } else {
-                                extensions.clear()
+                                detectFunctions.clear()
                             }
                         }
                     )
@@ -74,39 +76,39 @@ fun SettingsBoxExtensionsSelection(scanSettings: ScanSettings) {
                             text = stringResource(Res.string.ScanSettings_SelectAll),
                             fontSize = 14.sp,
                             modifier = Modifier.clickable {
-                                if(!extensions.containsAll(FileType.entries))
-                                    extensions.addAll(FileType.entries.filter { !extensions.contains(it) })
+                                if(!detectFunctions.containsAll(DetectFunction.entries))
+                                    detectFunctions.addAll(DetectFunction.entries.filter { !detectFunctions.contains(it) })
                                 else
-                                    extensions.clear()
+                                    detectFunctions.clear()
                             }
                         )
                     }
                 }
             }
-            items(FileType.entries) { extension ->
+            items(DetectFunction.entries) { detectFunction ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(1f)
                         .height(24.dp)
                 ) {
                     Checkbox(
-                        checked = extensions.contains(extension),
+                        checked = detectFunctions.contains(detectFunction),
                         onCheckedChange = { checked ->
-                            if (checked && !extensions.contains(extension))
-                                extensions.add(extension)
+                            if (checked && !detectFunctions.contains(detectFunction))
+                                detectFunctions.add(detectFunction)
                             else if (!checked)
-                                extensions.remove(extension)
+                                detectFunctions.remove(detectFunction)
                         }
                     )
                     CompositionLocalProvider(LocalRippleConfiguration provides null) {
                         Text(
-                            text = extension.name,
+                            text = detectFunction.composableName(),
                             fontSize = 14.sp,
                             modifier = Modifier.clickable {
-                                if(extensions.contains(extension))
-                                    extensions.remove(extension)
+                                if(detectFunctions.contains(detectFunction))
+                                    detectFunctions.remove(detectFunction)
                                 else
-                                    extensions.add(extension)
+                                    detectFunctions.add(detectFunction)
                             }
                         )
                     }

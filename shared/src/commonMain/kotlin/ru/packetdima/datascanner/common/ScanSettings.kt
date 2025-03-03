@@ -10,8 +10,8 @@ import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import ru.packetdima.datascanner.scan.functions.UserSignature
 import ru.packetdima.datascanner.scan.common.FileType
+import ru.packetdima.datascanner.scan.functions.UserSignature
 import ru.packetdima.datascanner.serializers.MutableStateSerializer
 import java.io.File
 
@@ -44,6 +44,7 @@ class ScanSettings: KoinComponent {
     val sampleCount = 100
 
     constructor() {
+        val userSignatureSettings by inject<UserSignatureSettings>()
         try {
             val prop: ScanSettings = Json.decodeFromString(settingsFile.readText())
 
@@ -55,7 +56,7 @@ class ScanSettings: KoinComponent {
             this.detectFunctions.addAll(prop.detectFunctions)
             this.detectFunctionsExpanded = prop.detectFunctionsExpanded
 
-            this.userSignatures.addAll(prop.userSignatures)
+            this.userSignatures.addAll(prop.userSignatures.filter { it in userSignatureSettings.userSignatures })
             this.userSignatureExpanded = prop.userSignatureExpanded
         } catch (ex: Exception) {
             logger.error {

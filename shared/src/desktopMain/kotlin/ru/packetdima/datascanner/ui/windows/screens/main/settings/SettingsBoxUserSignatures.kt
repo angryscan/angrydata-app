@@ -1,4 +1,4 @@
-package ru.packetdima.datascanner.ui.windows.screens.main
+package ru.packetdima.datascanner.ui.windows.screens.main.settings
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
@@ -51,7 +51,7 @@ fun SettingsBoxUserSignature(scanSettings: ScanSettings) {
                 userSignatureEditorVisibility = false
             },
             onSaveRequest = { signature ->
-                if(userSignatures.filter { it.name == signature.name }.isNotEmpty() && editedUserSignature == null) {
+                if(scanSettings.userSignatures.filter { it.name == signature.name }.isNotEmpty() && editedUserSignature == null) {
                     coroutineScope.launch {
                         JOptionPane.showConfirmDialog(
                             null,
@@ -63,12 +63,21 @@ fun SettingsBoxUserSignature(scanSettings: ScanSettings) {
                     }
                 } else {
                     if(editedUserSignature != null) {
+                        val selected = editedUserSignature in scanSettings.userSignatures
+                        scanSettings.userSignatures.remove(editedUserSignature)
+                        scanSettings.userSignatures.removeIf { it.name == signature.name }
+
                         val index = userSignatureSettings.userSignatures.mapIndexed{ index, us -> us to index}.first { it.first.name == signature.name }.second
-                        userSignatures[index] = signature
+                        userSignatureSettings.userSignatures[index] = signature
+
+                        if(selected)
+                            scanSettings.userSignatures.add(signature)
                     } else {
                         userSignatureSettings.userSignatures.add(signature)
                         scanSettings.userSignatures.add(signature)
                     }
+
+                    scanSettings.userSignatures.removeIf { it !in userSignatureSettings.userSignatures }
 
                     userSignatureSettings.save()
                     userSignatureEditorVisibility = false
@@ -157,7 +166,7 @@ fun SettingsBoxUserSignature(scanSettings: ScanSettings) {
                     }
                 }
             }
-            items(userSignatures) { signature ->
+            items(scanSettings.userSignatures) { signature ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(1f)
@@ -213,8 +222,8 @@ fun SettingsBoxUserSignature(scanSettings: ScanSettings) {
                                 .size(30.dp)
                                 .clip(MaterialTheme.shapes.small)
                                 .clickable {
-                                    selectedSignatures.remove(signature)
-                                    userSignatures.remove(signature)
+                                    scanSettings.userSignatures.remove(signature)
+                                    userSignatureSettings.userSignatures.remove(signature)
                                     scanSettings.save()
                                     userSignatureSettings.save()
                                 },

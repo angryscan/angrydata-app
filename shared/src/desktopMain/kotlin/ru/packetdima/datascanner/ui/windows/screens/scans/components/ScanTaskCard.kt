@@ -1,16 +1,8 @@
 package ru.packetdima.datascanner.ui.windows.screens.scans.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.RocketLaunch
 import androidx.compose.material3.Icon
@@ -25,18 +17,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import info.downdetector.bigdatascanner.common.DetectFunction
-import info.downdetector.bigdatascanner.common.IDetectFunction
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.char
 import org.jetbrains.compose.resources.stringResource
+import ru.packetdima.datascanner.db.models.TaskState
 import ru.packetdima.datascanner.resources.*
 import ru.packetdima.datascanner.scan.TaskEntityViewModel
 import ru.packetdima.datascanner.ui.extensions.color
 import ru.packetdima.datascanner.ui.extensions.icon
-import ru.packetdima.datascanner.ui.strings.composableName
-import kotlin.math.min
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ScanTaskCard(
     taskEntity: TaskEntityViewModel,
@@ -107,7 +97,8 @@ fun ScanTaskCard(
                             imageVector = Icons.Outlined.RocketLaunch,
                             contentDescription = null,
                             modifier = Modifier
-                                .size(24.dp)
+                                .size(24.dp),
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
 
@@ -146,7 +137,7 @@ fun ScanTaskCard(
                             letterSpacing = 0.1.sp
                         )
 
-                        if (finishedAt != null) {
+                        if (finishedAt != null && state == TaskState.COMPLETED) {
                             Text(
                                 text = stringResource(
                                     resource = Res.string.Task_FinishedAt,
@@ -259,7 +250,6 @@ fun ScanTaskCard(
             }
 
             if (foundAttributes.isNotEmpty()) {
-                val visibleAttributes = min(5, foundAttributes.size)
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
@@ -269,52 +259,15 @@ fun ScanTaskCard(
                         letterSpacing = 0.1.sp,
                         color = MaterialTheme.colorScheme.primary
                     )
-                    Row(
+                    FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        foundAttributes.take(visibleAttributes).forEach { attr ->
+                        foundAttributes.forEach { attr ->
                             AttributeCard(attr)
-                        }
-                    }
-
-                    if (visibleAttributes < foundAttributes.size) {
-                        Box(
-                            modifier = Modifier
-                                .clip(
-                                    MaterialTheme.shapes.small
-                                )
-                                .background(color = MaterialTheme.colorScheme.secondary)
-                                .padding(4.dp)
-                        ) {
-                            Text(
-                                text = "+${foundAttributes.size - visibleAttributes}",
-                                fontSize = 14.sp,
-                                lineHeight = 14.sp,
-                                letterSpacing = 0.1.sp
-                            )
                         }
                     }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun AttributeCard(attribute: IDetectFunction) {
-    Box(
-        modifier = Modifier
-            .clip(
-                MaterialTheme.shapes.small
-            )
-            .background(color = MaterialTheme.colorScheme.secondary)
-            .padding(4.dp)
-    ) {
-        Text(
-            text = if (attribute is DetectFunction) attribute.composableName() else attribute.writeName,
-            fontSize = 14.sp,
-            lineHeight = 14.sp,
-            letterSpacing = 0.1.sp
-        )
     }
 }

@@ -37,6 +37,7 @@ import ru.packetdima.datascanner.ui.windows.components.SideMenu
 import ru.packetdima.datascanner.ui.windows.screens.about.AboutScreen
 import ru.packetdima.datascanner.ui.windows.screens.main.MainScreen
 import ru.packetdima.datascanner.ui.windows.screens.scans.ScansScreen
+import ru.packetdima.datascanner.ui.windows.screens.scans.components.ScanResultScreen
 import ru.packetdima.datascanner.ui.windows.screens.settings.SettingsScreen
 import java.util.*
 
@@ -125,7 +126,7 @@ fun MainWindow(
                             navController = navController,
                             startDestination = AppScreens.Main.name,
                             enterTransition = {
-                                slideInVertically (
+                                slideInVertically(
                                     initialOffsetY = { it },
                                     animationSpec = tween(durationMillis = 700, easing = LinearOutSlowInEasing)
                                 )
@@ -153,7 +154,18 @@ fun MainWindow(
                                 MainScreen()
                             }
                             composable(route = AppScreens.Scans.name) {
-                                ScansScreen()
+                                ScansScreen(
+                                    onTaskClick = { taskId ->
+                                        navController.navigate(AppScreens.Scans.name + "/$taskId")
+                                    }
+                                )
+                            }
+                            composable(route = AppScreens.Scans.name + "/{taskId}") { backStackEntry ->
+                                val taskId = backStackEntry.arguments?.getString("taskId")?.toInt()
+                                ScanResultScreen(
+                                    taskId!!,
+                                    onCloseClick = { navController.popBackStack() }
+                                )
                             }
                             composable(route = AppScreens.Settings.name) {
                                 SettingsScreen()

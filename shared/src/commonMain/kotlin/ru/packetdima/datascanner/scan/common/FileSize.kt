@@ -1,11 +1,15 @@
 package ru.packetdima.datascanner.scan.common
 
-class FileSize {
+class FileSize(): Comparable<FileSize> {
     private var bytes: Long = 0
     private var kBytes: Long = 0
     private var mBytes: Long = 0
     private var gBytes: Long = 0
     private var tBytes: Long = 0
+
+    constructor(size: Long) : this() {
+        plus(size)
+    }
 
     operator fun plus(incrementBytes: Long): FileSize {
         bytes += incrementBytes
@@ -43,6 +47,20 @@ class FileSize {
         return this
     }
 
+    override fun compareTo(other: FileSize): Int {
+        if(this.tBytes > other.tBytes) return 1
+        if(this.tBytes < other.tBytes) return -1
+        if(this.gBytes > other.gBytes) return 1
+        if(this.gBytes > other.gBytes) return -1
+        if(this.mBytes > other.mBytes) return 1
+        if(this.mBytes < other.mBytes) return -1
+        if(this.kBytes > other.kBytes) return 1
+        if(this.kBytes > other.kBytes) return -1
+        if(this.bytes > other.bytes) return 1
+        if(this.bytes > other.bytes) return -1
+        return 0
+    }
+
     override fun toString(): String {
         return when {
             tBytes != 0L -> "${tBytes}.${(gBytes * 100) / 1024} TB"
@@ -52,4 +70,5 @@ class FileSize {
             else -> "$bytes B"
         }
     }
+
 }

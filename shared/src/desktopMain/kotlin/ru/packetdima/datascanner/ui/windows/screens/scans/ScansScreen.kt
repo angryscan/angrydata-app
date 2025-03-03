@@ -1,12 +1,15 @@
 package ru.packetdima.datascanner.ui.windows.screens.scans
 
+import androidx.compose.foundation.LocalScrollbarStyle
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.koin.compose.koinInject
@@ -16,7 +19,7 @@ import ru.packetdima.datascanner.ui.windows.screens.scans.components.ScanFilterC
 import ru.packetdima.datascanner.ui.windows.screens.scans.components.ScanTaskCard
 
 @Composable
-fun ScansScreen() {
+fun ScansScreen(onTaskClick: (Int) -> Unit) {
     val scanService = koinInject<ScanService>()
 
     val filterTaskStates = remember { mutableListOf<TaskState>() }
@@ -32,12 +35,12 @@ fun ScansScreen() {
             task.state.value != TaskState.LOADING
         else
             task.state.value in filterTaskStates
-    }
+    }.sortedByDescending { it.finishedAt.value }.sortedByDescending { it.startedAt.value }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 30.dp)
+            .padding(horizontal = 15.dp)
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -99,7 +102,8 @@ fun ScansScreen() {
             val state = rememberLazyListState()
             LazyColumn(
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .padding(end = 30.dp),
                 state = state,
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
@@ -107,7 +111,7 @@ fun ScansScreen() {
                     ScanTaskCard(
                         taskEntity = task,
                         onClick = {
-                            //TODO
+                            onTaskClick(task.id.value!!)
                         }
                     )
                 }
@@ -119,6 +123,11 @@ fun ScansScreen() {
                     .fillMaxHeight()
                     .padding(end = 10.dp)
                     .width(10.dp)
+                    .align(Alignment.CenterEnd),
+                style = LocalScrollbarStyle.current.copy(
+                    unhoverColor = MaterialTheme.colorScheme.secondary,
+                    hoverColor = MaterialTheme.colorScheme.primary
+                )
             )
         }
 

@@ -121,7 +121,7 @@ fun MainScreenTasks(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(activeTasks) { task ->
-                        TaskPanel(task, currentTime)
+                        MainScreenTaskCard(task, currentTime)
                     }
                 }
             }

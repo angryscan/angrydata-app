@@ -132,7 +132,7 @@ class ScanThread : KoinComponent {
                                 TaskFiles.id.eq(fileId)
                             }
                         ) {
-                            it[state] = TaskState.FAILED
+                            it[state] = TaskState.COMPLETED
                         }
                     }
                 } else {

@@ -34,7 +34,7 @@ fun SideMenu(navController: NavController) {
 
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentScreen = AppScreens.valueOf(
-        backStackEntry?.destination?.route ?: AppScreens.Main.name
+        backStackEntry?.destination?.route?.substringBefore("/") ?: AppScreens.Main.name
     )
 
     Surface(

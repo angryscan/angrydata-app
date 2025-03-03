@@ -29,7 +29,7 @@ import ru.packetdima.datascanner.scan.TaskEntityViewModel
 import ru.packetdima.datascanner.ui.extensions.color
 
 @Composable
-fun TaskPanel(taskEntity: TaskEntityViewModel, currentTime: Instant) {
+fun MainScreenTaskCard(taskEntity: TaskEntityViewModel, currentTime: Instant) {
     val scanService = koinInject<ScanService>()
     val state by taskEntity.state.collectAsState()
     val completedAt = taskEntity.dbTask.finishedAt?.toInstant(TimeZone.currentSystemDefault())

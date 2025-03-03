@@ -28,12 +28,8 @@ import ru.packetdima.datascanner.scan.common.FileType
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsBoxExtensionsSelection(scanSettings: ScanSettings) {
-    val extensions = remember { scanSettings.extensions }
     var expanded by remember { scanSettings.extensionsExpanded }
 
-    LaunchedEffect(extensions, expanded) {
-        scanSettings.save()
-    }
 
     SettingsBoxSpan(
         text = stringResource(Res.string.ScanSettings_FileExtensions),
@@ -60,13 +56,14 @@ fun SettingsBoxExtensionsSelection(scanSettings: ScanSettings) {
                     modifier = Modifier.height(42.dp)
                 ) {
                     Checkbox(
-                        checked = extensions.containsAll(FileType.entries),
+                        checked = scanSettings.extensions.containsAll(FileType.entries),
                         onCheckedChange = { checked ->
                             if (checked) {
-                                extensions.addAll(FileType.entries.filter { !extensions.contains(it) })
+                                scanSettings.extensions.addAll(FileType.entries.filter { !scanSettings.extensions.contains(it) })
                             } else {
-                                extensions.clear()
+                                scanSettings.extensions.clear()
                             }
+                            scanSettings.save()
                         }
                     )
                     CompositionLocalProvider(LocalRippleConfiguration provides null) {
@@ -74,10 +71,11 @@ fun SettingsBoxExtensionsSelection(scanSettings: ScanSettings) {
                             text = stringResource(Res.string.ScanSettings_SelectAll),
                             fontSize = 14.sp,
                             modifier = Modifier.clickable {
-                                if(!extensions.containsAll(FileType.entries))
-                                    extensions.addAll(FileType.entries.filter { !extensions.contains(it) })
+                                if(!scanSettings.extensions.containsAll(FileType.entries))
+                                    scanSettings.extensions.addAll(FileType.entries.filter { !scanSettings.extensions.contains(it) })
                                 else
-                                    extensions.clear()
+                                    scanSettings.extensions.clear()
+                                scanSettings.save()
                             }
                         )
                     }
@@ -90,12 +88,13 @@ fun SettingsBoxExtensionsSelection(scanSettings: ScanSettings) {
                         .height(24.dp)
                 ) {
                     Checkbox(
-                        checked = extensions.contains(extension),
+                        checked = scanSettings.extensions.contains(extension),
                         onCheckedChange = { checked ->
-                            if (checked && !extensions.contains(extension))
-                                extensions.add(extension)
+                            if (checked && !scanSettings.extensions.contains(extension))
+                                scanSettings.extensions.add(extension)
                             else if (!checked)
-                                extensions.remove(extension)
+                                scanSettings.extensions.remove(extension)
+                            scanSettings.save()
                         }
                     )
                     CompositionLocalProvider(LocalRippleConfiguration provides null) {
@@ -103,10 +102,11 @@ fun SettingsBoxExtensionsSelection(scanSettings: ScanSettings) {
                             text = extension.name,
                             fontSize = 14.sp,
                             modifier = Modifier.clickable {
-                                if(extensions.contains(extension))
-                                    extensions.remove(extension)
+                                if(scanSettings.extensions.contains(extension))
+                                    scanSettings.extensions.remove(extension)
                                 else
-                                    extensions.add(extension)
+                                    scanSettings.extensions.add(extension)
+                                scanSettings.save()
                             }
                         )
                     }

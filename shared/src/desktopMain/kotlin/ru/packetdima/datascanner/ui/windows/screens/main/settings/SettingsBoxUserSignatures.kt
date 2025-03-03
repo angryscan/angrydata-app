@@ -101,6 +101,7 @@ fun SettingsBoxUserSignature(scanSettings: ScanSettings) {
         textTail = {
             IconButton(
                 onClick = {
+                    editedUserSignature = null
                     userSignatureEditorVisibility = true
                 }
             ) {
@@ -166,7 +167,7 @@ fun SettingsBoxUserSignature(scanSettings: ScanSettings) {
                     }
                 }
             }
-            items(scanSettings.userSignatures) { signature ->
+            items(userSignatureSettings.userSignatures) { signature ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(1f)

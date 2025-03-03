@@ -170,6 +170,10 @@ fun MainScreen() {
                                             fastScan = scanSettings.fastScan.value
                                         )
                                         scanService.startTask(task)
+                                        if (!scanStateExpanded) {
+                                            settingsExpanded = false
+                                            scanStateExpanded = true
+                                        }
                                     }
                                 } else {
                                     scanNotCorrectPath = true

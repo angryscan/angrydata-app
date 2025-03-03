@@ -62,13 +62,14 @@ fun SettingsBoxDetectFunctions(scanSettings: ScanSettings) {
                     modifier = Modifier.height(42.dp)
                 ) {
                     Checkbox(
-                        checked = detectFunctions.containsAll(DetectFunction.entries),
+                        checked = scanSettings.detectFunctions.containsAll(DetectFunction.entries),
                         onCheckedChange = { checked ->
                             if (checked) {
-                                detectFunctions.addAll(DetectFunction.entries.filter { !detectFunctions.contains(it) })
+                                scanSettings.detectFunctions.addAll(DetectFunction.entries.filter { !scanSettings.detectFunctions.contains(it) })
                             } else {
-                                detectFunctions.clear()
+                                scanSettings.detectFunctions.clear()
                             }
+                            scanSettings.save()
                         }
                     )
                     CompositionLocalProvider(LocalRippleConfiguration provides null) {
@@ -76,10 +77,11 @@ fun SettingsBoxDetectFunctions(scanSettings: ScanSettings) {
                             text = stringResource(Res.string.ScanSettings_SelectAll),
                             fontSize = 14.sp,
                             modifier = Modifier.clickable {
-                                if(!detectFunctions.containsAll(DetectFunction.entries))
-                                    detectFunctions.addAll(DetectFunction.entries.filter { !detectFunctions.contains(it) })
+                                if(!scanSettings.detectFunctions.containsAll(DetectFunction.entries))
+                                    scanSettings.detectFunctions.addAll(DetectFunction.entries.filter { !scanSettings.detectFunctions.contains(it) })
                                 else
-                                    detectFunctions.clear()
+                                    scanSettings.detectFunctions.clear()
+                                scanSettings.save()
                             }
                         )
                     }
@@ -92,12 +94,13 @@ fun SettingsBoxDetectFunctions(scanSettings: ScanSettings) {
                         .height(24.dp)
                 ) {
                     Checkbox(
-                        checked = detectFunctions.contains(detectFunction),
+                        checked = scanSettings.detectFunctions.contains(detectFunction),
                         onCheckedChange = { checked ->
-                            if (checked && !detectFunctions.contains(detectFunction))
-                                detectFunctions.add(detectFunction)
+                            if (checked && !scanSettings.detectFunctions.contains(detectFunction))
+                                scanSettings.detectFunctions.add(detectFunction)
                             else if (!checked)
-                                detectFunctions.remove(detectFunction)
+                                scanSettings.detectFunctions.remove(detectFunction)
+                            scanSettings.save()
                         }
                     )
                     CompositionLocalProvider(LocalRippleConfiguration provides null) {
@@ -105,10 +108,11 @@ fun SettingsBoxDetectFunctions(scanSettings: ScanSettings) {
                             text = detectFunction.composableName(),
                             fontSize = 14.sp,
                             modifier = Modifier.clickable {
-                                if(detectFunctions.contains(detectFunction))
-                                    detectFunctions.remove(detectFunction)
+                                if(scanSettings.detectFunctions.contains(detectFunction))
+                                    scanSettings.detectFunctions.remove(detectFunction)
                                 else
-                                    detectFunctions.add(detectFunction)
+                                    scanSettings.detectFunctions.add(detectFunction)
+                                scanSettings.save()
                             }
                         )
                     }

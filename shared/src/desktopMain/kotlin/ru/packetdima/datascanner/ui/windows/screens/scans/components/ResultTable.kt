@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import ru.packetdima.datascanner.resources.*
 import ru.packetdima.datascanner.scan.TaskEntityViewModel
@@ -80,6 +81,8 @@ fun ResultTable(taskFilesViewModel: TaskFilesViewModel, task: TaskEntityViewMode
         taskFilesViewModel.update()
     }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
 
 
     Scaffold(
@@ -96,6 +99,7 @@ fun ResultTable(taskFilesViewModel: TaskFilesViewModel, task: TaskEntityViewMode
                 FloatingActionButton(
                     onClick = {
                         coroutineScope.launch {
+                            val filesToDelete = selectedFiles.size
                             val filesDeleted = taskFiles.filter { it.id in selectedFiles }.map { file ->
                                 File(file.path).delete()
                             }.count { it }
@@ -106,7 +110,15 @@ fun ResultTable(taskFilesViewModel: TaskFilesViewModel, task: TaskEntityViewMode
                                 }
                             }
 
+                            coroutineScope.launch {
+                                if(filesDeleted == filesToDelete)
+                                    snackbarHostState.showSnackbar(getString(Res.string.Result_DeletedFiles, filesDeleted))
+                                else
+                                    snackbarHostState.showSnackbar(getString(Res.string.Result_NotDeletedFiles, filesToDelete - filesDeleted))
+                            }
+
                             selectedFiles.clear()
+
                         }
                     }
                 ) {
@@ -124,7 +136,8 @@ fun ResultTable(taskFilesViewModel: TaskFilesViewModel, task: TaskEntityViewMode
                     }
                 }
             }
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) {
         Box(
             modifier = Modifier
@@ -146,7 +159,7 @@ fun ResultTable(taskFilesViewModel: TaskFilesViewModel, task: TaskEntityViewMode
                         onCheckedChange = { checkState ->
                             if (checkState) {
                                 selectedFiles.addAll(
-                                    sortedFiles.map { it.id }.filter { id -> !selectedFiles.contains(id) }
+                                    sortedFiles.map { it.id }.filter { id -> !selectedFiles.contains(id) && id in filesExists }
                                 )
                             } else {
                                 selectedFiles.clear()

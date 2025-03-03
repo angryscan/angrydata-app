@@ -139,6 +139,8 @@
     <string name="Result-ColumnSize">Size</string>
     <string name="Result-ColumnScore">Score</string>
     <string name="Result-DeleteFiles">Delete files: %1$d</string>
+    <string name="Result-DeletedFiles">Deleted files: %1$d</string>
+    <string name="Result-NotDeletedFiles">Cannot delete files: %1$d</string>
 
     <string name="FileSave-AlreadyExistTitle">File already exist!</string>
     <string name="FileSave-AlreadyExistText">File with this name already exist. Do you want to replace it?</string>

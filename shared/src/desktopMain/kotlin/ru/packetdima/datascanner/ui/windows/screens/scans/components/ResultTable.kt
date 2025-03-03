@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
@@ -369,6 +370,10 @@ fun ResultTable(taskFilesViewModel: TaskFilesViewModel, task: TaskEntityViewMode
                             )
                             Text(
                                 text = file.path.replace(task.path.value, "").substring(1),
+                                fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                                lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
+                                letterSpacing = 0.1.sp,
+                                fontWeight = MaterialTheme.typography.bodySmall.fontWeight,
                                 modifier = Modifier.weight(0.5f),
                             )
                             FlowRow(

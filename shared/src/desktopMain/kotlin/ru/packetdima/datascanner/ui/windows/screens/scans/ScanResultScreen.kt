@@ -152,9 +152,10 @@ fun ScanResultScreen(
 
                         Text(
                             text = path,
-                            fontSize = MaterialTheme.typography.labelMedium.fontSize,
-                            lineHeight = MaterialTheme.typography.labelMedium.lineHeight,
-                            fontWeight = MaterialTheme.typography.labelMedium.fontWeight
+                            fontSize = MaterialTheme.typography.bodyMedium.fontSize,
+                            lineHeight = MaterialTheme.typography.bodyMedium.lineHeight,
+                            fontWeight = MaterialTheme.typography.bodyMedium.fontWeight,
+                            letterSpacing = 0.1.sp
                         )
 
                         Icon(

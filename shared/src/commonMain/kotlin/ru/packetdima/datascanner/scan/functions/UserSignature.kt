@@ -1,5 +1,6 @@
 package ru.packetdima.datascanner.scan.functions
 
+import androidx.compose.runtime.mutableStateListOf
 import info.downdetector.bigdatascanner.common.IDetectFunction
 import kotlinx.serialization.Serializable
 import org.jetbrains.skia.Pattern
@@ -8,7 +9,7 @@ import org.jetbrains.skia.Pattern
 data class UserSignature(
     override var name: String,
     override var writeName: String,
-    var searchSignatures: MutableList<String>
+    val searchSignatures: MutableList<String> = mutableStateListOf()
 ) : IDetectFunction {
 
     override fun scan(text: String): Int {

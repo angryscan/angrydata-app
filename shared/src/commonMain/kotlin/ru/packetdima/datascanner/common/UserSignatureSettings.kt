@@ -11,20 +11,21 @@ import ru.packetdima.datascanner.scan.functions.UserSignature
 import java.io.File
 
 @Serializable
-class UserSignatureSettings: KoinComponent {
+class UserSignatureSettings : KoinComponent {
     @Transient
-    private val logger = KotlinLogging.logger {  }
-    class SettingsFile(path: String): File(path)
+    private val logger = KotlinLogging.logger { }
+
+    class SettingsFile(path: String) : File(path)
 
     private val settingsFile: SettingsFile by inject()
 
     @Serializable
-    var userSignatures: MutableList<UserSignature> = mutableStateListOf()
+    val userSignatures: MutableList<UserSignature> = mutableStateListOf()
 
     constructor() {
         try {
-            val prop: ScanSettings = Json.decodeFromString(settingsFile.readText())
-            this.userSignatures = prop.userSignatures
+            val prop: UserSignatureSettings = Json.decodeFromString(settingsFile.readText())
+            this.userSignatures.addAll(prop.userSignatures)
         } catch (_: Exception) {
             logger.error {
                 "Failed to load User signatures"

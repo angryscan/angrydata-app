@@ -1,53 +1,98 @@
 package ru.packetdima.datascanner.ui.windows.screens.main
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.common.UserSignatureSettings
-import ru.packetdima.datascanner.resources.Res
-import ru.packetdima.datascanner.resources.ScanSettings_Add
-import ru.packetdima.datascanner.resources.ScanSettings_SelectAll
-import ru.packetdima.datascanner.resources.ScanSettings_UserSignatures
+import ru.packetdima.datascanner.resources.*
 import ru.packetdima.datascanner.scan.common.FileType
+import ru.packetdima.datascanner.scan.functions.UserSignature
+import javax.swing.JOptionPane
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsBoxUserSignature(scanSettings: ScanSettings) {
-    val userSignatures = remember { scanSettings.userSignatures }
+
     var expanded by remember { scanSettings.userSignatureExpanded }
-    
+
     val userSignatureSettings = koinInject<UserSignatureSettings>()
-    
-    LaunchedEffect(userSignatures, expanded) {
-        scanSettings.save()
+
+    var userSignatureEditorVisibility by remember { mutableStateOf(false) }
+    val userSignatures = remember { userSignatureSettings.userSignatures }
+    val selectedSignatures = remember { scanSettings.userSignatures }
+
+    val coroutineScope = rememberCoroutineScope()
+
+    var editedUserSignature by remember { mutableStateOf<UserSignature?>(null) }
+
+    if (userSignatureEditorVisibility) {
+        UserSignatureEditor(
+            onCloseRequest = {
+                userSignatureEditorVisibility = false
+            },
+            onSaveRequest = { signature ->
+                if(userSignatures.filter { it.name == signature.name }.isNotEmpty() && editedUserSignature == null) {
+                    coroutineScope.launch {
+                        JOptionPane.showConfirmDialog(
+                            null,
+                            getString(Res.string.Signature_ErrorMessage),
+                            getString(Res.string.Signature_Title),
+                            JOptionPane.YES_OPTION,
+                            JOptionPane.ERROR_MESSAGE
+                        )
+                    }
+                } else {
+                    if(editedUserSignature != null) {
+                        val index = userSignatureSettings.userSignatures.mapIndexed{ index, us -> us to index}.first { it.first.name == signature.name }.second
+                        userSignatures[index] = signature
+                    } else {
+                        userSignatureSettings.userSignatures.add(signature)
+                        scanSettings.userSignatures.add(signature)
+                    }
+
+                    userSignatureSettings.save()
+                    userSignatureEditorVisibility = false
+                    scanSettings.save()
+
+                    editedUserSignature = null
+                }
+            },
+            userSignature = editedUserSignature
+        )
     }
+
 
     SettingsBoxSpan(
         text = stringResource(Res.string.ScanSettings_UserSignatures),
         expanded = expanded,
         onExpandClick = {
             expanded = !expanded
+            scanSettings.save()
         },
         textTail = {
             IconButton(
                 onClick = {
-                    //TODO
+                    userSignatureEditorVisibility = true
                 }
             ) {
                 Icon(
@@ -69,62 +114,119 @@ fun SettingsBoxUserSignature(scanSettings: ScanSettings) {
                 .fillMaxWidth()
         ) {
             item(span = { GridItemSpan(maxLineSpan) }) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.height(42.dp)
+                AnimatedVisibility(
+                    visible = userSignatures.isNotEmpty(),
                 ) {
-                    Checkbox(
-                        checked = userSignatures.containsAll(userSignatureSettings.userSignatures),
-                        onCheckedChange = { checked ->
-                            if (checked) {
-                                userSignatures.addAll(userSignatureSettings.userSignatures.filter { !userSignatures.contains(it) })
-                            } else {
-                                userSignatures.clear()
-                            }
-                        }
-                    )
-                    CompositionLocalProvider(LocalRippleConfiguration provides null) {
-                        Text(
-                            text = stringResource(Res.string.ScanSettings_SelectAll),
-                            fontSize = 14.sp,
-                            modifier = Modifier.clickable {
-                                if(!userSignatures.containsAll(userSignatureSettings.userSignatures))
-                                    userSignatures.addAll(userSignatureSettings.userSignatures.filter { !userSignatures.contains(it) })
-                                else
-                                    userSignatures.clear()
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.height(42.dp)
+                    ) {
+                        Checkbox(
+                            checked = selectedSignatures.containsAll(userSignatures) && userSignatures.isNotEmpty(),
+                            onCheckedChange = { checked ->
+                                if (checked) {
+                                    selectedSignatures.addAll(userSignatures.filter {
+                                        !selectedSignatures.contains(
+                                            it
+                                        )
+                                    })
+                                } else {
+                                    selectedSignatures.clear()
+                                }
+
+                                scanSettings.save()
                             }
                         )
+                        CompositionLocalProvider(LocalRippleConfiguration provides null) {
+                            Text(
+                                text = stringResource(Res.string.ScanSettings_SelectAll),
+                                fontSize = 14.sp,
+                                modifier = Modifier.clickable {
+                                    if (!selectedSignatures.containsAll(userSignatures))
+                                        selectedSignatures.addAll(userSignatures.filter {
+                                            !selectedSignatures.contains(
+                                                it
+                                            )
+                                        })
+                                    else
+                                        selectedSignatures.clear()
+                                }
+                            )
+                        }
                     }
                 }
             }
-            items(userSignatureSettings.userSignatures) { userSignature ->
+            items(userSignatures) { signature ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(1f)
-                        .height(24.dp)
+                        .height(24.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Checkbox(
-                        checked = userSignatures.contains(userSignature),
-                        onCheckedChange = { checked ->
-                            if (checked && !userSignatures.contains(userSignature))
-                                userSignatures.add(userSignature)
-                            else if (!checked)
-                                userSignatures.remove(userSignature)
-                        }
-                    )
-                    CompositionLocalProvider(LocalRippleConfiguration provides null) {
-                        Text(
-                            text = userSignature.name,
-                            fontSize = 14.sp,
-                            modifier = Modifier.clickable {
-                                if(userSignatures.contains(userSignature))
-                                    userSignatures.remove(userSignature)
-                                else
-                                    userSignatures.add(userSignature)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = selectedSignatures.contains(signature),
+                            onCheckedChange = { checked ->
+                                if (checked && !selectedSignatures.contains(signature))
+                                    selectedSignatures.add(signature)
+                                else if (!checked)
+                                    selectedSignatures.remove(signature)
+                                scanSettings.save()
                             }
                         )
+                        CompositionLocalProvider(LocalRippleConfiguration provides null) {
+                            Text(
+                                text = signature.name,
+                                fontSize = 14.sp,
+                                modifier = Modifier.clickable {
+                                    if (selectedSignatures.contains(signature))
+                                        selectedSignatures.remove(signature)
+                                    else
+                                        selectedSignatures.add(signature)
+                                }
+                            )
+                        }
                     }
+                    Row {
+                        Box(
+                            modifier = Modifier
+                                .size(30.dp)
+                                .clip(MaterialTheme.shapes.small)
+                                .clickable {
+                                    editedUserSignature = signature
+                                    userSignatureEditorVisibility = true
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Edit,
+                                contentDescription = null
+                            )
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .size(30.dp)
+                                .clip(MaterialTheme.shapes.small)
+                                .clickable {
+                                    selectedSignatures.remove(signature)
+                                    userSignatures.remove(signature)
+                                    scanSettings.save()
+                                    userSignatureSettings.save()
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Delete,
+                                contentDescription = null
+                            )
+                        }
+                    }
+
                 }
             }
         }

@@ -66,14 +66,6 @@
     <string name="uiUserSignature">User signature</string>
     <string name="add">Add</string>
     <string name="name">Name</string>
-    <string name="signature">Signature</string>
-    <string name="userSignatureTitle">User signature</string>
-    <string name="errorUserSignatureTitle">User signature save error</string>
-    <string name="errorUserSignatureEmpty">User signature can't be empty</string>
-    <string name="errorUserSignatureNameEmpty">Name can't be empty</string>
-    <string name="errorUserSignatureSave">Can't save user signature</string>
-    <string name="errorUserSignatureAlreadyExist">User signature with this name already exist</string>
-
 
     <string name="SideMenu-MainPage">Main</string>
     <string name="SideMenu-ScanListPage">Scans</string>
@@ -146,4 +138,10 @@
     <string name="FileSave-AlreadyExistText">File with this name already exist. Do you want to replace it?</string>
     <string name="FileSave-ErrorTitle">Error saving file!</string>
     <string name="FileSave-ErrorText">Cannot save file. Check it is in use by another process!</string>
+
+    <string name="Signature-Name">Signature name</string>
+    <string name="Signature-Signature">User signature</string>
+    <string name="Signature-Title">User signature</string>
+    <string name="Signature-ErrorTitle">User signature save error</string>
+    <string name="Signature-ErrorMessage">User signature with this name already exist</string>
 </resources>

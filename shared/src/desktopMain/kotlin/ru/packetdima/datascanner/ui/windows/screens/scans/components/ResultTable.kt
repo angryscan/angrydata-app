@@ -401,7 +401,7 @@ fun ResultTable(taskFilesViewModel: TaskFilesViewModel, task: TaskEntityViewMode
             VerticalScrollbar(
                 adapter = rememberScrollbarAdapter(scrollState),
                 modifier = Modifier
-                    .padding(10.dp)
+                    .padding(end = 10.dp)
                     .width(10.dp)
                     .align(Alignment.CenterEnd),
                 style = LocalScrollbarStyle.current.copy(

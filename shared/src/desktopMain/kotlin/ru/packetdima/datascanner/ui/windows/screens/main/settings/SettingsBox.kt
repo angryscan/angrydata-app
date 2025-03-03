@@ -102,8 +102,12 @@ fun SettingsBox(transition: Transition<Boolean>) {
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .fillMaxHeight()
-                    .padding(end = 6.dp)
-                    .width(12.dp)
+                    .padding(end = 10.dp)
+                    .width(10.dp),
+                style = LocalScrollbarStyle.current.copy(
+                    hoverColor = MaterialTheme.colorScheme.primary,
+                    unhoverColor = MaterialTheme.colorScheme.secondary
+                )
             )
         }
     }

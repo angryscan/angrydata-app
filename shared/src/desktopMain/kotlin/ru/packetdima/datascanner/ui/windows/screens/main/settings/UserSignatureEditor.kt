@@ -1,11 +1,11 @@
 package ru.packetdima.datascanner.ui.windows.screens.main.settings
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AddCircle
@@ -39,7 +39,7 @@ fun UserSignatureEditor(
 ) {
     val state = rememberDialogState(
         width = 450.dp,
-        height = 450.dp
+        height = 500.dp
     )
     val windowShapes = when (OS.currentOS()) {
         OS.WINDOWS -> MaterialTheme.shapes.medium.copy(CornerSize(0.dp))
@@ -92,7 +92,8 @@ fun UserSignatureEditor(
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .padding(bottom = 60.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 TitleBar(
@@ -174,38 +175,59 @@ fun UserSignatureEditor(
                             )
                         }
                     }
-                    LazyColumn(
+                    Box(
                         modifier = Modifier
-                            .fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                            .fillMaxSize()
                     ) {
-                        items(signaturesList) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(MaterialTheme.shapes.small)
-                                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                                    .padding(horizontal = 10.dp, vertical = 4.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(text = it)
-                                Box(
+                        val scrollState = rememberLazyListState()
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .animateContentSize()
+                                .padding(end = if(scrollState.canScrollForward || scrollState.canScrollBackward) 30.dp else 0.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                            state = scrollState
+                        ) {
+                            items(signaturesList) {
+                                Row(
                                     modifier = Modifier
-                                        .size(30.dp)
-                                        .clip(MaterialTheme.shapes.medium)
-                                        .clickable {
-                                            signaturesList.remove(it)
-                                        },
-                                    contentAlignment = Alignment.Center
+                                        .fillMaxWidth()
+                                        .clip(MaterialTheme.shapes.small)
+                                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                                        .padding(horizontal = 10.dp, vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Delete,
-                                        contentDescription = null
-                                    )
+                                    Text(text = it)
+                                    Box(
+                                        modifier = Modifier
+                                            .size(30.dp)
+                                            .clip(MaterialTheme.shapes.medium)
+                                            .clickable {
+                                                signaturesList.remove(it)
+                                            },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Outlined.Delete,
+                                            contentDescription = null
+                                        )
+                                    }
                                 }
                             }
                         }
+
+                        VerticalScrollbar(
+                            adapter = rememberScrollbarAdapter(scrollState),
+                            modifier = Modifier
+                                .padding(end = 10.dp)
+                                .width(10.dp)
+                                .align(Alignment.CenterEnd),
+                            style = LocalScrollbarStyle.current.copy(
+                                hoverColor = MaterialTheme.colorScheme.primary,
+                                unhoverColor = MaterialTheme.colorScheme.secondary
+                            )
+                        )
                     }
                 }
             }

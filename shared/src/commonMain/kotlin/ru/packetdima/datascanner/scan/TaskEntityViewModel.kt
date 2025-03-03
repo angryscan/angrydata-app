@@ -9,13 +9,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.update
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import ru.packetdima.datascanner.db.DatabaseConnector
@@ -49,19 +47,19 @@ class TaskEntityViewModel(
     val totalFiles
         get() = _totalFiles.asStateFlow()
 
-    private var _selectedFiles = MutableStateFlow<Long>(0L)
+    private var _selectedFiles = MutableStateFlow(0L)
     val selectedFiles
         get() = _selectedFiles.asStateFlow()
 
-    private var _scannedFiles = MutableStateFlow<Long>(0L)
+    private var _scannedFiles = MutableStateFlow(0L)
     val scannedFiles
         get() = _scannedFiles.asStateFlow()
 
-    private var _foundFiles = MutableStateFlow<Long>(0L)
+    private var _foundFiles = MutableStateFlow(0L)
     val foundFiles
         get() = _foundFiles.asStateFlow()
 
-    private var _skippedFiles = MutableStateFlow<Long>(0L)
+    private var _skippedFiles = MutableStateFlow(0L)
     val skippedFiles
         get() = _skippedFiles.asStateFlow()
 
@@ -69,22 +67,28 @@ class TaskEntityViewModel(
     val foundAttributes
         get() = _foundAttributes.asStateFlow()
 
+    private var _fastScan = MutableStateFlow(false)
+    val fastScan
+        get() = _fastScan.asStateFlow()
+
+    private var _path = MutableStateFlow("")
+    val path
+        get() = _path.asStateFlow()
+
+    private var _startedAt = MutableStateFlow<LocalDateTime?>(null)
+    val startedAt
+        get() = _startedAt.asStateFlow()
+
+    private var _finishedAt = MutableStateFlow<LocalDateTime?>(null)
+    val finishedAt
+        get() = _finishedAt.asStateFlow()
+
     init {
         if (_state.value == TaskState.LOADING) {
             taskScope.launch {
                 database.transaction {
                     _state.value = dbTask.taskState
                     _totalFiles.value = dbTask.filesCount ?: 0L
-                    _foundAttributes.value = (
-                            TaskFileScanResults
-                                    innerJoin TaskFiles
-                                    innerJoin TaskDetectFunctions
-                            )
-                        .select(TaskFileScanResults.detectFunction)
-                        .where { TaskFiles.task.eq(dbTask.id) }
-                        .withDistinct()
-                        .map { it[TaskDetectFunctions.function] }
-                        .toSet()
                 }
             }
         } else {
@@ -96,6 +100,23 @@ class TaskEntityViewModel(
 
             if (foundFiles != null)
                 _foundFiles.value = foundFiles
+        }
+
+        taskScope.launch {
+            database.transaction {
+                _fastScan.value = dbTask.fastScan
+                _path.value = dbTask.path
+                _startedAt.value = dbTask.startedAt
+                _finishedAt.value = dbTask.finishedAt
+
+                _foundAttributes.value =
+                    TaskFileScanResults
+                        .innerJoin(TaskDetectFunctions)
+                        .select(TaskDetectFunctions.function)
+                        .where { TaskDetectFunctions.task.eq(dbTask.id) }
+                        .map { it[TaskDetectFunctions.function] }
+                        .toSet()
+            }
         }
         _id.value = dbTask.id.value
         checkProgress()
@@ -163,11 +184,15 @@ class TaskEntityViewModel(
                 when (state) {
                     TaskState.SEARCHING -> {
                         dbTask.startedAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+                        _startedAt.value = dbTask.startedAt
+
                         dbTask.finishedAt = null
+                        _finishedAt.value = dbTask.finishedAt
                     }
 
                     TaskState.COMPLETED -> {
                         dbTask.finishedAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+                        _finishedAt.value = dbTask.finishedAt
                     }
 
                     TaskState.STOPPED -> {
@@ -182,6 +207,7 @@ class TaskEntityViewModel(
                             it[TaskFiles.state] = TaskState.STOPPED
                         }
                         dbTask.finishedAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+                        _finishedAt.value = dbTask.finishedAt
                     }
 
                     TaskState.SCANNING -> {
@@ -195,6 +221,7 @@ class TaskEntityViewModel(
                             it[TaskFiles.state] = TaskState.SEARCHING
                         }
                         dbTask.finishedAt = null
+                        _finishedAt.value = dbTask.finishedAt
                     }
 
                     else -> {}

@@ -98,9 +98,9 @@ class ScanThread : KoinComponent {
                 val fileObject = File(filePath)
                 val detectFunctions = database.transaction {
                     TaskDetectFunctions
-                        .select(TaskDetectFunctions.function)
+                        .select(TaskDetectFunctions.function, TaskDetectFunctions.id)
                         .where { TaskDetectFunctions.task.eq(taskEntity.dbTask.id) }
-                        .map { it[TaskDetectFunctions.function] }
+                        .associate { it[TaskDetectFunctions.function] to it[TaskDetectFunctions.id].value }
                 }
 
                 scanningFileId.set(fileId)
@@ -110,7 +110,7 @@ class ScanThread : KoinComponent {
                     ?.scanFile(
                         file = fileObject,
                         context = currentCoroutineContext(),
-                        detectFunctions = detectFunctions,
+                        detectFunctions = detectFunctions.map { it.key },
                         fastScan = fastScan
                     )
 
@@ -119,7 +119,7 @@ class ScanThread : KoinComponent {
                         scanRes.getDocumentFields().forEach { field ->
                             TaskFileScanResults.insert {
                                 it[file] = fileId
-                                it[detectFunction] = fileId
+                                it[detectFunction] = detectFunctions[field.key] ?: 0
                                 it[count] = field.value
                             }
                             taskEntity.addFoundAttribute(field.key)

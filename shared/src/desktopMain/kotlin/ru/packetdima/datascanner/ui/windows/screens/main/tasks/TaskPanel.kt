@@ -26,6 +26,7 @@ import org.koin.compose.koinInject
 import ru.packetdima.datascanner.db.models.TaskState
 import ru.packetdima.datascanner.scan.ScanService
 import ru.packetdima.datascanner.scan.TaskEntityViewModel
+import ru.packetdima.datascanner.ui.extensions.color
 
 @Composable
 fun TaskPanel(taskEntity: TaskEntityViewModel, currentTime: Instant) {
@@ -68,7 +69,7 @@ fun TaskPanel(taskEntity: TaskEntityViewModel, currentTime: Instant) {
             .height(55.dp)
             .clip(MaterialTheme.shapes.medium)
             .background(
-                taskColor(state).copy(alpha = 0.25f)
+                state.color().copy(alpha = 0.25f)
             ),
         contentAlignment = Alignment.CenterStart
     ) {
@@ -76,7 +77,7 @@ fun TaskPanel(taskEntity: TaskEntityViewModel, currentTime: Instant) {
             modifier = Modifier
                 .fillMaxHeight()
                 .fillMaxWidth(progress)
-                .background(taskColor(state))
+                .background(state.color())
         )
         Row(
             modifier = Modifier
@@ -143,12 +144,4 @@ fun TaskPanel(taskEntity: TaskEntityViewModel, currentTime: Instant) {
             }
         }
     }
-}
-
-@Composable
-fun taskColor(taskState: TaskState) = when (taskState) {
-    TaskState.LOADING, TaskState.PENDING, TaskState.SCANNING, TaskState.SEARCHING -> MaterialTheme.colorScheme.primary
-    TaskState.COMPLETED -> MaterialTheme.colorScheme.tertiary
-    TaskState.STOPPED -> MaterialTheme.colorScheme.secondary
-    TaskState.FAILED -> MaterialTheme.colorScheme.error
 }

@@ -369,7 +369,10 @@ fun ResultTable(taskFilesViewModel: TaskFilesViewModel, task: TaskEntityViewMode
                                 enabled = filesExists.contains(file.id)
                             )
                             Text(
-                                text = file.path.replace(task.path.value, "").substring(1),
+                                text = file.path
+                                    .replace(task.path.value, "")
+                                    .removePrefix("/")
+                                    .removePrefix("\\"),
                                 fontSize = MaterialTheme.typography.bodySmall.fontSize,
                                 lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
                                 letterSpacing = 0.1.sp,

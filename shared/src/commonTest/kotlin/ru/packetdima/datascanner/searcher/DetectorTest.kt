@@ -1,9 +1,17 @@
 package ru.packetdima.datascanner.searcher
 
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.runBlocking
 import info.downdetector.bigdatascanner.common.Cleaner
 import info.downdetector.bigdatascanner.common.DetectFunction
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import org.junit.Rule
+import org.koin.dsl.module
+import org.koin.test.KoinTestRule
+import ru.packetdima.datascanner.common.AppSettings
+import ru.packetdima.datascanner.common.ScanSettings
+import ru.packetdima.datascanner.common.UserSignatureSettings
+import ru.packetdima.datascanner.db.DatabaseSettings
+import ru.packetdima.datascanner.di.scanModule
 import ru.packetdima.datascanner.scan.common.Document
 import ru.packetdima.datascanner.scan.common.FileType
 import java.io.File
@@ -11,7 +19,34 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-class DetectorTest {
+internal class DetectorTest {
+    @get:Rule
+    val koinTestRule = KoinTestRule.create {
+        modules(
+            module {
+                single {
+                    DatabaseSettings(
+                        url = "jdbc:sqlite:test.db",
+                        driver = "org.sqlite.JDBC"
+                    )
+                }
+
+            },
+            module {
+                single { javaClass.getResource("common/UserSignatures.json")
+                    ?.let { it1 -> UserSignatureSettings.SettingsFile(it1.path) } }
+                single { UserSignatureSettings() }
+                single { javaClass.getResource("common/AppSettings.json")
+                    ?.let { it1 -> AppSettings.AppSettingsFile(it1.path) } }
+                single { AppSettings() }
+                single { javaClass.getResource("common/ScanSettings.json")
+                    ?.let { it1 -> ScanSettings.SettingsFile(it1.path) } }
+                single { ScanSettings() }
+            },
+            scanModule
+        )
+    }
+
     @Test
     fun scan() {
         val sampleText = """Sample text, 4279432112344321 199-510-399 13  
@@ -142,23 +177,19 @@ class DetectorTest {
         assertEquals(0, getCountOfAttribute(file, DetectFunction.INN))
     }
 
-    private fun getCountOfAttribute(filePath: String, field: DetectFunction): Int {
+    private fun getCountOfAttribute(filePath: String, detectFunction: DetectFunction): Int {
 
         val file = File(filePath)
 
         assertEquals(true, file.exists())
 
-        val document = runBlocking {
-            FileType.getFileType(file)?.scanFile(file, currentCoroutineContext(), DetectFunction.entries, false).let {
+        val coroutineContext = Dispatchers.Default
+
+        val document = runBlocking(coroutineContext) {
+            FileType.getFileType(file)?.scanFile(file, coroutineContext, listOf(detectFunction), false).let {
                 assertNotNull(it)
             }
         }
-        if (!document.getDocumentFields().containsKey(field)) {
-            println("attribute name " + field.writeName + " = NO SUCH ATTRIBUTE")
-            return 0
-        }
-        val findedCount = document.getDocumentFields().getValue(field)
-        println("attribute name = " + field.writeName + "; field count = " + findedCount)
-        return findedCount
+        return document.getDocumentFields().getOrDefault(detectFunction, 0)
     }
 }

@@ -54,6 +54,8 @@ fun MainWindow(
 
     val hideOnMinimize by remember { appSettings.hideOnMinimize }
 
+    val navController = rememberNavController()
+
     val appLocale by remember { appSettings.language }
     LaunchedEffect(appLocale) {
         Locale.setDefault(Locale.forLanguageTag(appLocale.locale))
@@ -62,12 +64,12 @@ fun MainWindow(
 
     LaunchedEffect(focusRemember) {
         if (focusRemember) {
+            navController.navigate(AppScreens.Main.name)
             delay(100)
             ScanPathHelper.resetFocus()
         }
     }
 
-    val navController = rememberNavController()
 
     //On windows not working window shapes with OPENGL
     val windowShapes = if (OS.currentOS() == OS.WINDOWS)

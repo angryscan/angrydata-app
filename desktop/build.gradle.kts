@@ -30,6 +30,8 @@ kotlin {
         val desktopTest by getting {
             dependencies {
                 implementation(compose.desktop.uiTestJUnit4)
+                implementation(libs.koin.core)
+                implementation(libs.koin.test.junit4)
             }
         }
         // Adds common test dependencies

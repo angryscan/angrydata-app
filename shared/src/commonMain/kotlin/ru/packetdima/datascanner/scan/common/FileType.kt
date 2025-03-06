@@ -46,7 +46,7 @@ import java.util.zip.ZipInputStream
 import kotlin.coroutines.CoroutineContext
 
 
-enum class FileType(val extensions: List<String>): KoinComponent {
+enum class FileType(val extensions: List<String>) : KoinComponent {
     XLSX(listOf("xlsx")) {
         override suspend fun scanFile(
             file: File,
@@ -62,9 +62,10 @@ enum class FileType(val extensions: List<String>): KoinComponent {
                     FileInputStream(file).use { inputStream ->
                         ReadableWorkbook(inputStream).use { workbook ->
                             workbook.sheets.use { sheets ->
-                                sheets.forEach { sheet ->
+                                sheets.forEach sheet@{ sheet ->
                                     sheet?.openStream().use { rowStream ->
                                         rowStream?.forEach rowStream@{ row ->
+                                            if(isSampleOverload(sample, fastScan) || !isActive) return@rowStream
                                             row?.forEach { cell ->
                                                 if (cell != null) {
                                                     str.append(cell.text).append("\n")
@@ -88,10 +89,11 @@ enum class FileType(val extensions: List<String>): KoinComponent {
                     }
                 }
             } catch (e: Exception) {
+                e.printStackTrace()
                 res.skip()
                 return res
             }
-            if (str.isNotEmpty() && !isSampleOverload(sample, fastScan)) {
+            if (str.isNotEmpty()) {
                 res + withContext(context) { scan(str.toString(), detectFunctions) }
             }
             return res
@@ -110,7 +112,7 @@ enum class FileType(val extensions: List<String>): KoinComponent {
             try {
                 withContext(Dispatchers.IO) {
                     FileInputStream(file).use { fileInputStream ->
-                        XWPFDocument(fileInputStream).use stream@{ document ->
+                        XWPFDocument(fileInputStream).use { document ->
                             document.bodyElements
                             for (elem in document.bodyElements) {
                                 when (elem) {
@@ -123,7 +125,7 @@ enum class FileType(val extensions: List<String>): KoinComponent {
                                         res + withContext(context) { scan(str.toString(), detectFunctions) }
                                         str.clear()
                                         sample++
-                                        if (isSampleOverload(sample, fastScan) || !isActive) return@stream
+                                        if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
                                     }
                                 }
                                 str.append("\n")
@@ -143,7 +145,7 @@ enum class FileType(val extensions: List<String>): KoinComponent {
                                             res + withContext(context) { scan(str.toString(), detectFunctions) }
                                             str.clear()
                                             sample++
-                                            if (isSampleOverload(sample, fastScan) || !isActive) return@forEach
+                                            if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
                                         }
                                     }
                                 }
@@ -349,13 +351,14 @@ enum class FileType(val extensions: List<String>): KoinComponent {
                                     res + withContext(context) { scan(str.toString(), detectFunctions) }
                                     str.clear()
                                     sample++
-                                    if (isSampleOverload(sample, fastScan) || !isActive) break
+                                    if (isSampleOverload(sample, fastScan) || !isActive)
+                                        return@withContext
                                 }
                             }
                         }
                     }
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 res.skip()
                 return res
             }
@@ -385,7 +388,7 @@ enum class FileType(val extensions: List<String>): KoinComponent {
                                     res + withContext(context) { scan(str.toString(), detectFunctions) }
                                     str.clear()
                                     sample++
-                                    if (isSampleOverload(sample, fastScan) || !isActive) return@forEach
+                                    if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
                                 }
                             }
                         }
@@ -402,7 +405,7 @@ enum class FileType(val extensions: List<String>): KoinComponent {
                                         res + withContext(context) { scan(str.toString(), detectFunctions) }
                                         str.clear()
                                         sample++
-                                        if (isSampleOverload(sample, fastScan) || !isActive) return@forEach
+                                        if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
                                     }
                                 }
                             }
@@ -435,6 +438,7 @@ enum class FileType(val extensions: List<String>): KoinComponent {
                     FileInputStream(file).use { fileInputStream ->
                         HSSFWorkbook(fileInputStream).use { workbook ->
                             val dataFormatter = DataFormatter()
+                            dataFormatter.isEmulateCSV = true
                             workbook.forEach workbook@{ sheet ->
                                 sheet?.forEach { row ->
                                     row?.forEach { cell ->
@@ -443,14 +447,14 @@ enum class FileType(val extensions: List<String>): KoinComponent {
                                                 CellType.NUMERIC -> str.append(dataFormatter.formatCellValue(cell))
                                                     .append("\n")
 
-                                                CellType.STRING -> str.append(cell.stringCellValue).append("\n")
+                                                CellType.STRING -> str.append(dataFormatter.formatCellValue(cell)).append("\n")
                                                 else -> {}
                                             }
                                             if (str.length >= scanSettings.sampleLength || !isActive) {
                                                 res + withContext(context) { scan(str.toString(), detectFunctions) }
                                                 str.clear()
                                                 sample++
-                                                if (isSampleOverload(sample, fastScan) || !isActive) return@workbook
+                                                if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
                                             }
                                         }
                                     }
@@ -488,7 +492,7 @@ enum class FileType(val extensions: List<String>): KoinComponent {
                                 res + withContext(context) { scan(str.toString(), detectFunctions) }
                                 str.clear()
                                 sample++
-                                if (isSampleOverload(sample, fastScan) || !isActive) return@forEach
+                                if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
                             }
                         }
                     }
@@ -884,7 +888,7 @@ enum class FileType(val extensions: List<String>): KoinComponent {
         }.toMap()
     }
 
-    companion object: KoinComponent {
+    companion object : KoinComponent {
         fun getFileType(file: File): FileType? {
             return entries.find { fileType -> fileType.extensions.contains(file.extension) }
         }
@@ -899,7 +903,7 @@ enum class FileType(val extensions: List<String>): KoinComponent {
         private fun isSampleOverload(sample: Int, fastScan: Boolean): Boolean {
             return (fastScan && sample >= scanSettings.sampleCount)
         }
-        
+
         val scanSettings: ScanSettings by inject()
     }
 }

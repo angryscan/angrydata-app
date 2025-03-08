@@ -1,8 +1,9 @@
 package ru.packetdima.datascanner.ui
 
-import androidx.compose.animation.*
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -19,8 +20,8 @@ import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.rememberWindowState
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -36,8 +37,8 @@ import ru.packetdima.datascanner.ui.windows.components.MainWindowTitleBar
 import ru.packetdima.datascanner.ui.windows.components.SideMenu
 import ru.packetdima.datascanner.ui.windows.screens.about.AboutScreen
 import ru.packetdima.datascanner.ui.windows.screens.main.MainScreen
-import ru.packetdima.datascanner.ui.windows.screens.scans.ScansScreen
 import ru.packetdima.datascanner.ui.windows.screens.scans.ScanResultScreen
+import ru.packetdima.datascanner.ui.windows.screens.scans.ScansScreen
 import ru.packetdima.datascanner.ui.windows.screens.settings.SettingsScreen
 import java.util.*
 
@@ -56,17 +57,20 @@ fun MainWindow(
 
     val navController = rememberNavController()
 
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentScreen = AppScreens.valueOf(
+        backStackEntry?.destination?.route?.substringBefore("/") ?: AppScreens.Main.name
+    )
+
     val appLocale by remember { appSettings.language }
     LaunchedEffect(appLocale) {
         Locale.setDefault(Locale.forLanguageTag(appLocale.locale))
-
     }
 
     LaunchedEffect(focusRemember) {
         if (focusRemember) {
-            navController.navigate(AppScreens.Main.name)
-            delay(100)
-            ScanPathHelper.resetFocus()
+            if (currentScreen != AppScreens.Main)
+                navController.navigate(AppScreens.Main.name)
         }
     }
 

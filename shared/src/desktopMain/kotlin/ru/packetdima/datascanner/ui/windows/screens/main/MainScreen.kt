@@ -40,9 +40,10 @@ fun MainScreen() {
 
     val scanSettings = koinInject<ScanSettings>()
 
-    val helperPath = ScanPathHelper.path.collectAsState()
+    val helperPath by ScanPathHelper.path.collectAsState()
+    val focusRequested by ScanPathHelper.focusRequested.collectAsState()
 
-    var path by remember { mutableStateOf(helperPath.value) }
+    var path by remember { mutableStateOf(helperPath) }
 
     var settingsExpanded by remember { mutableStateOf(false) }
 
@@ -76,8 +77,10 @@ fun MainScreen() {
     }
 
     LaunchedEffect(helperPath) {
-        if (helperPath.value.isNotEmpty()) {
-            path = helperPath.value
+        if (helperPath.isNotEmpty()) {
+            path = helperPath
+            if(focusRequested)
+                ScanPathHelper.resetFocus()
         }
     }
 

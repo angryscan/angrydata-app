@@ -74,15 +74,15 @@ compose.desktop {
             windows {
                 menuGroup = "start-menu-group"
                 installationPath = "Big Data Scanner"
-                upgradeUuid = "6e025a94-4f4b-4446-a750-8e5c65d8c523"
-                iconFile.set(project(":shared").file("src\\commonMain\\resources\\icons\\icon.ico"))
+                upgradeUuid = "baf17015-b8d3-4b88-9a59-0031a7b53b34"
+                iconFile.set(project(":shared").projectDir.resolve("src\\desktopMain\\composeResources\\files\\icon.ico"))
             }
             linux {
-                debMaintainer = "AAleksKravchenko@sber.ru"
+                debMaintainer = "soulofpain.k@gmail.com"
                 menuGroup = "Security"
                 appCategory = "Utility"
                 installationPath = "/opt"
-                iconFile.set(project(":shared").file("src\\commonMain\\resources\\icons\\linux.png"))
+                iconFile.set(project(":shared").projectDir.resolve("src\\desktopMain\\composeResources\\files\\icon.png"))
             }
         }
     }

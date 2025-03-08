@@ -46,7 +46,7 @@ fun ScanTaskCard(
 
     val foundAttributes by taskEntity.foundAttributes.collectAsState()
 
-    val progress = 100 * (scanned + skipped) / selectedFiles
+    val progress = if (selectedFiles > 0) 100 * (scanned + skipped) / selectedFiles else 0
 
     val folderSize = taskEntity.dbTask.size ?: ""
 
@@ -72,7 +72,7 @@ fun ScanTaskCard(
                 color = state.color(),
                 shape = MaterialTheme.shapes.medium
             )
-            .clickable (
+            .clickable(
                 onClick = onClick
             )
             .padding(14.dp),

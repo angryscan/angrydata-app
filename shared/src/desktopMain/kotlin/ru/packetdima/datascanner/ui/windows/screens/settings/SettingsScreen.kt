@@ -95,22 +95,26 @@ fun SettingsScreen() {
                     }
 
                 }
-                SettingsRow(title = stringResource(Res.string.SettingsScreen_ContextMenu)) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(text = stringResource(Res.string.SettingsScreen_ContextMenuExplorer))
 
-                        Switch(
-                            checked = contextMenuEnabled,
-                            onCheckedChange = {
-                                contextMenuEnabled = it
-                                ContextMenu.enabled = it
-                            }
-                        )
+                if(ContextMenu.supported()) {
+                    SettingsRow(title = stringResource(Res.string.SettingsScreen_ContextMenu)) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = stringResource(Res.string.SettingsScreen_ContextMenuExplorer))
+
+                            Switch(
+                                checked = contextMenuEnabled,
+                                onCheckedChange = {
+                                    contextMenuEnabled = it
+                                    ContextMenu.enabled = it
+                                }
+                            )
+                        }
                     }
                 }
+
                 SettingsRow(title = stringResource(Res.string.SettingsScreen_Language)) {
                     val rows =
                         AppSettings.LanguageType.entries.size / 3 + if (AppSettings.LanguageType.entries.size % 3 > 0) 1 else 0

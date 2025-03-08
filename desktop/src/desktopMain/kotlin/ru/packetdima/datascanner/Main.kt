@@ -15,11 +15,8 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.koin.core.context.startKoin
 import ru.packetdima.datascanner.common.AppFiles
-import ru.packetdima.datascanner.common.AppVersion
 import ru.packetdima.datascanner.common.OS
 import ru.packetdima.datascanner.di.databaseModule
 import ru.packetdima.datascanner.di.scanModule
@@ -31,9 +28,6 @@ import ru.packetdima.datascanner.ui.windows.ApplicationErrorWindow
 import java.awt.event.WindowEvent
 import java.io.File
 import java.net.BindException
-import java.sql.Connection
-import java.util.*
-import javax.swing.JOptionPane
 import javax.swing.UIManager
 import kotlin.system.exitProcess
 
@@ -68,23 +62,26 @@ suspend fun main(args: Array<String>) {
     val selectorManager = SelectorManager(Dispatchers.IO)
 
     try {
-        val serverSocket = aSocket(selectorManager).tcp().bind("127.0.0.1", port)
-        logger.info { "Server started at port $port" }
-        CoroutineScope(Dispatchers.IO).launch {
-            while (true) {
-                try {
-                    val socket = serverSocket.accept()
-                    logger.debug { "Client connected" }
-                    val input = socket.openReadChannel()
-                    val path = input.readUTF8Line()
-                    socket.close()
-                    if (path != null && File(path).exists()) {
-                        ScanPathHelper.setPath(path)
-                        logger.debug { "Path received: $path" }
-                        ScanPathHelper.requestFocus()
+        if(args.isEmpty() ||
+            arrayOf("-c", "-console", "-h", "-help").all { !args.contains(it) }) {
+            val serverSocket = aSocket(selectorManager).tcp().bind("127.0.0.1", port)
+            logger.info { "Server started at port $port" }
+            CoroutineScope(Dispatchers.IO).launch {
+                while (true) {
+                    try {
+                        val socket = serverSocket.accept()
+                        logger.debug { "Client connected" }
+                        val input = socket.openReadChannel()
+                        val path = input.readUTF8Line()
+                        socket.close()
+                        if (path != null && File(path).exists()) {
+                            ScanPathHelper.setPath(path)
+                            logger.debug { "Path received: $path" }
+                            ScanPathHelper.requestFocus()
+                        }
+                    } catch (e: Exception) {
+                        logger.error { "Error when receiving data from client: ${e.message}" }
                     }
-                } catch (e: Exception) {
-                    logger.error { "Error when receiving data from client: ${e.message}" }
                 }
             }
         }
@@ -113,31 +110,6 @@ suspend fun main(args: Array<String>) {
 
     var lastError: Throwable? by mutableStateOf(null)
 
-    val password =
-        if (AppVersion == "Debug")
-            ""
-        else
-            UUID.randomUUID().toString()
-
-    if (AppFiles.ResultDBFile.exists()) {
-        if (!AppFiles.ResultDBFile.delete()) {
-            JOptionPane.showMessageDialog(
-                null,
-                "Cannot access to database. Check it is in use by another process!",
-                "Error!",
-                JOptionPane.ERROR_MESSAGE
-            )
-            logger.error { "Cannot access to database. Check it is in use by another process!" }
-            return
-        }
-    }
-
-    try {
-        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
-    } catch (_: Exception) {
-        logger.warn { "Cannot load system look and feel" }
-    }
-
     startKoin {
         modules(
             settingsModule,
@@ -146,20 +118,18 @@ suspend fun main(args: Array<String>) {
         )
     }
 
-    Database.connect(
-        "jdbc:sqlite:${AppFiles.ResultDBFile.absolutePath}",
-        driver = "org.sqlite.JDBC",
-        password = password
-    )
-    TransactionManager.manager.defaultIsolationLevel =
-        Connection.TRANSACTION_SERIALIZABLE
-
-
     if (args.isNotEmpty() &&
         arrayOf("-c", "-console", "-h", "-help").any { args.contains(it) }
     ) {
-        if (arrayOf("-c", "-console").any { args.contains(it) })
+        if (arrayOf("-c", "-console").any { args.contains(it) }){
+            if (AppFiles.ResultDBFile.exists()) {
+                if (!AppFiles.ResultDBFile.delete()) {
+                    logger.error { "Cannot access to database. Check it is in use by another process!" }
+                    return
+                }
+            }
             Console.consoleRun(args)
+        }
         else if (arrayOf("-h", "-help").any { args.contains(it) }) {
             Console.help()
         }
@@ -171,6 +141,13 @@ suspend fun main(args: Array<String>) {
             }
             ScanPathHelper.setPath(args.first())
         }
+
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
+        } catch (_: Exception) {
+            logger.warn { "Cannot load system look and feel" }
+        }
+
         application(exitProcessOnExit = false) {
             CompositionLocalProvider(
                 LocalWindowExceptionHandlerFactory provides WindowExceptionHandlerFactory { window ->

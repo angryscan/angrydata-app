@@ -383,7 +383,14 @@ fun ResultTable(taskFilesViewModel: TaskFilesViewModel, task: TaskEntityViewMode
                                 text = file.path
                                     .replace(task.path.value, "")
                                     .removePrefix("/")
-                                    .removePrefix("\\"),
+                                    .removePrefix("\\")
+                                    .let {
+                                        if(it.isNotEmpty())
+                                            it
+                                        else file.path
+                                            .substringAfterLast("/")
+                                            .substringAfterLast("\\")
+                                    },
                                 fontSize = MaterialTheme.typography.bodySmall.fontSize,
                                 lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
                                 letterSpacing = 0.1.sp,

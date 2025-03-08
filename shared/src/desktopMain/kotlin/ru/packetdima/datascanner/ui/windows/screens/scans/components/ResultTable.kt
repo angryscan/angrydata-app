@@ -57,7 +57,7 @@ fun ResultTable(taskFilesViewModel: TaskFilesViewModel, task: TaskEntityViewMode
 
     val state by task.state.collectAsState()
 
-    val progress = (scanned + skipped).toFloat() / selected
+    val progress = if (selected > 0) (scanned + skipped).toFloat() / selected else 0f
 
     var prevProgress by remember { mutableStateOf(progress) }
 
@@ -106,16 +106,26 @@ fun ResultTable(taskFilesViewModel: TaskFilesViewModel, task: TaskEntityViewMode
                             }.count { it }
 
                             taskFiles.filter { it.id in selectedFiles }.forEach {
-                                if(!File(it.path).exists()) {
+                                if (!File(it.path).exists()) {
                                     filesExists.remove(it.id)
                                 }
                             }
 
                             coroutineScope.launch {
-                                if(filesDeleted == filesToDelete)
-                                    snackbarHostState.showSnackbar(getString(Res.string.Result_DeletedFiles, filesDeleted))
+                                if (filesDeleted == filesToDelete)
+                                    snackbarHostState.showSnackbar(
+                                        getString(
+                                            Res.string.Result_DeletedFiles,
+                                            filesDeleted
+                                        )
+                                    )
                                 else
-                                    snackbarHostState.showSnackbar(getString(Res.string.Result_NotDeletedFiles, filesToDelete - filesDeleted))
+                                    snackbarHostState.showSnackbar(
+                                        getString(
+                                            Res.string.Result_NotDeletedFiles,
+                                            filesToDelete - filesDeleted
+                                        )
+                                    )
                             }
 
                             selectedFiles.clear()
@@ -160,7 +170,8 @@ fun ResultTable(taskFilesViewModel: TaskFilesViewModel, task: TaskEntityViewMode
                         onCheckedChange = { checkState ->
                             if (checkState) {
                                 selectedFiles.addAll(
-                                    sortedFiles.map { it.id }.filter { id -> !selectedFiles.contains(id) && id in filesExists }
+                                    sortedFiles.map { it.id }
+                                        .filter { id -> !selectedFiles.contains(id) && id in filesExists }
                                 )
                             } else {
                                 selectedFiles.clear()

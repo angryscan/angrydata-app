@@ -70,11 +70,11 @@ fun ScanResultScreen(
 
     val foundAttributes by task.foundAttributes.collectAsState()
 
-    val progress = 100 * (scanned + skipped) / selectedFiles
+    val progress = if(selectedFiles > 0) 100 * (scanned + skipped) / selectedFiles else 0
 
     val animatedProgress by
     animateFloatAsState(
-        targetValue = (scanned + skipped).toFloat() / selectedFiles,
+        targetValue = if (selectedFiles > 0) (scanned + skipped).toFloat() / selectedFiles else 0f,
         animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec
     )
 

@@ -177,6 +177,13 @@ internal class DetectorTest {
         assertEquals(0, getCountOfAttribute(file, DetectFunction.INN))
     }
 
+    @Test
+    fun testPassports() {
+        val file = javaClass.getResource("/files/passport/passport.txt")?.file
+        assertNotNull(file)
+        assertEquals(1, getCountOfAttribute(file, DetectFunction.Passport))
+    }
+
     private fun getCountOfAttribute(filePath: String, detectFunction: DetectFunction): Int {
 
         val file = File(filePath)

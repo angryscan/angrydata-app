@@ -62,6 +62,8 @@
     <string name="add">Добавить</string>
     <string name="name">Наименование</string>
 
+    <string name="SelectAll">Выбрать все (%1$d)</string>
+
     <string name="SideMenu-MainPage">Главная</string>
     <string name="SideMenu-ScanListPage">Список сканирований</string>
     <string name="SideMenu-SettingsPage">Параметры</string>

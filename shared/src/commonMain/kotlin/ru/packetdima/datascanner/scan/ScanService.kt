@@ -1,6 +1,7 @@
 package ru.packetdima.datascanner.scan
 
 import info.downdetector.bigdatascanner.common.IDetectFunction
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,6 +19,7 @@ import ru.packetdima.datascanner.db.models.*
 import ru.packetdima.datascanner.scan.common.FileType
 
 class ScanService : KoinComponent {
+    private val logging = KotlinLogging.logger {}
     private val database: DatabaseConnector by inject()
 
     private val appSettings: AppSettings by inject()
@@ -58,8 +60,10 @@ class ScanService : KoinComponent {
                             .withDistinct()
                             .count()
                     )
-                    if (task.taskState == TaskState.SCANNING)
+                    if (task.taskState == TaskState.SCANNING) {
                         taskEntity.setState(TaskState.STOPPED)
+                        //logging.info()
+                    }
 
                     tasks.add(taskEntity)
                 }

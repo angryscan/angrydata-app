@@ -49,7 +49,9 @@ compose.desktop {
         mainClass = "ru.packetdima.datascanner.MainKt"
 
         jvmArgs += listOf(
-            "-Xmx6g"
+            "-Xmx6g",
+            "-console",
+            "-help"
         )
 
         buildTypes.release.proguard {

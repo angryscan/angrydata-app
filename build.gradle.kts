@@ -46,10 +46,8 @@ fun String.runCommand(currentWorkingDir: File = file("./")): String {
 
 val gitBranch = System.getProperty("GIT_BRANCH") ?: "git rev-parse --abbrev-ref HEAD".runCommand()
 
-koverReport{
+kover.reports {
     filters {
-        includes {
-            classes("*")
-        }
+        includes.classes("*")
     }
 }

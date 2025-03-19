@@ -254,7 +254,7 @@ fun ScanResultScreen(
                                     TaskState.SEARCHING, TaskState.SCANNING, TaskState.LOADING, TaskState.PENDING ->
                                         scanService.stopTask(task)
 
-                                    TaskState.STOPPED -> scanService.startTask(task)
+                                    TaskState.STOPPED -> scanService.resumeTask(task)
                                     else -> scanService.rescanTask(task)
                                 }
                             },

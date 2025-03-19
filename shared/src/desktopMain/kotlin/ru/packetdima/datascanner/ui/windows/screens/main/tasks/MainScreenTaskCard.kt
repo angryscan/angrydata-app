@@ -106,7 +106,7 @@ fun MainScreenTaskCard(taskEntity: TaskEntityViewModel, currentTime: Instant) {
                                 when (state) {
                                     TaskState.SEARCHING, TaskState.SCANNING, TaskState.LOADING, TaskState.PENDING ->
                                         scanService.stopTask(taskEntity)
-                                    TaskState.STOPPED -> scanService.startTask(taskEntity)
+                                    TaskState.STOPPED -> scanService.resumeTask(taskEntity)
                                     else -> scanService.rescanTask(taskEntity)
                                 }
                             },

@@ -6,10 +6,10 @@ import kotlinx.coroutines.sync.withPermit
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import ru.packetdima.datascanner.common.ScanSettings
+import ru.packetdima.datascanner.db.DatabaseConnector
 import ru.packetdima.datascanner.scan.common.Document
 import ru.packetdima.datascanner.searcher.model.*
 import ru.packetdima.datascanner.ui.strings.readableName
@@ -18,12 +18,13 @@ import java.io.FileOutputStream
 import java.nio.charset.Charset
 
 object Writer: KoinComponent {
+    private val database by inject<DatabaseConnector>()
     suspend fun write(report: List<Document>) {
         if (report.isEmpty())
             return
 
         writeSemaphore.withPermit {
-            transaction {
+            database.transaction {
 
                 for (document in report) {
 
@@ -50,7 +51,7 @@ object Writer: KoinComponent {
     suspend fun initDB() {
         val scanSettings: ScanSettings by inject()
         writeSemaphore.withPermit {
-            transaction {
+            database.transaction {
                 SchemaUtils.drop(
                     Attributes,
                     ScannedFiles,
@@ -85,31 +86,31 @@ object Writer: KoinComponent {
         }
     }
 
-    fun writeReport(reportFile: String, reportEncoding: String = "UTF-8") =
-        writeReport(File(reportFile), reportEncoding)
-
     fun writeReport(reportFile: File, reportEncoding: String = "UTF-8") {
-        FileOutputStream(reportFile, true).bufferedWriter(charset = Charset.forName(reportEncoding)).use { writer ->
-            transaction {
-                writer.append(
-                    runBlocking {
-                        ResultRows.columns.filter { it.name != "id" }.map { it.readableName() }
-                    }.joinToString(";") + "\r\n"
-                )
-
-                val query = ResultRows
-                    .selectAll()
-                    .orderBy(ResultRows.score, SortOrder.DESC)
-                query.forEach { row ->
+            FileOutputStream(reportFile, true).bufferedWriter(charset = Charset.forName(reportEncoding))
+        .use { writer ->
+            runBlocking {
+                database.transaction {
                     writer.append(
-                        listOf(
-                            row[ResultRows.path].toString(),
-                            row[ResultRows.score].toString(),
-                            row[ResultRows.attrCount].toString(),
-                            row[ResultRows.attrNames].toString(),
-                            (row[ResultRows.fileSize].toLong() / 1024).toString() + "KB"
-                        ).joinToString(";") + "\r\n"
+                        runBlocking {
+                            ResultRows.columns.filter { it.name != "id" }.map { it.readableName() }
+                        }.joinToString(";") + "\r\n"
                     )
+
+                    val query = ResultRows
+                        .selectAll()
+                        .orderBy(ResultRows.score, SortOrder.DESC)
+                    query.forEach { row ->
+                        writer.append(
+                            listOf(
+                                row[ResultRows.path].toString(),
+                                row[ResultRows.score].toString(),
+                                row[ResultRows.attrCount].toString(),
+                                row[ResultRows.attrNames].toString(),
+                                (row[ResultRows.fileSize].toLong() / 1024).toString() + "KB"
+                            ).joinToString(";") + "\r\n"
+                        )
+                    }
                 }
             }
         }

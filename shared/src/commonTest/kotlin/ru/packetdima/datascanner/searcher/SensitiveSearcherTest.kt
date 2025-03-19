@@ -1,18 +1,18 @@
 package ru.packetdima.datascanner.searcher
 
+import info.downdetector.bigdatascanner.common.IDetectFunction
 import kotlinx.coroutines.runBlocking
-import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.JoinType
 import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.transactions.transaction
-import ru.packetdima.datascanner.common.AppFiles
-import info.downdetector.bigdatascanner.common.IDetectFunction
 import org.junit.Rule
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import org.koin.dsl.module
 import org.koin.test.KoinTestRule
 import ru.packetdima.datascanner.common.AppSettings
 import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.common.UserSignatureSettings
+import ru.packetdima.datascanner.db.DatabaseConnector
 import ru.packetdima.datascanner.db.DatabaseSettings
 import ru.packetdima.datascanner.di.scanModule
 import ru.packetdima.datascanner.scan.common.FileSize
@@ -25,7 +25,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-internal class SensitiveSearcherTest {
+internal class SensitiveSearcherTest: KoinComponent {
     @get:Rule
     val koinTestRule = KoinTestRule.create {
         modules(
@@ -53,6 +53,8 @@ internal class SensitiveSearcherTest {
         )
     }
 
+    val database by inject<DatabaseConnector>()
+
 
     @Test
     fun `Check whole dir scan`() {
@@ -62,17 +64,19 @@ internal class SensitiveSearcherTest {
         inspectDirectory(path)
 
         val results = mutableMapOf<String, MutableMap<IDetectFunction, Int>>()
-        transaction {
-            Reports.join(Attributes, JoinType.INNER, Reports.attribute, Attributes.id)
-                .join(ScannedFiles, JoinType.INNER, Reports.file, ScannedFiles.id)
-                .selectAll()
-                .forEach {
-                    val filename = it[ScannedFiles.path].replace("\\", "/").substringAfterLast("/files/")
-                    val count = it[Reports.count]
-                    Matrix.getFnByName(it[Attributes.name]) ?. let { funname ->
-                        results[filename]?.set(funname, count)
+        runBlocking {
+            database.transaction {
+                Reports.join(Attributes, JoinType.INNER, Reports.attribute, Attributes.id)
+                    .join(ScannedFiles, JoinType.INNER, Reports.file, ScannedFiles.id)
+                    .selectAll()
+                    .forEach {
+                        val filename = it[ScannedFiles.path].replace("\\", "/").substringAfterLast("/files/")
+                        val count = it[Reports.count]
+                        Matrix.getFnByName(it[Attributes.name])?.let { funname ->
+                            results[filename]?.set(funname, count)
+                        }
                     }
-                }
+            }
         }
         results.forEach { (filename, arr) ->
             if (Matrix.contains(filename))
@@ -94,12 +98,14 @@ internal class SensitiveSearcherTest {
 
         inspectDirectory(folder.absolutePath)
 
-        transaction {
-            Reports.selectAll()
-                .forEach {
-                    assertEquals(1, it[Reports.count])
-                    assertEquals(2, it[Reports.attribute].value) // "phones"
-                }
+        runBlocking {
+            database.transaction {
+                Reports.selectAll()
+                    .forEach {
+                        assertEquals(1, it[Reports.count])
+                        assertEquals(2, it[Reports.attribute].value) // "phones"
+                    }
+            }
         }
     }
     fun inspectDirectory(path : String) = runBlocking {
@@ -109,11 +115,6 @@ internal class SensitiveSearcherTest {
         val onSkipScanFile: (Long) -> Unit = {}
         val onReportCreated: (filesCount: Pair<Long, FileSize>) -> Unit = {}
         val searcher = SensitiveSearcher()
-
-        Database.connect(
-            "jdbc:sqlite:${AppFiles.ResultDBFile.absolutePath}",
-            driver = "org.sqlite.JDBC"
-        )
 
         Writer.initDB()
 

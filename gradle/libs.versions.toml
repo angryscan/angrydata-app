@@ -1,9 +1,9 @@
 [versions]
 kotlin = "2.1.10"
-exposed = "0.59.0"
-poi = "5.2.5"
+exposed = "0.60.0"
+poi = "5.4.0"
 compose = "1.7.3"
-ktor = "2.3.10"
+ktor = "3.1.1"
 datascanner = "1.0.6"
 progressbar = "0.10.1"
 log4j = "2.24.3"
@@ -17,15 +17,15 @@ exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "e
 exposed-json = { module = "org.jetbrains.exposed:exposed-json", version.ref = "exposed" }
 exposed-datetime = { module = "org.jetbrains.exposed:exposed-kotlin-datetime", version.ref = "exposed" }
 
-logging-oshai = { module = "io.github.oshai:kotlin-logging-jvm", version = "6.0.3" }
-logging-logback = { module = "ch.qos.logback:logback-classic", version = "1.5.3" }
+logging-oshai = { module = "io.github.oshai:kotlin-logging-jvm", version = "7.0.5" }
+logging-logback = { module = "ch.qos.logback:logback-classic", version = "1.5.17" }
 logging-log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }
 
 dorkbox = { module = "com.dorkbox:SystemTray", version = "4.4" }
 
 files-junrar = { module = "com.github.junrar:junrar", version = "7.5.5" }
-files-fastexcel = { module = "org.dhatim:fastexcel-reader", version = "0.17.0" }
-files-pdfbox = { module = "org.apache.pdfbox:pdfbox", version = "2.0.31" } # Update to 3.x version?
+files-fastexcel = { module = "org.dhatim:fastexcel-reader", version = "0.18.4" }
+files-pdfbox = { module = "org.apache.pdfbox:pdfbox", version = "2.0.33" } # Update to 3.x version?
 files-poi-core = { module = "org.apache.poi:poi", version.ref = "poi" }
 files-poi-scratchpad = { module = "org.apache.poi:poi-scratchpad", version.ref = "poi" }
 files-poi-ooxml = { module = "org.apache.poi:poi-ooxml", version.ref = "poi" }
@@ -34,10 +34,10 @@ files-odftoolkit-simple = {module = "org.odftoolkit:simple-odf", version = "0.9.
 
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.8.0" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version = "0.6.2" }
-kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.8.0" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "1.10.1" }
 
-sql-sqlite = { module = "io.github.willena:sqlite-jdbc", version = "3.45.1.0" }
-sql-postgresql = { module = "org.postgresql:postgresql", version = "42.7.3" }
+sql-sqlite = { module = "io.github.willena:sqlite-jdbc", version = "3.49.1.0" }
+sql-postgresql = { module = "org.postgresql:postgresql", version = "42.7.5" }
 
 ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor"}
 ktor-network = { module = "io.ktor:ktor-network", version.ref = "ktor"}
@@ -53,7 +53,6 @@ koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", ver
 koin-compose-viewmodel-navigation = { module = "io.insert-koin:koin-compose-viewmodel-navigation", version.ref = "koin" }
 koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin" }
 koin-test-junit4 = { module = "io.insert-koin:koin-test-junit4", version.ref = "koin" }
-koin-test-junit5 = { module = "io.insert-koin:koin-test-junit5", version.ref = "koin" }
 
 lifecycle-viewmodel = { module ="org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "viewmodel" }
 
@@ -63,4 +62,4 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 kotlin-jpa = { id = "org.jetbrains.kotlin.plugin.jpa", version.ref = "kotlin" }
 compose = { id = "org.jetbrains.compose", version.ref = "compose" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin"}
-kover = { id = "org.jetbrains.kotlinx.kover", version = "0.7.6" }
+kover = { id = "org.jetbrains.kotlinx.kover", version = "0.9.1" }

@@ -1,6 +1,7 @@
 package ru.packetdima.datascanner.scan
 
 import info.downdetector.bigdatascanner.common.IDetectFunction
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -12,10 +13,13 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import ru.packetdima.datascanner.common.AppSettings
+import ru.packetdima.datascanner.common.LogMarkers
 import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.db.DatabaseConnector
 import ru.packetdima.datascanner.db.models.*
 import ru.packetdima.datascanner.scan.common.FileType
+
+private val logging = KotlinLogging.logger {}
 
 class ScanService : KoinComponent {
     private val database: DatabaseConnector by inject()
@@ -58,8 +62,12 @@ class ScanService : KoinComponent {
                             .withDistinct()
                             .count()
                     )
-                    if (task.taskState == TaskState.SCANNING)
+                    if (task.taskState == TaskState.SCANNING) {
                         taskEntity.setState(TaskState.STOPPED)
+                        logging.info(throwable = null, LogMarkers.UserAction) {
+                            "Stopped task after restart (${taskEntity.id.value}) ${taskEntity.path.value}"
+                        }
+                    }
 
                     tasks.add(taskEntity)
                 }
@@ -67,18 +75,32 @@ class ScanService : KoinComponent {
         }
     }
 
-    fun start() = scanThreads.forEach {
-        if (!it.started)
-            it.start()
+    fun start() {
+        logging.info(throwable = null, LogMarkers.UserAction) {
+            "Starting scan threads"
+        }
+        scanThreads.forEach {
+
+            if (!it.started)
+                it.start()
+        }
     }
 
-    suspend fun stop() = scanThreads.map {
-        if (it.started)
-            it.stop()
+    suspend fun stop() {
+        logging.info(throwable = null, LogMarkers.UserAction) {
+            "Stopping scan threads"
+        }
+        scanThreads.map {
+            if (it.started)
+                it.stop()
+        }
     }
 
     fun setThreadsCount() {
         val scanStarted = scanThreads.any { it.started }
+        logging.info(throwable = null, LogMarkers.UserAction) {
+            "Setting scan threads to ${appSettings.threadCount.value}"
+        }
         if (scanStarted)
             runBlocking { stop() }
 
@@ -94,11 +116,29 @@ class ScanService : KoinComponent {
         detectFunctions: List<IDetectFunction>? = null,
         fastScan: Boolean? = null
     ): TaskEntityViewModel {
+
         return database.transaction {
             val task = Task.new {
                 this.path = path
                 this.taskState = TaskState.PENDING
                 this.fastScan = fastScan ?: scanSettings.fastScan.value
+            }
+            logging.info(throwable = null, LogMarkers.UserAction) {
+                "Creating task. " +
+                        "ID: ${task.id.value} " +
+                        "Path: \"$path\". " +
+                        "Extensions: ${
+                            (if (extensions != null)
+                                extensions else
+                                scanSettings.extensions).joinToString { it.name }
+                        } " +
+                        "Detect functions: ${
+                            (if (detectFunctions != null)
+                                detectFunctions
+                            else (scanSettings.detectFunctions + scanSettings.userSignatures)
+                                    ).joinToString { it.name }
+                        } " +
+                        "Fast scan: ${fastScan ?: scanSettings.fastScan.value}"
             }
             if (extensions != null) {
                 extensions.forEach { ext ->
@@ -130,6 +170,13 @@ class ScanService : KoinComponent {
                         this.function = df
                     }
                 }
+                scanSettings.userSignatures.forEach { df ->
+                    TaskDetectFunction.new {
+                        this.task = task
+                        this.function = df
+                    }
+
+                }
             }
 
             val taskEntity = TaskEntityViewModel(task)
@@ -139,6 +186,9 @@ class ScanService : KoinComponent {
     }
 
     suspend fun deleteTask(task: TaskEntityViewModel) {
+        logging.info(throwable = null, LogMarkers.UserAction) {
+            "Delete task. ID: ${task.id.value}. Path: \"${task.path.value}\""
+        }
         database.transaction {
             TaskFileExtensions.deleteWhere {
                 TaskFileExtensions.task.eq(task.dbTask.id)
@@ -155,14 +205,34 @@ class ScanService : KoinComponent {
     }
 
     fun startTask(task: TaskEntityViewModel) {
+        logging.info(throwable = null, LogMarkers.UserAction) {
+            "Starting task. ID: ${task.id.value}. Path: \"${task.path.value}\""
+        }
         task.start()
         this.start()
     }
 
-    fun stopTask(task: TaskEntityViewModel) = task.stop()
+    fun stopTask(task: TaskEntityViewModel) {
+        logging.info(throwable = null, LogMarkers.UserAction) {
+            "Stopping task. ID: ${task.id.value}. Path: \"${task.path.value}\""
+        }
+        task.stop()
+    }
 
-    fun resumeTask(task: TaskEntityViewModel) = task.resume(false)
+    fun resumeTask(task: TaskEntityViewModel) {
+        logging.info(throwable = null, LogMarkers.UserAction) {
+            "Resume task. ID: ${task.id.value}. Path: \"${task.path.value}\""
+        }
+        task.resume(false)
+        this.start()
+    }
 
     @Suppress("Unused")
-    fun rescanTask(task: TaskEntityViewModel) = task.resume(true)
+    fun rescanTask(task: TaskEntityViewModel) {
+        logging.info(throwable = null, LogMarkers.UserAction) {
+            "Restart task. ID: ${task.id.value}. Path: \"${task.path.value}\""
+        }
+        task.resume(true)
+        this.start()
+    }
 }

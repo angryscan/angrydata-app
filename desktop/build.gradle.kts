@@ -48,6 +48,7 @@ compose.desktop {
     application {
         mainClass = "ru.packetdima.datascanner.MainKt"
 
+
         jvmArgs += listOf(
             "-Xmx6g"
         )

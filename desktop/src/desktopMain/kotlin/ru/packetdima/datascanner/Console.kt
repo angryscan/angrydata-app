@@ -1,14 +1,15 @@
 package ru.packetdima.datascanner
 
 import info.downdetector.bigdatascanner.common.DetectFunction
-import kotlinx.coroutines.*
+import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import me.tongfei.progressbar.ProgressBar
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import ru.packetdima.datascanner.common.AppFiles
-import ru.packetdima.datascanner.common.AppSettings
-import ru.packetdima.datascanner.common.ScanSettings
-import ru.packetdima.datascanner.common.UserSignatureSettings
+import ru.packetdima.datascanner.common.*
 import ru.packetdima.datascanner.scan.common.FileType
 import ru.packetdima.datascanner.searcher.ConsoleFilesCounter
 import ru.packetdima.datascanner.searcher.SensitiveSearcher
@@ -18,11 +19,13 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.system.exitProcess
 
+private val logger = KotlinLogging.logger {}
+
 object Console: KoinComponent {
     lateinit var progressBar: ProgressBar
 
     private var path: String? = null
-    private var reportDir: File = AppFiles.WorkDir
+    private var reportDir: File = AppFiles.UserDirPath
     private var reportEncoding = "UTF-8"
 
     suspend fun consoleRun(args: Array<String>) {
@@ -34,7 +37,16 @@ object Console: KoinComponent {
 
         parseArgs(args)
 
+        val scanSettings by inject<ScanSettings>()
+
         if (path != null) {
+            logger.info(throwable = null, LogMarkers.UserAction) {
+                "Starting scanning with path: $path " +
+                        "extensions: ${scanSettings.extensions.joinToString(", ")} " +
+                        "detect functions: ${scanSettings.detectFunctions.joinToString(", ")} " +
+                        "user signatures: ${scanSettings.userSignatures.joinToString(", ")} " +
+                        "fast scan: ${scanSettings.fastScan} "
+            }
             println("Selecting files...")
             Writer.initDB()
             val job = CoroutineScope(Dispatchers.Default).launch {
@@ -97,7 +109,7 @@ object Console: KoinComponent {
         val reportFile = reportDir.resolve("ADS_$currentTime.csv")
         Writer.writeReport(reportFile, reportEncoding)
 
-        println("Report saved to $reportFile")
+        logger.info(throwable = null, LogMarkers.UserAction) { "Scanning completed. Report saved to $reportDir" }
     }
 
     private fun parseArgs(args: Array<String>) {
@@ -200,24 +212,28 @@ object Console: KoinComponent {
 
         if (detectFunctions != null) {
             scanSettings.detectFunctions.clear()
-            detectFunctions.split(",").forEach { df ->
-                val dfo = DetectFunction.entries.find { it.name == df }
-                if (dfo != null)
-                    scanSettings.detectFunctions.add(dfo)
-                else
-                    println("Unknown detect function: $df, skipping...")
+            if(detectFunctions.isNotEmpty()) {
+                detectFunctions.split(",").forEach { df ->
+                    val dfo = DetectFunction.entries.find { it.name == df }
+                    if (dfo != null)
+                        scanSettings.detectFunctions.add(dfo)
+                    else
+                        println("Unknown detect function: $df, skipping...")
+                }
             }
         }
         println("Detect functions: ${scanSettings.detectFunctions.joinToString(", ")}")
 
         if(userSignatures != null) {
             scanSettings.userSignatures.clear()
-            userSignatures.split(",").forEach { sig ->
-                val sigo = userSignaturesSettings.userSignatures.find { it.name == sig }
-                if (sigo != null)
-                    scanSettings.userSignatures.add(sigo)
-                else
-                    println("Unknown user detect signature: $sig, skipping...")
+            if(userSignatures.isNotEmpty()) {
+                userSignatures.split(",").forEach { sig ->
+                    val sigo = userSignaturesSettings.userSignatures.find { it.name == sig }
+                    if (sigo != null)
+                        scanSettings.userSignatures.add(sigo)
+                    else
+                        println("Unknown user detect signature: $sig, skipping...")
+                }
             }
         }
         println("User signature functions: ${scanSettings.userSignatures.joinToString(", ")}")

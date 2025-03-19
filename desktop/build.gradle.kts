@@ -53,12 +53,6 @@ compose.desktop {
             "-Xmx6g"
         )
 
-        args += listOf(
-            "-console",
-            "-path",
-            "C:\\Users\\soulo\\OneDrive\\Документы\\Разное"
-        )
-
         buildTypes.release.proguard {
             version.set("7.4.1")
             isEnabled.set(false)

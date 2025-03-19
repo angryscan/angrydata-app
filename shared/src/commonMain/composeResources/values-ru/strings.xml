@@ -76,6 +76,8 @@
     <string name="ScanSettings-DetectFunctions">Функции детектирования</string>
     <string name="ScanSettings-UserSignatures">Пользовательские сигнатуры</string>
     <string name="ScanSettings-SelectAll">Выбрать все</string>
+    <string name="SettingsScreen-Logging">Журналирование</string>
+    <string name="SettingsScreen-OpenFolder">Открыть папку</string>
 
     <string name="DetectFunction-Emails">Эл. адрес</string>
     <string name="DetectFunction-Phones">Телефон</string>

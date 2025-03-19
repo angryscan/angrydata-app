@@ -48,10 +48,15 @@ compose.desktop {
     application {
         mainClass = "ru.packetdima.datascanner.MainKt"
 
+
         jvmArgs += listOf(
-            "-Xmx6g",
+            "-Xmx6g"
+        )
+
+        args += listOf(
             "-console",
-            "-help"
+            "-path",
+            "C:\\Users\\soulo\\OneDrive\\Документы\\Разное"
         )
 
         buildTypes.release.proguard {

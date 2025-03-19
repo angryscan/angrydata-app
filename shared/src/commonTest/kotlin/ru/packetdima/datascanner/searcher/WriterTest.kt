@@ -2,11 +2,9 @@ package ru.packetdima.datascanner.searcher
 
 import info.downdetector.bigdatascanner.common.DetectFunction
 import kotlinx.coroutines.runBlocking
-import org.jetbrains.exposed.sql.Database
 import org.junit.Rule
 import org.koin.dsl.module
 import org.koin.test.KoinTestRule
-import ru.packetdima.datascanner.common.AppFiles
 import ru.packetdima.datascanner.common.AppSettings
 import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.common.UserSignatureSettings
@@ -46,14 +44,6 @@ internal class WriterTest {
 
     @Test
     fun initTest() {
-        if (AppFiles.ResultDBFile.exists())
-            if (!AppFiles.ResultDBFile.delete())
-                throw Exception("Cannot delete db file")
-        Database.connect(
-            "jdbc:sqlite:${AppFiles.ResultDBFile.absolutePath}",
-            driver = "org.sqlite.JDBC"
-        )
-
         runBlocking {
             Writer.initDB()
         }
@@ -75,14 +65,6 @@ internal class WriterTest {
 
     @Test
     fun write() {
-        if (AppFiles.ResultDBFile.exists())
-            if (!AppFiles.ResultDBFile.delete())
-                throw Exception("Cannot delete db file")
-        Database.connect(
-            "jdbc:sqlite:${AppFiles.ResultDBFile.absolutePath}",
-            driver = "org.sqlite.JDBC"
-        )
-
         runBlocking {
             Writer.initDB()
         }

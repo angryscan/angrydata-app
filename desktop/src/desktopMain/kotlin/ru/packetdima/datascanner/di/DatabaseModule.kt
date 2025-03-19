@@ -12,3 +12,12 @@ val databaseModule = module {
         )
     }
 }
+
+val consoldeDatabaseModule = module {
+    single {
+        DatabaseSettings(
+            url = "jdbc:sqlite:${AppFiles.WorkDir.resolve("console.db").absolutePath}",
+            driver = "org.sqlite.JDBC"
+        )
+    }
+}

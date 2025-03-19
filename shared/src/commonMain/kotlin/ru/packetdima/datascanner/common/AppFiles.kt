@@ -13,6 +13,11 @@ object AppFiles {
         else -> Path(System.getProperty("user.home")).resolve(".ads")
     }
 
+    val UserDirPath: File = when (OS.currentOS()) {
+        OS.WINDOWS -> File(System.getenv("USERPROFILE"))
+        else -> File(System.getProperty("user.home"))
+    }
+
     val WorkDir = WorkDirPath.toFile().also { path ->
         if (!path.exists() && !path.mkdir())
             throw Exception("Fail to create application directory")

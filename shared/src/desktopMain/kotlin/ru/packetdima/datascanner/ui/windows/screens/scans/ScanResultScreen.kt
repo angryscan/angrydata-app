@@ -86,11 +86,11 @@ fun ScanResultScreen(
     val folderSize = task.dbTask.size ?: ""
 
     val dateFormat = LocalDateTime.Format {
-        year()
+        dayOfMonth()
         char('.')
         monthNumber()
         char('.')
-        dayOfMonth()
+        year()
         char(' ')
         hour()
         char(':')

@@ -11,55 +11,37 @@ import ru.packetdima.datascanner.ui.strings.readableName
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.charset.Charset
-import javax.swing.JDialog
-import javax.swing.JFileChooser
 import javax.swing.JOptionPane
-import javax.swing.filechooser.FileNameExtensionFilter
 
 object ResultWriter {
+    enum class FileExtensions(val extension: String) {
+        CSV("csv"),
+        XLSX("xlsx"),
+        PDF("pdf"),
+        XML("xml"),
+    }
 
-    suspend fun saveResult(fileName: String, result: List<TaskFileResult>): Boolean {
-        val f = JFileChooser()
-        f.fileSelectionMode = JFileChooser.FILES_ONLY
-        f.isMultiSelectionEnabled = false
-        f.fileFilter = FileNameExtensionFilter("CSV (*.csv)", "csv")
-        f.selectedFile = File(fileName)
-        val resDialog = f.showSaveDialog(null)
-        if (resDialog != JFileChooser.APPROVE_OPTION)
+    suspend fun saveResult(filePath: String, result: List<TaskFileResult>, onSaveError: () -> Unit): Boolean {
+        val extension = FileExtensions.entries.find { filePath.endsWith(".${it.extension}") }
+        if (extension == null)
             return false
-        var path = f.selectedFile.absolutePath
-
-        if (!path.endsWith(".csv"))
-            path += ".csv"
 
 
-        if (File(path).exists()) {
-            JDialog.setDefaultLookAndFeelDecorated(true)
-            val response = JOptionPane.showConfirmDialog(
-                null,
-                getString(Res.string.FileSave_AlreadyExistText),
-                getString(Res.string.FileSave_AlreadyExistTitle),
-                JOptionPane.YES_NO_CANCEL_OPTION,
-                JOptionPane.QUESTION_MESSAGE
-            )
-            if (response == JOptionPane.YES_OPTION) {
-                if (!File(path).delete()) {
-                    JOptionPane.showMessageDialog(
-                        null,
-                        getString(Res.string.FileSave_ErrorText),
-                        getString(Res.string.FileSave_ErrorTitle),
-                        JOptionPane.ERROR_MESSAGE
-                    )
-                    return false
-                }
-            } else
-                return false
+        if (File(filePath).exists() && !File(filePath).delete()) {
+            onSaveError()
+//            JOptionPane.showMessageDialog(
+//                null,
+//                getString(Res.string.FileSave_ErrorText),
+//                getString(Res.string.FileSave_ErrorTitle),
+//                JOptionPane.ERROR_MESSAGE
+//            )
+            return false
         }
 
 
         try {
             write(
-                reportFile = path,
+                reportFile = filePath,
                 reportEncoding = when (OS.currentOS()) {
                     OS.WINDOWS -> "Windows-1251"
                     else -> "UTF-8"

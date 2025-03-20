@@ -8,6 +8,7 @@ import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import ru.packetdima.datascanner.scan.common.ResultWriter
 import ru.packetdima.datascanner.serializers.MutableStateSerializer
 import java.io.File
 import java.util.*
@@ -60,6 +61,9 @@ class AppSettings : KoinComponent {
     var language: MutableState<LanguageType>
 
     @Serializable(with = MutableStateSerializer::class)
+    var reportSaveExtension: MutableState<ResultWriter.FileExtensions>
+
+    @Serializable(with = MutableStateSerializer::class)
     var hideOnMinimize: MutableState<Boolean>
 
     constructor() {
@@ -79,6 +83,7 @@ class AppSettings : KoinComponent {
             this.theme = prop.theme
             this.language = prop.language
             this.hideOnMinimize = prop.hideOnMinimize
+            this.reportSaveExtension = prop.reportSaveExtension
         } catch (e: Exception) {
             logger.error {
                 "Failed to load app settings. Loading defaults."
@@ -92,6 +97,7 @@ class AppSettings : KoinComponent {
             this.theme = mutableStateOf(ThemeType.Dark)
             this.language = mutableStateOf(LanguageType.Default)
             this.hideOnMinimize = mutableStateOf(true)
+            this.reportSaveExtension = mutableStateOf(ResultWriter.FileExtensions.CSV)
         }
     }
 

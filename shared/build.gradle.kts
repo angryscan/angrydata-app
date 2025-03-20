@@ -52,6 +52,10 @@ kotlin {
                 api(libs.koin.compose.viewmodel)
                 api(libs.koin.compose.viewmodel.navigation)
                 implementation(libs.lifecycle.viewmodel)
+
+                api(libs.filekit.core)
+                implementation(libs.filekit.dialogs)
+                implementation(libs.filekit.dialogs.compose)
             }
         }
         commonTest {

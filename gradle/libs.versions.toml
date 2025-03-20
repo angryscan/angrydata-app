@@ -9,6 +9,7 @@ progressbar = "0.10.1"
 log4j = "2.24.3"
 koin = "4.0.2"
 viewmodel = "2.8.4"
+filekit = "0.10.0-beta01"
 
 [libraries]
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
@@ -45,6 +46,10 @@ ktor-network = { module = "io.ktor:ktor-network", version.ref = "ktor"}
 datascanner = { module = "info.downdetector.bigdatascanner:datascanner", version.ref = "datascanner"}
 
 console-progressbar = { module = "me.tongfei:progressbar", version.ref = "progressbar" }
+
+filekit-core = {module = "io.github.vinceglb:filekit-core", version.ref = "filekit"}
+filekit-dialogs = { module = "io.github.vinceglb:filekit-dialogs", version.ref = "filekit" }
+filekit-dialogs-compose = { module = "io.github.vinceglb:filekit-dialogs-compose", version.ref = "filekit" }
 
 #Koin
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }

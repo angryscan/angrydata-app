@@ -10,10 +10,7 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,6 +18,9 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.dialogs.compose.rememberFileSaverLauncher
+import io.github.vinceglb.filekit.path
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.char
@@ -28,11 +28,15 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+import ru.packetdima.datascanner.common.AppFiles
+import ru.packetdima.datascanner.common.AppSettings
 import ru.packetdima.datascanner.db.models.TaskState
 import ru.packetdima.datascanner.resources.*
 import ru.packetdima.datascanner.scan.ScanService
 import ru.packetdima.datascanner.scan.TaskFilesViewModel
 import ru.packetdima.datascanner.scan.common.ResultWriter
+import ru.packetdima.datascanner.scan.common.createDialogSettings
+import ru.packetdima.datascanner.ui.dialogs.DesktopAlertDialog
 import ru.packetdima.datascanner.ui.extensions.color
 import ru.packetdima.datascanner.ui.extensions.icon
 import ru.packetdima.datascanner.ui.windows.screens.scans.components.AttributeCard
@@ -40,13 +44,14 @@ import ru.packetdima.datascanner.ui.windows.screens.scans.components.ResultTable
 import ru.packetdima.datascanner.ui.windows.screens.scans.components.SortColumn
 import ru.packetdima.datascanner.ui.windows.screens.scans.components.comparator
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ScanResultScreen(
     taskId: Int,
     onCloseClick: () -> Unit
 ) {
     val scanService = koinInject<ScanService>()
+    val appSettings = koinInject<AppSettings>()
     val task = scanService.tasks.tasks.value.first { it.id.value == taskId }
 
     val taskFilesViewModel = koinViewModel<TaskFilesViewModel> { parametersOf(task.dbTask) }
@@ -70,7 +75,7 @@ fun ScanResultScreen(
 
     val foundAttributes by task.foundAttributes.collectAsState()
 
-    val progress = if(selectedFiles > 0) 100 * (scanned + skipped) / selectedFiles else 0
+    val progress = if (selectedFiles > 0) 100 * (scanned + skipped) / selectedFiles else 0
 
     val animatedProgress by
     animateFloatAsState(
@@ -108,6 +113,39 @@ fun ScanResultScreen(
         second()
     }
 
+    val dialogSettings = createDialogSettings()
+
+    val reportExtension by remember { appSettings.reportSaveExtension }
+    var errorDialogVisible by remember { mutableStateOf(false) }
+
+    val saveLauncher = rememberFileSaverLauncher(
+        dialogSettings = dialogSettings
+    ) { file ->
+        if (file != null) {
+            coroutineScope.launch {
+                ResultWriter.saveResult(
+                    file.path,
+                    taskFiles.sortedWith(
+                        SortColumn.Score.comparator()
+                    ),
+                    onSaveError = {
+                        errorDialogVisible = true
+                    }
+                )
+            }
+        }
+
+    }
+
+    if (errorDialogVisible) {
+        DesktopAlertDialog(
+            onCloseRequest = {
+                errorDialogVisible = false
+            },
+            title = stringResource(Res.string.FileSave_ErrorTitle),
+            message = stringResource(Res.string.FileSave_ErrorText)
+        )
+    }
 
     val shapes = MaterialTheme.shapes.medium.copy(bottomEnd = CornerSize(0.dp), bottomStart = CornerSize(0.dp))
     Box(
@@ -200,14 +238,11 @@ fun ScanResultScreen(
                                     .clip(MaterialTheme.shapes.medium)
                                     .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
                                     .clickable {
-                                        coroutineScope.launch {
-                                            ResultWriter.saveResult(
-                                                fileName = "BDS_${fileDateFormat.format(finishedAt!!)}.csv",
-                                                result = taskFiles.sortedWith(
-                                                    SortColumn.Score.comparator()
-                                                )
-                                            )
-                                        }
+                                        saveLauncher.launch(
+                                            suggestedName = "BDS_${fileDateFormat.format(finishedAt!!)}",
+                                            extension = reportExtension.extension,
+                                            directory = PlatformFile(AppFiles.UserDirPath)
+                                        )
                                     },
                                 contentAlignment = Alignment.Center
                             ) {

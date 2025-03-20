@@ -52,19 +52,19 @@ class AppSettings : KoinComponent {
     private val settingsFile: AppSettingsFile by inject()
 
     @Serializable(with = MutableStateSerializer::class)
-    var threadCount: MutableState<Int>
+    var threadCount: MutableState<Int> = mutableStateOf(Runtime.getRuntime().availableProcessors())
 
     @Serializable(with = MutableStateSerializer::class)
-    var theme: MutableState<ThemeType>
+    var theme: MutableState<ThemeType> = mutableStateOf(ThemeType.System)
 
     @Serializable(with = MutableStateSerializer::class)
-    var language: MutableState<LanguageType>
+    var language: MutableState<LanguageType> = mutableStateOf(LanguageType.Default)
 
     @Serializable(with = MutableStateSerializer::class)
-    var reportSaveExtension: MutableState<ResultWriter.FileExtensions>
+    var reportSaveExtension: MutableState<ResultWriter.FileExtensions> = mutableStateOf(ResultWriter.FileExtensions.XLSX)
 
     @Serializable(with = MutableStateSerializer::class)
-    var hideOnMinimize: MutableState<Boolean>
+    var hideOnMinimize: MutableState<Boolean> = mutableStateOf(true)
 
     constructor() {
         try {

@@ -10,6 +10,7 @@ log4j = "2.24.3"
 koin = "4.0.2"
 viewmodel = "2.8.4"
 filekit = "0.10.0-beta01"
+fastexcel = "0.18.4"
 
 [libraries]
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
@@ -25,7 +26,8 @@ logging-log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.r
 dorkbox = { module = "com.dorkbox:SystemTray", version = "4.4" }
 
 files-junrar = { module = "com.github.junrar:junrar", version = "7.5.5" }
-files-fastexcel = { module = "org.dhatim:fastexcel-reader", version = "0.18.4" }
+files-fastexcel-reader = { module = "org.dhatim:fastexcel-reader", version.ref = "fastexcel" }
+files-fastexcel = { module = "org.dhatim:fastexcel", version.ref = "fastexcel" }
 files-pdfbox = { module = "org.apache.pdfbox:pdfbox", version = "2.0.33" } # Update to 3.x version?
 files-poi-core = { module = "org.apache.poi:poi", version.ref = "poi" }
 files-poi-scratchpad = { module = "org.apache.poi:poi-scratchpad", version.ref = "poi" }

@@ -319,6 +319,7 @@ fun ScanResultScreen(
                                         onClick = {
                                             reportExtension = it
                                             reportExtensionChooserExpanded = false
+                                            appSettings.save()
                                         },
                                         text = { Text(text = it.name) }
                                     )

@@ -37,6 +37,7 @@ kotlin {
 
                 implementation(libs.files.pdfbox)
                 implementation(libs.files.fastexcel)
+                implementation(libs.files.fastexcel.reader)
                 implementation(libs.files.junrar)
                 implementation(libs.files.poi.core)
                 implementation(libs.files.poi.ooxml)

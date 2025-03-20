@@ -115,7 +115,8 @@ fun ScanResultScreen(
 
     val dialogSettings = createDialogSettings()
 
-    val reportExtension by remember { appSettings.reportSaveExtension }
+    var reportExtension by remember { appSettings.reportSaveExtension }
+    var reportExtensionChooserExpanded by remember { mutableStateOf(false) }
     var errorDialogVisible by remember { mutableStateOf(false) }
 
     val saveLauncher = rememberFileSaverLauncher(
@@ -232,24 +233,62 @@ fun ScanResultScreen(
                         AnimatedVisibility(
                             visible = state == TaskState.COMPLETED,
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .clip(MaterialTheme.shapes.medium)
-                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
-                                    .clickable {
-                                        saveLauncher.launch(
-                                            suggestedName = "BDS_${fileDateFormat.format(finishedAt!!)}",
-                                            extension = reportExtension.extension,
-                                            directory = PlatformFile(AppFiles.UserDirPath)
+                            Row {
+
+
+                                Box(
+                                    modifier = Modifier
+                                        .size(height = 40.dp, width = 90.dp)
+                                        .clip(
+                                            MaterialTheme.shapes.medium.copy(
+                                                bottomEnd = CornerSize(0.dp),
+                                                topEnd = CornerSize(0.dp)
+                                            )
                                         )
-                                    },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Download,
-                                    contentDescription = null
-                                )
+                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+                                        .clickable {
+                                            saveLauncher.launch(
+                                                suggestedName = "BDS_${fileDateFormat.format(finishedAt!!)}",
+                                                extension = reportExtension.extension,
+                                                directory = PlatformFile(AppFiles.UserDirPath)
+                                            )
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Row {
+                                        Icon(
+                                            imageVector = Icons.Outlined.Download,
+                                            contentDescription = null
+                                        )
+                                        Text(
+                                            text = reportExtension.name,
+                                            modifier = Modifier
+                                                .padding(start = 5.dp)
+                                        )
+                                    }
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .clip(
+                                            MaterialTheme.shapes.medium.copy(
+                                                bottomStart = CornerSize(0.dp),
+                                                topStart = CornerSize(0.dp)
+                                            )
+                                        )
+                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+                                        .clickable {
+                                            reportExtensionChooserExpanded = true
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.ArrowDropDown,
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                    )
+                                }
                             }
                         }
                         Box(
@@ -269,6 +308,22 @@ fun ScanResultScreen(
                                 imageVector = Icons.Outlined.Delete,
                                 contentDescription = null
                             )
+                            DropdownMenu(
+                                expanded = reportExtensionChooserExpanded,
+                                onDismissRequest = {
+                                    reportExtensionChooserExpanded = false
+                                }
+                            ) {
+                                ResultWriter.FileExtensions.entries.forEach {
+                                    DropdownMenuItem(
+                                        onClick = {
+                                            reportExtension = it
+                                            reportExtensionChooserExpanded = false
+                                        },
+                                        text = { Text(text = it.name) }
+                                    )
+                                }
+                            }
                         }
                     }
                 }

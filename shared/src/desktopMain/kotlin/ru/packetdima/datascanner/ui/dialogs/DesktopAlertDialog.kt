@@ -42,10 +42,13 @@ fun DesktopAlertDialog(
         Surface(
             shape = DesktopWindowShapes(),
             color = MaterialTheme.colorScheme.background,
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.error)
         ) {
             Column(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 TitleBar(
                     windowPlacement = WindowPlacement.Floating
@@ -53,9 +56,8 @@ fun DesktopAlertDialog(
 
                     Row(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Warning,
@@ -73,7 +75,7 @@ fun DesktopAlertDialog(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(12.dp),
+                        .padding(top = 12.dp, bottom = 4.dp, start = 12.dp, end = 12.dp),
                     verticalArrangement = Arrangement.SpaceBetween,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -82,7 +84,6 @@ fun DesktopAlertDialog(
                         fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                         fontWeight = MaterialTheme.typography.bodyMedium.fontWeight,
                         lineHeight = MaterialTheme.typography.bodyMedium.lineHeight,
-                        modifier = Modifier.padding(16.dp)
                     )
                     Row(
                         modifier = Modifier

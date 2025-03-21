@@ -29,7 +29,7 @@
     <string name="resultStatisticDesc">Статистика сканирования</string>
     <string name="resultDeleteAllButton">Удалить все</string>
     <string name="resultDeleteAllButtonDesk">Удалить все файлы</string>
-    <string name="resultDeleteAllConfirmationText">Все файлы будут удалены без возможности восстановления! Вы уверены что хотите продолжить?</string>
+    <string name="resultDeleteAllConfirmationText">Все файлы будут удалены без возможности восстановления! Вы уверены, что хотите продолжить?</string>
     <string name="resultDeleteAllConfirmationTitle">Удалить все файлы?</string>
     <string name="resultDeleteConfirmationText">Удалено файлов: %1$d</string>
     <string name="resultDeleteConfirmationTitle">Удаление завершено!</string>
@@ -124,6 +124,7 @@
     <string name="Result-ColumnCount">Кол-во</string>
     <string name="Result-ColumnSize">Размер</string>
     <string name="Result-ColumnScore">Оценка</string>
+    <string name="Result-SheetName">Отчёт</string>
     <string name="Result-DeleteFiles">Удалить файлов: %1$d</string>
     <string name="Result-DeletedFiles">Удалено файлов: %1$d</string>
     <string name="Result-NotDeletedFiles">Не удалось удалить файлов: %1$d</string>
@@ -140,6 +141,6 @@
     <string name="Signature-ErrorMessage">Пользовательская сигнатура с таким именем уже существует</string>
 
     <string name="AboutScreen-Version">Версия программы: %1$s</string>
-    <string name="AboutScren-Copyright">Авторские права © ООО "Детектикум", 2024</string>
+    <string name="AboutScreen-Copyright">Авторские права © ООО "Детектикум", 2024</string>
     <string name="AboutScreen-Description">Big Data Scanner — персональное программное обеспечение для экспресс-проверки наличия в файлах персональных данных и номеров банковских карт. Big Data Scanner работает со следующими форматами файлов: .xlsx, .docx, .txt, .csv, .xml, .json, .log, .doc, .xls, .pdf, .zip.\nBig Data Scanner не вносит никаких изменений в проверяемые файлы, требуется доступ только для чтения файла.\n\nРезультат работы программы носит рекомендательный характер, может требоваться дополнительная верификация со стороны пользователя.</string>
 </resources>

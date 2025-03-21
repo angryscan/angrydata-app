@@ -37,6 +37,7 @@ kotlin {
 
                 implementation(libs.files.pdfbox)
                 implementation(libs.files.fastexcel)
+                implementation(libs.files.fastexcel.reader)
                 implementation(libs.files.junrar)
                 implementation(libs.files.poi.core)
                 implementation(libs.files.poi.ooxml)
@@ -52,6 +53,12 @@ kotlin {
                 api(libs.koin.compose.viewmodel)
                 api(libs.koin.compose.viewmodel.navigation)
                 implementation(libs.lifecycle.viewmodel)
+
+                api(libs.filekit.core)
+                implementation(libs.filekit.dialogs)
+                implementation(libs.filekit.dialogs.compose)
+
+                implementation(libs.kotlin.stdlib)
             }
         }
         commonTest {

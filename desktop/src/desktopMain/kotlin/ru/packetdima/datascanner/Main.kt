@@ -5,6 +5,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.github.vinceglb.filekit.FileKit
 import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
@@ -52,6 +53,7 @@ suspend fun main(args: Array<String>) {
             else -> "OPENGL"
         }
     )
+    FileKit.init(appId = "Big Data Scanner")
 
     try {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())

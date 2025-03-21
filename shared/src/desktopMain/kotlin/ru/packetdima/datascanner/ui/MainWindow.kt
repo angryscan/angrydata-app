@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
@@ -26,13 +25,14 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import ru.packetdima.datascanner.common.AppSettings
-import ru.packetdima.datascanner.common.OS
 import ru.packetdima.datascanner.navigation.AppScreens
 import ru.packetdima.datascanner.resources.Res
 import ru.packetdima.datascanner.resources.appName
 import ru.packetdima.datascanner.resources.icon
 import ru.packetdima.datascanner.scan.common.ScanPathHelper
+import ru.packetdima.datascanner.scan.common.mainWindow
 import ru.packetdima.datascanner.ui.theme.AppTheme
+import ru.packetdima.datascanner.ui.windows.components.DesktopWindowShapes
 import ru.packetdima.datascanner.ui.windows.components.MainWindowTitleBar
 import ru.packetdima.datascanner.ui.windows.components.SideMenu
 import ru.packetdima.datascanner.ui.windows.screens.about.AboutScreen
@@ -74,13 +74,6 @@ fun MainWindow(
         }
     }
 
-
-    //On windows not working window shapes with OPENGL
-    val windowShapes = if (OS.currentOS() == OS.WINDOWS)
-        MaterialTheme.shapes.medium.copy(CornerSize(0.dp))
-    else
-        MaterialTheme.shapes.medium
-
     Window(
         onCloseRequest = onCloseRequest,
         title = stringResource(Res.string.appName),
@@ -91,12 +84,14 @@ fun MainWindow(
         visible = isVisible,
         alwaysOnTop = focusRemember
     ) {
+        mainWindow = this.window
+
         AppTheme {
             Surface(
                 color = MaterialTheme.colorScheme.background,
                 modifier = Modifier
                     .fillMaxSize(),
-                shape = windowShapes,
+                shape = DesktopWindowShapes(),
                 shadowElevation = 3.dp,
                 tonalElevation = 3.dp
             ) {

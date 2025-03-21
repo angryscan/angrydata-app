@@ -8,6 +8,7 @@ import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import ru.packetdima.datascanner.scan.common.writer.ResultWriter
 import ru.packetdima.datascanner.serializers.MutableStateSerializer
 import java.io.File
 import java.util.*
@@ -51,16 +52,19 @@ class AppSettings : KoinComponent {
     private val settingsFile: AppSettingsFile by inject()
 
     @Serializable(with = MutableStateSerializer::class)
-    var threadCount: MutableState<Int>
+    var threadCount: MutableState<Int> = mutableStateOf(Runtime.getRuntime().availableProcessors())
 
     @Serializable(with = MutableStateSerializer::class)
-    var theme: MutableState<ThemeType>
+    var theme: MutableState<ThemeType> = mutableStateOf(ThemeType.System)
 
     @Serializable(with = MutableStateSerializer::class)
-    var language: MutableState<LanguageType>
+    var language: MutableState<LanguageType> = mutableStateOf(LanguageType.Default)
 
     @Serializable(with = MutableStateSerializer::class)
-    var hideOnMinimize: MutableState<Boolean>
+    var reportSaveExtension: MutableState<ResultWriter.FileExtensions> = mutableStateOf(ResultWriter.FileExtensions.XLSX)
+
+    @Serializable(with = MutableStateSerializer::class)
+    var hideOnMinimize: MutableState<Boolean> = mutableStateOf(true)
 
     constructor() {
         try {
@@ -79,6 +83,7 @@ class AppSettings : KoinComponent {
             this.theme = prop.theme
             this.language = prop.language
             this.hideOnMinimize = prop.hideOnMinimize
+            this.reportSaveExtension = prop.reportSaveExtension
         } catch (e: Exception) {
             logger.error {
                 "Failed to load app settings. Loading defaults."
@@ -92,6 +97,7 @@ class AppSettings : KoinComponent {
             this.theme = mutableStateOf(ThemeType.Dark)
             this.language = mutableStateOf(LanguageType.Default)
             this.hideOnMinimize = mutableStateOf(true)
+            this.reportSaveExtension = mutableStateOf(ResultWriter.FileExtensions.CSV)
         }
     }
 

@@ -28,7 +28,10 @@ import java.io.File
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun ResultTable(taskFilesViewModel: TaskFilesViewModel, task: TaskEntityViewModel) {
+fun ResultTable(
+    taskFilesViewModel: TaskFilesViewModel,
+    task: TaskEntityViewModel
+) {
 
     val coroutineScope = rememberCoroutineScope()
 

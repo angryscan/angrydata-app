@@ -50,7 +50,7 @@ fun AboutScreen() {
                     text = stringResource(Res.string.AboutScreen_Version, AppVersion),
                     style = MaterialTheme.typography.bodyLarge
                 )
-                Text(text = stringResource(Res.string.AboutScren_Copyright), style = MaterialTheme.typography.bodyLarge)
+                Text(text = stringResource(Res.string.AboutScreen_Copyright), style = MaterialTheme.typography.bodyLarge)
             }
         }
 

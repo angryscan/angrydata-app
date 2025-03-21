@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AddCircle
 import androidx.compose.material.icons.outlined.Close
@@ -23,12 +22,12 @@ import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.rememberDialogState
 import org.jetbrains.compose.resources.stringResource
-import ru.packetdima.datascanner.common.OS
 import ru.packetdima.datascanner.resources.Res
 import ru.packetdima.datascanner.resources.Signature_Name
 import ru.packetdima.datascanner.resources.Signature_Signature
 import ru.packetdima.datascanner.resources.Signature_Title
 import ru.packetdima.datascanner.scan.functions.UserSignature
+import ru.packetdima.datascanner.ui.windows.components.DesktopWindowShapes
 import ru.packetdima.datascanner.ui.windows.components.TitleBar
 
 @Composable
@@ -41,10 +40,6 @@ fun UserSignatureEditor(
         width = 450.dp,
         height = 500.dp
     )
-    val windowShapes = when (OS.currentOS()) {
-        OS.WINDOWS -> MaterialTheme.shapes.medium.copy(CornerSize(0.dp))
-        else -> MaterialTheme.shapes.medium
-    }
 
     var name by remember { mutableStateOf(userSignature?.name ?: "") }
     var signature by remember { mutableStateOf("") }
@@ -61,10 +56,10 @@ fun UserSignatureEditor(
         Scaffold(
             modifier = Modifier
                 .fillMaxSize()
-                .clip(windowShapes)
+                .clip(DesktopWindowShapes())
                 .border(
                     width = 1.dp,
-                    shape = windowShapes,
+                    shape = DesktopWindowShapes(),
                     color = MaterialTheme.colorScheme.primary
                 ),
             floatingActionButton = {

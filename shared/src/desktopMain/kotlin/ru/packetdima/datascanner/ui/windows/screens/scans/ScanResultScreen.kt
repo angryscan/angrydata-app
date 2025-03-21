@@ -73,6 +73,8 @@ fun ScanResultScreen(
     val foundFiles by task.foundFiles.collectAsState()
     val totalFiles by task.totalFiles.collectAsState()
 
+    val folderSize by task.folderSize.collectAsState()
+
     val foundAttributes by task.foundAttributes.collectAsState()
     val attributesOnOpen = remember { mutableStateListOf<IDetectFunction>() }
 
@@ -93,8 +95,6 @@ fun ScanResultScreen(
         targetValue = if (selectedFiles > 0) (scanned + skipped).toFloat() / selectedFiles else 0f,
         animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec
     )
-
-    val folderSize = task.dbTask.size ?: ""
 
     val dateFormat = LocalDateTime.Format {
         dayOfMonth()

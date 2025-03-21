@@ -84,6 +84,10 @@ class TaskEntityViewModel(
     val finishedAt
         get() = _finishedAt.asStateFlow()
 
+    private var _folderSize = MutableStateFlow("")
+    val folderSize
+        get() = _folderSize.asStateFlow()
+
     init {
         if (_state.value == TaskState.LOADING) {
             taskScope.launch {
@@ -94,7 +98,7 @@ class TaskEntityViewModel(
             }
         } else {
             if (totalFiles != null)
-                _totalFiles = MutableStateFlow(totalFiles)
+                _totalFiles.value = totalFiles
 
             if (foundAttributes != null)
                 _foundAttributes.value = foundAttributes
@@ -312,6 +316,8 @@ class TaskEntityViewModel(
                     dbTask.size = directorySize.filesSize.toString()
                     dbTask.filesCount = directorySize.filesCount
                 }
+                _foundFiles.value = directorySize.filesCount
+                _folderSize.value = directorySize.filesSize.toString()
             }
 
             setState(TaskState.SCANNING)

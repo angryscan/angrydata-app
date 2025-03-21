@@ -125,20 +125,21 @@ class ScanService : KoinComponent {
             }
             logging.info(throwable = null, LogMarkers.UserAction) {
                 "Creating task. " +
-                        "ID: ${task.id.value} " +
+                        "ID: ${task.id.value}. " +
                         "Path: \"$path\". " +
                         "Extensions: ${
                             (if (extensions != null)
                                 extensions else
                                 scanSettings.extensions).joinToString { it.name }
-                        } " +
+                        }. " +
                         "Detect functions: ${
                             (if (detectFunctions != null)
                                 detectFunctions
                             else (scanSettings.detectFunctions + scanSettings.userSignatures)
                                     ).joinToString { it.name }
-                        } " +
-                        "Fast scan: ${fastScan ?: scanSettings.fastScan.value}"
+                        }. " +
+                        "Fast scan: ${fastScan ?: scanSettings.fastScan.value}. " +
+                        "Threads: ${appSettings.threadCount.value}"
             }
             if (extensions != null) {
                 extensions.forEach { ext ->

@@ -10,7 +10,6 @@ import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.dao.id.LongIdTable
 import org.jetbrains.exposed.sql.Column
-import ru.packetdima.datascanner.ui.datatable.TableHeader
 import ru.packetdima.datascanner.resources.*
 
 object ScannedFiles : LongIdTable() {
@@ -60,15 +59,10 @@ class Report(id: EntityID<Long>) : LongEntity(id) {
 }
 
 object ResultRows : LongIdTable() {
-    @TableHeader("File name", 0, 1f)
     val path = text("path")
-    @TableHeader("Score", 1, 0.4f)
     val score = long("score")
-    @TableHeader("Attributes count", 2, 0.3f)
     val attrCount = integer("attrCount")
-    @TableHeader("Attributes found", 3, 0.4f)
     val attrNames = varchar("attrNames", 300)
-    @TableHeader("File size", 4, 0.3f)
     val fileSize = long("fileSize")
 }
 

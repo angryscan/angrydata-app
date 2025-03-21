@@ -20,6 +20,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import info.downdetector.bigdatascanner.common.DetectFunction
 import info.downdetector.bigdatascanner.common.IDetectFunction
+import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.dialogs.compose.rememberFileSaverLauncher
+import io.github.vinceglb.filekit.path
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.char
@@ -27,23 +30,28 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+import ru.packetdima.datascanner.common.AppFiles
+import ru.packetdima.datascanner.common.AppSettings
 import ru.packetdima.datascanner.db.models.TaskState
 import ru.packetdima.datascanner.resources.*
 import ru.packetdima.datascanner.scan.ScanService
 import ru.packetdima.datascanner.scan.TaskFilesViewModel
-import ru.packetdima.datascanner.scan.common.ResultWriter
+import ru.packetdima.datascanner.scan.common.writer.ResultWriter
+import ru.packetdima.datascanner.scan.common.createDialogSettings
+import ru.packetdima.datascanner.ui.dialogs.DesktopAlertDialog
 import ru.packetdima.datascanner.ui.extensions.color
 import ru.packetdima.datascanner.ui.extensions.icon
 import ru.packetdima.datascanner.ui.strings.composableName
 import ru.packetdima.datascanner.ui.windows.screens.scans.components.*
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ScanResultScreen(
     taskId: Int,
     onCloseClick: () -> Unit
 ) {
     val scanService = koinInject<ScanService>()
+    val appSettings = koinInject<AppSettings>()
     val task = scanService.tasks.tasks.value.first { it.id.value == taskId }
 
     val taskFilesViewModel = koinViewModel<TaskFilesViewModel> { parametersOf(task.dbTask) }
@@ -78,7 +86,7 @@ fun ScanResultScreen(
             }
     }
 
-    val progress = if(selectedFiles > 0) 100 * (scanned + skipped) / selectedFiles else 0
+    val progress = if (selectedFiles > 0) 100 * (scanned + skipped) / selectedFiles else 0
 
     val animatedProgress by
     animateFloatAsState(
@@ -89,11 +97,11 @@ fun ScanResultScreen(
     val folderSize = task.dbTask.size ?: ""
 
     val dateFormat = LocalDateTime.Format {
-        year()
+        dayOfMonth()
         char('.')
         monthNumber()
         char('.')
-        dayOfMonth()
+        year()
         char(' ')
         hour()
         char(':')
@@ -114,6 +122,41 @@ fun ScanResultScreen(
         minute()
         char('-')
         second()
+    }
+
+    val dialogSettings = createDialogSettings()
+
+    var reportExtension by remember { appSettings.reportSaveExtension }
+    var reportExtensionChooserExpanded by remember { mutableStateOf(false) }
+    var errorDialogVisible by remember { mutableStateOf(false) }
+
+    val saveLauncher = rememberFileSaverLauncher(
+        dialogSettings = dialogSettings
+    ) { file ->
+        if (file != null) {
+            coroutineScope.launch {
+                ResultWriter.saveResult(
+                    file.path,
+                    taskFiles.sortedWith(
+                        SortColumn.Score.comparator()
+                    ),
+                    onSaveError = {
+                        errorDialogVisible = true
+                    }
+                )
+            }
+        }
+
+    }
+
+    if (errorDialogVisible) {
+        DesktopAlertDialog(
+            onCloseRequest = {
+                errorDialogVisible = false
+            },
+            title = stringResource(Res.string.FileSave_ErrorTitle),
+            message = stringResource(Res.string.FileSave_ErrorText)
+        )
     }
 
     val shapes = MaterialTheme.shapes.medium.copy(bottomEnd = CornerSize(0.dp), bottomStart = CornerSize(0.dp))
@@ -201,27 +244,62 @@ fun ScanResultScreen(
                         AnimatedVisibility(
                             visible = state == TaskState.COMPLETED,
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .clip(MaterialTheme.shapes.medium)
-                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
-                                    .clickable {
-                                        coroutineScope.launch {
-                                            ResultWriter.saveResult(
-                                                fileName = "BDS_${fileDateFormat.format(finishedAt!!)}.csv",
-                                                result = taskFiles.sortedWith(
-                                                    SortColumn.Score.comparator()
-                                                )
+                            Row {
+
+
+                                Box(
+                                    modifier = Modifier
+                                        .size(height = 40.dp, width = 90.dp)
+                                        .clip(
+                                            MaterialTheme.shapes.medium.copy(
+                                                bottomEnd = CornerSize(0.dp),
+                                                topEnd = CornerSize(0.dp)
                                             )
-                                        }
-                                    },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Download,
-                                    contentDescription = null
-                                )
+                                        )
+                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+                                        .clickable {
+                                            saveLauncher.launch(
+                                                suggestedName = "BDS_${fileDateFormat.format(finishedAt!!)}",
+                                                extension = reportExtension.extension,
+                                                directory = PlatformFile(AppFiles.UserDirPath)
+                                            )
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Row {
+                                        Icon(
+                                            imageVector = Icons.Outlined.Download,
+                                            contentDescription = null
+                                        )
+                                        Text(
+                                            text = reportExtension.name,
+                                            modifier = Modifier
+                                                .padding(start = 5.dp)
+                                        )
+                                    }
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .clip(
+                                            MaterialTheme.shapes.medium.copy(
+                                                bottomStart = CornerSize(0.dp),
+                                                topStart = CornerSize(0.dp)
+                                            )
+                                        )
+                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+                                        .clickable {
+                                            reportExtensionChooserExpanded = true
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.ArrowDropDown,
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                    )
+                                }
                             }
                         }
                         Box(
@@ -241,6 +319,23 @@ fun ScanResultScreen(
                                 imageVector = Icons.Outlined.Delete,
                                 contentDescription = null
                             )
+                            DropdownMenu(
+                                expanded = reportExtensionChooserExpanded,
+                                onDismissRequest = {
+                                    reportExtensionChooserExpanded = false
+                                }
+                            ) {
+                                ResultWriter.FileExtensions.entries.forEach {
+                                    DropdownMenuItem(
+                                        onClick = {
+                                            reportExtension = it
+                                            reportExtensionChooserExpanded = false
+                                            appSettings.save()
+                                        },
+                                        text = { Text(text = it.name) }
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -261,7 +356,7 @@ fun ScanResultScreen(
                                     TaskState.SEARCHING, TaskState.SCANNING, TaskState.LOADING, TaskState.PENDING ->
                                         scanService.stopTask(task)
 
-                                    TaskState.STOPPED -> scanService.startTask(task)
+                                    TaskState.STOPPED -> scanService.resumeTask(task)
                                     else -> scanService.rescanTask(task)
                                 }
                             },

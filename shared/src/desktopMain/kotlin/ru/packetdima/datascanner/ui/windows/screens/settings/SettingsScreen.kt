@@ -1,5 +1,6 @@
 package ru.packetdima.datascanner.ui.windows.screens.settings
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,12 +18,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import ru.packetdima.datascanner.common.AppFiles
 import ru.packetdima.datascanner.common.AppSettings
 import ru.packetdima.datascanner.resources.*
 import ru.packetdima.datascanner.scan.ScanService
 import ru.packetdima.datascanner.store.ContextMenu
 import ru.packetdima.datascanner.ui.icons.icon
 import ru.packetdima.datascanner.ui.strings.composableName
+import java.awt.Desktop
 
 @Composable
 fun SettingsScreen() {
@@ -221,6 +224,29 @@ fun SettingsScreen() {
 
                             }
                         }
+                    }
+                }
+                SettingsRow(
+                    title = stringResource(Res.string.SettingsScreen_Logging)
+                ) {
+                    OutlinedButton(
+                        modifier = Modifier
+                            .size(width = 150.dp, height = 34.dp),
+                        shape = MaterialTheme.shapes.large,
+                        border = BorderStroke(width = 1.dp, color =MaterialTheme.colorScheme.primary),
+                        onClick = {
+                            Desktop.getDesktop().open(AppFiles.LoggingDir.toFile())
+                        },
+                        colors = ButtonDefaults.outlinedButtonColors().copy(
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.SettingsScreen_OpenFolder),
+                            fontSize = 14.sp,
+                            lineHeight = 14.sp,
+                            fontWeight = MaterialTheme.typography.bodyMedium.fontWeight
+                        )
                     }
                 }
             }

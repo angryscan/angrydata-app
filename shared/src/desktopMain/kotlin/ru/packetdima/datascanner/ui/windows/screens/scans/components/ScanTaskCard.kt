@@ -51,11 +51,11 @@ fun ScanTaskCard(
     val folderSize = taskEntity.dbTask.size ?: ""
 
     val dateFormat = LocalDateTime.Format {
-        year()
+        dayOfMonth()
         char('.')
         monthNumber()
         char('.')
-        dayOfMonth()
+        year()
         char(' ')
         hour()
         char(':')

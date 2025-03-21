@@ -48,6 +48,7 @@ compose.desktop {
     application {
         mainClass = "ru.packetdima.datascanner.MainKt"
 
+
         jvmArgs += listOf(
             "-Xmx6g"
         )
@@ -83,6 +84,7 @@ compose.desktop {
                 appCategory = "Utility"
                 installationPath = "/opt"
                 iconFile.set(project(":shared").projectDir.resolve("src\\desktopMain\\composeResources\\files\\icon.png"))
+                modules("jdk.security.auth")
             }
         }
     }

@@ -5,6 +5,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.github.vinceglb.filekit.FileKit
 import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
@@ -17,7 +18,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.core.context.startKoin
 import ru.packetdima.datascanner.common.AppFiles
+import ru.packetdima.datascanner.common.LogMarkers
 import ru.packetdima.datascanner.common.OS
+import ru.packetdima.datascanner.di.consoldeDatabaseModule
 import ru.packetdima.datascanner.di.databaseModule
 import ru.packetdima.datascanner.di.scanModule
 import ru.packetdima.datascanner.di.settingsModule
@@ -41,7 +44,6 @@ suspend fun main(args: Array<String>) {
         }
     }?.collect()
 
-
     System.setProperty(
         "skiko.renderApi",
         when (OS.currentOS()) {
@@ -51,6 +53,7 @@ suspend fun main(args: Array<String>) {
             else -> "OPENGL"
         }
     )
+    FileKit.init(appId = "Big Data Scanner")
 
     try {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
@@ -110,35 +113,43 @@ suspend fun main(args: Array<String>) {
 
     var lastError: Throwable? by mutableStateOf(null)
 
-    startKoin {
-        modules(
-            settingsModule,
-            databaseModule,
-            scanModule
-        )
-    }
+
 
     if (args.isNotEmpty() &&
         arrayOf("-c", "-console", "-h", "-help").any { args.contains(it) }
     ) {
-        if (arrayOf("-c", "-console").any { args.contains(it) }){
+        startKoin {
+            modules(
+                settingsModule,
+                consoldeDatabaseModule,
+                scanModule
+            )
+        }
+        if (arrayOf("-h", "-help").any { args.contains(it) }) {
+            Console.help()
+        }
+        else if (arrayOf("-c", "-console").any { args.contains(it) }){
             if (AppFiles.ResultDBFile.exists()) {
                 if (!AppFiles.ResultDBFile.delete()) {
                     logger.error { "Cannot access to database. Check it is in use by another process!" }
                     return
                 }
             }
+            logger.info(throwable = null, LogMarkers.UserAction) { "Starting console application" }
             Console.consoleRun(args)
         }
-        else if (arrayOf("-h", "-help").any { args.contains(it) }) {
-            Console.help()
-        }
     } else {
+        // Start Koin GUI mode
+        startKoin {
+            modules(
+                settingsModule,
+                databaseModule,
+                scanModule
+            )
+        }
         if (args.isNotEmpty()) {
-            logger.warn { "Started with ${args.size} argument(s):" }
-            args.forEach {
-                logger.warn { "Argument: $it" }
-            }
+            logger.warn { "Started with ${args.size} argument(s): ${args.joinToString(", ")}" }
+            logger.info { "Set path to: ${args.first()}" }
             ScanPathHelper.setPath(args.first())
         }
 
@@ -148,6 +159,7 @@ suspend fun main(args: Array<String>) {
             logger.warn { "Cannot load system look and feel" }
         }
 
+        logger.info(throwable = null, marker = LogMarkers.UserAction) { "Starting GUI application" }
         application(exitProcessOnExit = false) {
             CompositionLocalProvider(
                 LocalWindowExceptionHandlerFactory provides WindowExceptionHandlerFactory { window ->

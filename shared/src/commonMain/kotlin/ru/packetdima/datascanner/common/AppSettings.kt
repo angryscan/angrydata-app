@@ -8,7 +8,7 @@ import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import ru.packetdima.datascanner.scan.common.ResultWriter
+import ru.packetdima.datascanner.scan.common.writer.ResultWriter
 import ru.packetdima.datascanner.serializers.MutableStateSerializer
 import java.io.File
 import java.util.*

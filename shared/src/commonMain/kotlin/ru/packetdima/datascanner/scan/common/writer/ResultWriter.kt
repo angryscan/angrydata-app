@@ -1,4 +1,4 @@
-package ru.packetdima.datascanner.scan.common
+package ru.packetdima.datascanner.scan.common.writer
 
 import info.downdetector.bigdatascanner.common.DetectFunction
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -14,6 +14,10 @@ import ru.packetdima.datascanner.ui.strings.readableName
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.charset.Charset
+import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.transform.TransformerFactory
+import javax.xml.transform.dom.DOMSource
+import javax.xml.transform.stream.StreamResult
 
 val logging = KotlinLogging.logger {}
 
@@ -22,7 +26,7 @@ object ResultWriter {
         CSV("csv"),
         XLSX("xlsx"),
 //        PDF("pdf"),
-//        XML("xml"),
+        XML("xml"),
     }
 
     suspend fun saveResult(filePath: String, result: List<TaskFileResult>, onSaveError: () -> Unit): Boolean {
@@ -43,6 +47,7 @@ object ResultWriter {
             when (extension) {
                 FileExtensions.CSV -> writeCSV(File(filePath), result = result)
                 FileExtensions.XLSX -> writeXLSX(File(filePath), result = result)
+                FileExtensions.XML -> writeXML(File(filePath), result = result)
             }
             return true
         } catch (e: Exception) {
@@ -130,6 +135,51 @@ object ResultWriter {
                 sheet.freezePane(columns.size, 1)
                 sheet.setAutoFilter(0, 0, columns.size)
             }
+        }
+    }
+
+    private suspend fun writeXML(reportFile: File, result: List<TaskFileResult>) {
+        val documentBuilderFactory = DocumentBuilderFactory.newInstance()
+        val documentBuilder = documentBuilderFactory.newDocumentBuilder()
+        val doc = documentBuilder.newDocument()
+        val rootElement = doc.createElement("report")
+        doc.appendChild(rootElement)
+
+        result.forEach { fileRow ->
+            val fileElement = doc.createElement("file")
+            rootElement.appendChild(fileElement)
+
+            val pathElement = doc.createElement("path")
+            pathElement.appendChild(doc.createTextNode(fileRow.path))
+            fileElement.appendChild(pathElement)
+
+            val attributesElement = doc.createElement("attributes")
+            fileElement.appendChild(attributesElement)
+
+            fileRow.foundAttributes.forEach { attr ->
+                val attrElement = doc.createElement("attribute")
+                attrElement.appendChild(doc.createTextNode(if(attr is DetectFunction) attr.readableName() else attr.writeName))
+                attributesElement.appendChild(attrElement)
+            }
+
+            val scoreElement = doc.createElement("score")
+            scoreElement.appendChild(doc.createTextNode(fileRow.score.toString()))
+            fileElement.appendChild(scoreElement)
+
+            val countElement = doc.createElement("count")
+            countElement.appendChild(doc.createTextNode(fileRow.count.toString()))
+            fileElement.appendChild(countElement)
+
+            val sizeElement = doc.createElement("size")
+            sizeElement.appendChild(doc.createTextNode(fileRow.size.toString()))
+            fileElement.appendChild(sizeElement)
+        }
+
+        withContext(Dispatchers.IO) {
+            TransformerFactory.newInstance().newTransformer().transform(
+                DOMSource(doc),
+                StreamResult(reportFile)
+            )
         }
     }
 }

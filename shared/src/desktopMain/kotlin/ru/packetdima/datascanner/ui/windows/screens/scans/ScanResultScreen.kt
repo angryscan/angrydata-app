@@ -34,7 +34,7 @@ import ru.packetdima.datascanner.db.models.TaskState
 import ru.packetdima.datascanner.resources.*
 import ru.packetdima.datascanner.scan.ScanService
 import ru.packetdima.datascanner.scan.TaskFilesViewModel
-import ru.packetdima.datascanner.scan.common.ResultWriter
+import ru.packetdima.datascanner.scan.common.writer.ResultWriter
 import ru.packetdima.datascanner.scan.common.createDialogSettings
 import ru.packetdima.datascanner.ui.dialogs.DesktopAlertDialog
 import ru.packetdima.datascanner.ui.extensions.color

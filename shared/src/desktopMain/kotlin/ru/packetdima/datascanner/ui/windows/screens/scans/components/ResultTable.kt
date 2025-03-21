@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import info.downdetector.bigdatascanner.common.IDetectFunction
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
@@ -30,7 +31,8 @@ import java.io.File
 @Composable
 fun ResultTable(
     taskFilesViewModel: TaskFilesViewModel,
-    task: TaskEntityViewModel
+    task: TaskEntityViewModel,
+    selectedAttributes: List<IDetectFunction>
 ) {
 
     val coroutineScope = rememberCoroutineScope()
@@ -356,7 +358,11 @@ fun ResultTable(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     state = scrollState
                 ) {
-                    items(sortedFiles) { file ->
+                    items(
+                        sortedFiles.filter { f ->
+                            f.foundAttributes.any { attr -> attr in selectedAttributes }
+                        }
+                    ) { file ->
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -388,7 +394,7 @@ fun ResultTable(
                                     .removePrefix("/")
                                     .removePrefix("\\")
                                     .let {
-                                        if(it.isNotEmpty())
+                                        if (it.isNotEmpty())
                                             it
                                         else file.path
                                             .substringAfterLast("/")

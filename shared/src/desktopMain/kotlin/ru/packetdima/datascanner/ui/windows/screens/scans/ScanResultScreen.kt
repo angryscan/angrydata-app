@@ -18,6 +18,8 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import info.downdetector.bigdatascanner.common.DetectFunction
+import info.downdetector.bigdatascanner.common.IDetectFunction
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.dialogs.compose.rememberFileSaverLauncher
 import io.github.vinceglb.filekit.path
@@ -39,10 +41,8 @@ import ru.packetdima.datascanner.scan.common.createDialogSettings
 import ru.packetdima.datascanner.ui.dialogs.DesktopAlertDialog
 import ru.packetdima.datascanner.ui.extensions.color
 import ru.packetdima.datascanner.ui.extensions.icon
-import ru.packetdima.datascanner.ui.windows.screens.scans.components.AttributeCard
-import ru.packetdima.datascanner.ui.windows.screens.scans.components.ResultTable
-import ru.packetdima.datascanner.ui.windows.screens.scans.components.SortColumn
-import ru.packetdima.datascanner.ui.windows.screens.scans.components.comparator
+import ru.packetdima.datascanner.ui.strings.composableName
+import ru.packetdima.datascanner.ui.windows.screens.scans.components.*
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -74,6 +74,17 @@ fun ScanResultScreen(
     val totalFiles by task.totalFiles.collectAsState()
 
     val foundAttributes by task.foundAttributes.collectAsState()
+    val attributesOnOpen = remember { mutableStateListOf<IDetectFunction>() }
+
+    val selectedAttributes = remember { mutableStateListOf<IDetectFunction>() }
+
+    LaunchedEffect(foundAttributes) {
+        foundAttributes.filter { it !in attributesOnOpen }
+            .let { attributes ->
+                selectedAttributes.addAll(attributes)
+                attributesOnOpen.addAll(attributes)
+            }
+    }
 
     val progress = if (selectedFiles > 0) 100 * (scanned + skipped) / selectedFiles else 0
 
@@ -513,11 +524,32 @@ fun ScanResultScreen(
                         color = MaterialTheme.colorScheme.primary
                     )
                     FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        foundAttributes.forEach { attr ->
-                            AttributeCard(attr)
+                        AttributeFilterChip(
+                            text = stringResource(Res.string.SelectAll, attributesOnOpen.size),
+                            selected = attributesOnOpen.size == selectedAttributes.size,
+                            onClick = {
+                                if (attributesOnOpen.size == selectedAttributes.size) {
+                                    selectedAttributes.clear()
+                                } else {
+                                    selectedAttributes.addAll(attributesOnOpen.filter { it !in selectedAttributes })
+                                }
+                            }
+                        )
+                        attributesOnOpen.forEach { attr ->
+                            AttributeFilterChip(
+                                text = if (attr is DetectFunction) attr.composableName() else attr.writeName,
+                                selected = attr in selectedAttributes,
+                                onClick = {
+                                    if (attr in selectedAttributes) {
+                                        selectedAttributes -= attr
+                                    } else {
+                                        selectedAttributes += attr
+                                    }
+                                }
+                            )
                         }
                     }
                 }
@@ -525,7 +557,8 @@ fun ScanResultScreen(
 
             ResultTable(
                 taskFilesViewModel = taskFilesViewModel,
-                task = task
+                task = task,
+                selectedAttributes = selectedAttributes
             )
         }
     }

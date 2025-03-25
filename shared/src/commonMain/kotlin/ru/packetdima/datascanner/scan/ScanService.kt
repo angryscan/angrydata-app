@@ -2,14 +2,13 @@ package ru.packetdima.datascanner.scan
 
 import info.downdetector.bigdatascanner.common.IDetectFunction
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import ru.packetdima.datascanner.common.AppSettings
@@ -18,8 +17,9 @@ import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.db.DatabaseConnector
 import ru.packetdima.datascanner.db.models.*
 import ru.packetdima.datascanner.scan.common.FileType
+import java.util.concurrent.atomic.AtomicBoolean
 
-private val logging = KotlinLogging.logger {}
+private val logger = KotlinLogging.logger {}
 
 class ScanService : KoinComponent {
     private val database: DatabaseConnector by inject()
@@ -30,6 +30,10 @@ class ScanService : KoinComponent {
     val tasks: TasksViewModel by inject()
 
     private var scanThreads: Array<ScanThread>
+
+    private val coroutineScope = CoroutineScope(Dispatchers.Default)
+
+    val changingThreadsCount = AtomicBoolean(false)
 
     init {
         transaction(database.connection) {
@@ -57,14 +61,27 @@ class ScanService : KoinComponent {
                             .map { it[TaskDetectFunctions.function] }
                             .toSet(),
                         foundFiles = TaskFiles
+                            .innerJoin(TaskFileScanResults)
                             .select(TaskFiles.id)
                             .where { TaskFiles.task.eq(task.id) }
                             .withDistinct()
-                            .count()
+                            .count(),
+                        folderSize = task.size
                     )
                     if (task.taskState == TaskState.SCANNING) {
                         taskEntity.setState(TaskState.STOPPED)
-                        logging.info(throwable = null, LogMarkers.UserAction) {
+                        TaskFiles.update(
+                            where = {
+                                TaskFiles.task.eq(task.id) and
+                                        TaskFiles.state.neq(TaskState.STOPPED) and
+                                        TaskFiles.state.neq(TaskState.COMPLETED) and
+                                        TaskFiles.state.neq(TaskState.FAILED)
+                            }
+                        ) {
+                            it[state] = TaskState.STOPPED
+                        }
+
+                        logger.info(throwable = null, LogMarkers.UserAction) {
                             "Stopped task after restart (${taskEntity.id.value}) ${taskEntity.path.value}"
                         }
                     }
@@ -76,38 +93,50 @@ class ScanService : KoinComponent {
     }
 
     fun start() {
-        logging.info(throwable = null, LogMarkers.UserAction) {
+        logger.info(throwable = null, LogMarkers.UserAction) {
             "Starting scan threads"
         }
-        scanThreads.forEach {
+        coroutineScope.launch {
+            while(changingThreadsCount.get())
+                delay(1000)
 
-            if (!it.started)
-                it.start()
+            scanThreads.forEach {
+                if (!it.started)
+                    it.start()
+            }
         }
+
     }
 
     suspend fun stop() {
-        logging.info(throwable = null, LogMarkers.UserAction) {
+        logger.info(throwable = null, LogMarkers.UserAction) {
             "Stopping scan threads"
         }
-        scanThreads.map {
-            if (it.started)
-                it.stop()
+        coroutineScope {
+            scanThreads.map {
+                async {
+                    if (it.started)
+                        it.stop()
+                }
+            }.awaitAll()
         }
     }
 
     fun setThreadsCount() {
         val scanStarted = scanThreads.any { it.started }
-        logging.info(throwable = null, LogMarkers.UserAction) {
+        logger.info(throwable = null, LogMarkers.UserAction) {
             "Setting scan threads to ${appSettings.threadCount.value}"
         }
-        if (scanStarted)
-            runBlocking { stop() }
+        coroutineScope.launch {
+            changingThreadsCount.set(true)
+            if (scanStarted)
+                stop()
 
-        scanThreads = Array(appSettings.threadCount.value) { ScanThread() }
-
-        if (scanStarted)
-            start()
+            scanThreads = Array(appSettings.threadCount.value) { ScanThread() }
+            if (scanStarted)
+                start()
+            changingThreadsCount.set(false)
+        }
     }
 
     suspend fun createTask(
@@ -123,7 +152,7 @@ class ScanService : KoinComponent {
                 this.taskState = TaskState.PENDING
                 this.fastScan = fastScan ?: scanSettings.fastScan.value
             }
-            logging.info(throwable = null, LogMarkers.UserAction) {
+            logger.info(throwable = null, LogMarkers.UserAction) {
                 "Creating task. " +
                         "ID: ${task.id.value}. " +
                         "Path: \"$path\". " +
@@ -187,7 +216,7 @@ class ScanService : KoinComponent {
     }
 
     suspend fun deleteTask(task: TaskEntityViewModel) {
-        logging.info(throwable = null, LogMarkers.UserAction) {
+        logger.info(throwable = null, LogMarkers.UserAction) {
             "Delete task. ID: ${task.id.value}. Path: \"${task.path.value}\""
         }
         database.transaction {
@@ -206,34 +235,36 @@ class ScanService : KoinComponent {
     }
 
     fun startTask(task: TaskEntityViewModel) {
-        logging.info(throwable = null, LogMarkers.UserAction) {
+        logger.info(throwable = null, LogMarkers.UserAction) {
             "Starting task. ID: ${task.id.value}. Path: \"${task.path.value}\""
         }
-        task.start()
-        this.start()
+        task.start {
+            this.start()
+        }
     }
 
     fun stopTask(task: TaskEntityViewModel) {
-        logging.info(throwable = null, LogMarkers.UserAction) {
+        logger.info(throwable = null, LogMarkers.UserAction) {
             "Stopping task. ID: ${task.id.value}. Path: \"${task.path.value}\""
         }
         task.stop()
     }
 
     fun resumeTask(task: TaskEntityViewModel) {
-        logging.info(throwable = null, LogMarkers.UserAction) {
+        logger.info(throwable = null, LogMarkers.UserAction) {
             "Resume task. ID: ${task.id.value}. Path: \"${task.path.value}\""
         }
-        task.resume(false)
-        this.start()
+        task.resume {
+            this.start()
+        }
     }
 
-    @Suppress("Unused")
     fun rescanTask(task: TaskEntityViewModel) {
-        logging.info(throwable = null, LogMarkers.UserAction) {
+        logger.info(throwable = null, LogMarkers.UserAction) {
             "Restart task. ID: ${task.id.value}. Path: \"${task.path.value}\""
         }
-        task.resume(true)
-        this.start()
+        task.rescan {
+            this.start()
+        }
     }
 }

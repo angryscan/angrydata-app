@@ -52,7 +52,10 @@ class AppSettings : KoinComponent {
     private val settingsFile: AppSettingsFile by inject()
 
     @Serializable(with = MutableStateSerializer::class)
-    var threadCount: MutableState<Int> = mutableStateOf(Runtime.getRuntime().availableProcessors())
+    var threadCount: MutableState<Int> = mutableStateOf(max(
+        Runtime.getRuntime().availableProcessors() /2,
+        1
+    ))
 
     @Serializable(with = MutableStateSerializer::class)
     var theme: MutableState<ThemeType> = mutableStateOf(ThemeType.System)
@@ -65,6 +68,9 @@ class AppSettings : KoinComponent {
 
     @Serializable(with = MutableStateSerializer::class)
     var hideOnMinimize: MutableState<Boolean> = mutableStateOf(true)
+
+    @Serializable(with = MutableStateSerializer::class)
+    var debugMode: MutableState<Boolean> = mutableStateOf(false)
 
     constructor() {
         try {
@@ -84,20 +90,11 @@ class AppSettings : KoinComponent {
             this.language = prop.language
             this.hideOnMinimize = prop.hideOnMinimize
             this.reportSaveExtension = prop.reportSaveExtension
+            this.debugMode = prop.debugMode
         } catch (e: Exception) {
             logger.error {
                 "Failed to load app settings. Loading defaults."
             }
-            this.threadCount = mutableStateOf(
-                max(
-                    Runtime.getRuntime().availableProcessors() /2,
-                    1
-                )
-            )
-            this.theme = mutableStateOf(ThemeType.Dark)
-            this.language = mutableStateOf(LanguageType.Default)
-            this.hideOnMinimize = mutableStateOf(true)
-            this.reportSaveExtension = mutableStateOf(ResultWriter.FileExtensions.CSV)
         }
     }
 

@@ -53,38 +53,34 @@ fun ResultTable(
     val selectedFiles = remember { mutableStateListOf<Int>() }
 
     val filesExists = remember { mutableStateListOf<Int>() }
+    val filesDeleted = remember { mutableStateListOf<Int>() }
 
     val scrollState = rememberLazyListState()
 
-    val scanned by task.scannedFiles.collectAsState()
-    val skipped by task.skippedFiles.collectAsState()
-    val selected by task.selectedFiles.collectAsState()
-
     val state by task.state.collectAsState()
 
-    val progress = if (selected > 0) (scanned + skipped).toFloat() / selected else 0f
+    LaunchedEffect(taskFiles) {
+        filesExists.addAll(
+            taskFiles
+                .filter { it.id !in filesExists && it.id !in filesDeleted }
+                .map { it.id }
+        )
 
-    var prevProgress by remember { mutableStateOf(progress) }
+    }
 
     LaunchedEffect(state) {
+        taskFilesViewModel.update()
+
         filesExists.clear()
         filesExists.addAll(
             taskFiles
                 .filter { File(it.path).exists() }
                 .map { it.id }
         )
-    }
-
-
-    LaunchedEffect(progress) {
-        if (progress > prevProgress + 0.1f) {
-            taskFilesViewModel.update()
-            prevProgress = progress
-        }
-    }
-
-    LaunchedEffect(state) {
-        taskFilesViewModel.update()
+        filesDeleted
+            .addAll(
+                taskFiles.filter { it.id !in filesExists }.map { it.id }
+            )
     }
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -106,18 +102,19 @@ fun ResultTable(
                     onClick = {
                         coroutineScope.launch {
                             val filesToDelete = selectedFiles.size
-                            val filesDeleted = taskFiles.filter { it.id in selectedFiles }.map { file ->
+                            val fd = taskFiles.filter { it.id in selectedFiles }.map { file ->
                                 File(file.path).delete()
                             }.count { it }
 
                             taskFiles.filter { it.id in selectedFiles }.forEach {
                                 if (!File(it.path).exists()) {
                                     filesExists.remove(it.id)
+                                    filesDeleted.add(it.id)
                                 }
                             }
 
                             coroutineScope.launch {
-                                if (filesDeleted == filesToDelete)
+                                if (fd == filesToDelete)
                                     snackbarHostState.showSnackbar(
                                         getString(
                                             Res.string.Result_DeletedFiles,
@@ -128,7 +125,7 @@ fun ResultTable(
                                     snackbarHostState.showSnackbar(
                                         getString(
                                             Res.string.Result_NotDeletedFiles,
-                                            filesToDelete - filesDeleted
+                                            filesToDelete - fd
                                         )
                                     )
                             }

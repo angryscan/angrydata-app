@@ -4,6 +4,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
+import ch.qos.logback.classic.Level
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.vinceglb.filekit.FileKit
 import io.ktor.network.selector.*
@@ -18,12 +19,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.core.context.startKoin
 import ru.packetdima.datascanner.common.AppFiles
+import ru.packetdima.datascanner.common.AppVersion
 import ru.packetdima.datascanner.common.LogMarkers
 import ru.packetdima.datascanner.common.OS
 import ru.packetdima.datascanner.di.consoldeDatabaseModule
 import ru.packetdima.datascanner.di.databaseModule
 import ru.packetdima.datascanner.di.scanModule
 import ru.packetdima.datascanner.di.settingsModule
+import ru.packetdima.datascanner.logging.LogLevel
 import ru.packetdima.datascanner.scan.common.ScanPathHelper
 import ru.packetdima.datascanner.ui.MainWindow
 import ru.packetdima.datascanner.ui.tray.DorkTray
@@ -38,6 +41,11 @@ private val logger = KotlinLogging.logger {}
 
 @OptIn(ExperimentalComposeUiApi::class)
 suspend fun main(args: Array<String>) {
+
+    if(AppVersion != "Debug") {
+        LogLevel.setLoggingLevel(Level.INFO)
+    }
+
     File(System.getProperty("java.io.tmpdir")).listFiles()?.toList()?.asFlow()?.map {
         if (it.name.startsWith("ADS_")) {
             it.delete()

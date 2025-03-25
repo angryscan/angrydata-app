@@ -25,6 +25,7 @@ import ru.packetdima.datascanner.resources.*
 import ru.packetdima.datascanner.scan.TaskEntityViewModel
 import ru.packetdima.datascanner.scan.TaskFileResult
 import ru.packetdima.datascanner.scan.TaskFilesViewModel
+import java.awt.Desktop
 import java.io.File
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -366,6 +367,15 @@ fun ResultTable(
                             modifier = Modifier
                                 .clip(MaterialTheme.shapes.medium)
                                 .background(MaterialTheme.colorScheme.surfaceVariant)
+                                .clickable(
+                                    enabled = filesExists.contains(file.id)
+                                ) {
+                                    try {
+                                        Desktop.getDesktop().open(File(file.path))
+                                    } catch (e: Exception) {
+                                        filesExists.remove(file.id)
+                                    }
+                                }
                                 .padding(4.dp)
                         ) {
 

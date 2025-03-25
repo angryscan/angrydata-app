@@ -37,6 +37,7 @@ fun SettingsScreen() {
     val maxThreads = Runtime.getRuntime().availableProcessors()
 
     var contextMenuEnabled by remember { mutableStateOf(ContextMenu.enabled) }
+    var debugModeEnabled by remember { appSettings.debugMode }
 
     var language by remember { appSettings.language }
 
@@ -229,24 +230,44 @@ fun SettingsScreen() {
                 SettingsRow(
                     title = stringResource(Res.string.SettingsScreen_Logging)
                 ) {
-                    OutlinedButton(
-                        modifier = Modifier
-                            .size(width = 150.dp, height = 34.dp),
-                        shape = MaterialTheme.shapes.large,
-                        border = BorderStroke(width = 1.dp, color =MaterialTheme.colorScheme.primary),
-                        onClick = {
-                            Desktop.getDesktop().open(AppFiles.LoggingDir.toFile())
-                        },
-                        colors = ButtonDefaults.outlinedButtonColors().copy(
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(32.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = stringResource(Res.string.SettingsScreen_OpenFolder),
-                            fontSize = 14.sp,
-                            lineHeight = 14.sp,
-                            fontWeight = MaterialTheme.typography.bodyMedium.fontWeight
-                        )
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = stringResource(Res.string.ScanSettings_DebugMode))
+
+                            Switch(
+                                checked = debugModeEnabled,
+                                onCheckedChange = {
+                                    debugModeEnabled = it
+                                    appSettings.save()
+                                }
+                            )
+                        }
+
+                        OutlinedButton(
+                            modifier = Modifier
+                                .size(width = 150.dp, height = 34.dp),
+                            shape = MaterialTheme.shapes.large,
+                            border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.primary),
+                            onClick = {
+                                Desktop.getDesktop().open(AppFiles.LoggingDir.toFile())
+                            },
+                            colors = ButtonDefaults.outlinedButtonColors().copy(
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.SettingsScreen_OpenFolder),
+                                fontSize = 14.sp,
+                                lineHeight = 14.sp,
+                                fontWeight = MaterialTheme.typography.bodyMedium.fontWeight
+                            )
+                        }
                     }
                 }
             }

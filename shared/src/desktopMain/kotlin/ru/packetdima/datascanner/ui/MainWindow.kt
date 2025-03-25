@@ -21,10 +21,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import ch.qos.logback.classic.Level
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import ru.packetdima.datascanner.common.AppSettings
+import ru.packetdima.datascanner.logging.LogLevel
 import ru.packetdima.datascanner.navigation.AppScreens
 import ru.packetdima.datascanner.resources.Res
 import ru.packetdima.datascanner.resources.appName
@@ -57,6 +59,8 @@ fun MainWindow(
 
     val navController = rememberNavController()
 
+    val debugMode by remember { appSettings.debugMode }
+
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentScreen = AppScreens.valueOf(
         backStackEntry?.destination?.route?.substringBefore("/") ?: AppScreens.Main.name
@@ -72,6 +76,13 @@ fun MainWindow(
             if (currentScreen != AppScreens.Main)
                 navController.navigate(AppScreens.Main.name)
         }
+    }
+
+    LaunchedEffect(debugMode) {
+        if (debugMode)
+            LogLevel.setLoggingLevel(Level.DEBUG)
+        else
+            LogLevel.setLoggingLevel(Level.INFO)
     }
 
     Window(

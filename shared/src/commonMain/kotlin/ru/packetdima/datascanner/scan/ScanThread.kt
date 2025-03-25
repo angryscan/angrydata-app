@@ -1,5 +1,6 @@
 package ru.packetdima.datascanner.scan
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.*
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
@@ -16,6 +17,9 @@ import ru.packetdima.datascanner.scan.common.FileType
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.system.measureTimeMillis
+
+private val logger = KotlinLogging.logger {}
 
 class ScanThread : KoinComponent {
     private val scanThreadScope = CoroutineScope(Dispatchers.Default)
@@ -33,32 +37,37 @@ class ScanThread : KoinComponent {
     private var retryCount = 0
 
     suspend fun stop() {
+        logger.debug { "Stop requested for scan thread [$scanThreadScope]." }
         stopRequested.set(true)
+
         scanThreadScope.launch {
             while (_started.get())
                 delay(1000)
+            logger.debug { "Scan thread [$scanThreadScope] stopped by request." }
         }.join()
     }
 
     fun start() {
+        logger.debug { "Starting scan thread [$scanThreadScope]." }
         _started.set(true)
         scanThreadScope.launch {
             while (_started.get() && !stopRequested.get()) {
                 yield()
                 val tasksToScan = tasks.tasks.value.filter { it.state.value == TaskState.SCANNING }
-                if (tasksToScan.count() == 0) {
+                if (tasksToScan.isEmpty()) {
                     retryCount++
                     if (retryCount > 3) {
                         _started.set(false)
                         retryCount = 0
+                        logger.debug { "Nothing to scan. Scan thread [$scanThreadScope] stopped." }
                     }
                     delay(1000)
                     continue
                 }
 
-                val taskEntity = tasks.tasks.value.filter { it.state.value == TaskState.SCANNING }.random()
+                retryCount = 0
 
-                val fastScan = database.transaction { taskEntity.dbTask.fastScan }
+                val taskEntity = tasks.tasks.value.filter { it.state.value == TaskState.SCANNING }.random()
 
                 val dbFile = database.transaction {
                     val resultRow = TaskFiles.selectAll()
@@ -93,6 +102,8 @@ class ScanThread : KoinComponent {
                     continue
                 }
 
+                val fastScan = database.transaction { taskEntity.dbTask.fastScan }
+
                 val fileId = dbFile[TaskFiles.id].value
                 val filePath = dbFile[TaskFiles.path]
                 val fileObject = File(filePath)
@@ -105,49 +116,56 @@ class ScanThread : KoinComponent {
 
                 scanningFileId.set(fileId)
 
-                val scanRes = FileType
-                    .getFileType(fileObject)
-                    ?.scanFile(
-                        file = fileObject,
-                        context = currentCoroutineContext(),
-                        detectFunctions = detectFunctions.map { it.key },
-                        fastScan = fastScan
-                    )
+                val timer = measureTimeMillis {
 
-                if (scanRes != null && !scanRes.skipped()) {
-                    database.transaction {
-                        scanRes.getDocumentFields().forEach { field ->
-                            TaskFileScanResults.insert {
-                                it[file] = fileId
-                                it[detectFunction] = detectFunctions[field.key] ?: 0
-                                it[count] = field.value
+
+                    val scanRes = FileType
+                        .getFileType(fileObject)
+                        ?.scanFile(
+                            file = fileObject,
+                            context = currentCoroutineContext(),
+                            detectFunctions = detectFunctions.map { it.key },
+                            fastScan = fastScan
+                        )
+
+
+                    if (scanRes != null && !scanRes.skipped()) {
+                        database.transaction {
+                            scanRes.getDocumentFields().forEach { field ->
+                                TaskFileScanResults.insert {
+                                    it[file] = fileId
+                                    it[detectFunction] = detectFunctions[field.key] ?: 0
+                                    it[count] = field.value
+                                }
+                                taskEntity.addFoundAttribute(field.key)
                             }
-                            taskEntity.addFoundAttribute(field.key)
-                        }
-                        if (!scanRes.isEmpty()) {
-                            taskEntity.incrementFoundFiles()
-                        }
-                        TaskFiles.update(
-                            where = {
-                                TaskFiles.id.eq(fileId)
+                            if (!scanRes.isEmpty()) {
+                                taskEntity.incrementFoundFiles()
                             }
-                        ) {
-                            it[state] = TaskState.COMPLETED
-                        }
-                    }
-                } else {
-                    database.transaction {
-                        TaskFiles.update(
-                            where = {
-                                TaskFiles.id.eq(fileId)
+                            TaskFiles.update(
+                                where = {
+                                    TaskFiles.id.eq(fileId)
+                                }
+                            ) {
+                                it[state] = TaskState.COMPLETED
                             }
-                        ) {
-                            it[state] = TaskState.FAILED
+                        }
+                    } else {
+                        database.transaction {
+                            TaskFiles.update(
+                                where = {
+                                    TaskFiles.id.eq(fileId)
+                                }
+                            ) {
+                                it[state] = TaskState.FAILED
+                            }
                         }
                     }
                 }
+                logger.debug { "Scanned file with extension ${fileObject.extension} and size ${fileObject.length()} in $timer ms" }
 
                 taskEntity.checkProgress()
+                yield()
             }
 
             _started.set(false)

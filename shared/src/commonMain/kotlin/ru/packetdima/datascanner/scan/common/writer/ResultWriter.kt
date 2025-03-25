@@ -19,7 +19,7 @@ import javax.xml.transform.TransformerFactory
 import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 
-val logging = KotlinLogging.logger {}
+private val logger = KotlinLogging.logger {}
 
 object ResultWriter {
     enum class FileExtensions(val extension: String) {
@@ -51,7 +51,7 @@ object ResultWriter {
             }
             return true
         } catch (e: Exception) {
-            logging.error { "Failed to save report. ${e.message}" }
+            logger.error { "Failed to save report. ${e.message}" }
             onSaveError()
             return false
         }

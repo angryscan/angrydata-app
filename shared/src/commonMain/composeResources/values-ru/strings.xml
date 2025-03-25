@@ -80,6 +80,7 @@
     <string name="ScanSettings-SelectAll">Выбрать все</string>
     <string name="SettingsScreen-Logging">Журналирование</string>
     <string name="SettingsScreen-OpenFolder">Открыть папку</string>
+    <string name="ScanSettings-DebugMode">Собирать отладочную информацию</string>
 
     <string name="DetectFunction-Emails">Эл. адрес</string>
     <string name="DetectFunction-Phones">Телефон</string>

@@ -80,6 +80,7 @@
     <string name="ScanSettings-DetectFunctions">Detect functions</string>
     <string name="ScanSettings-UserSignatures">User signatures</string>
     <string name="ScanSettings-SelectAll">Select all</string>
+    <string name="ScanSettings-DebugMode">Collect debug info</string>
 
     <string name="DetectFunction-Emails">Email</string>
     <string name="DetectFunction-Phones">Phone</string>

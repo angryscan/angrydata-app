@@ -2,6 +2,7 @@ package ru.packetdima.datascanner.scan
 
 import androidx.lifecycle.ViewModel
 import info.downdetector.bigdatascanner.common.IDetectFunction
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -16,17 +17,21 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import ru.packetdima.datascanner.common.LogMarkers
 import ru.packetdima.datascanner.db.DatabaseConnector
 import ru.packetdima.datascanner.db.models.*
 import ru.packetdima.datascanner.scan.common.FilesCounter
 import ru.packetdima.datascanner.scan.functions.UserSignature
 import java.io.File
 
+private val logger = KotlinLogging.logger {}
+
 class TaskEntityViewModel(
     val dbTask: Task,
     totalFiles: Long? = null,
     foundAttributes: Set<IDetectFunction>? = null,
     foundFiles: Long? = null,
+    folderSize: String? = null,
     state: TaskState = TaskState.LOADING
 ) : ViewModel(), KoinComponent {
     private val database: DatabaseConnector by inject()
@@ -94,6 +99,7 @@ class TaskEntityViewModel(
                 database.transaction {
                     _state.value = dbTask.taskState
                     _totalFiles.value = dbTask.filesCount ?: 0L
+                    _folderSize.value = dbTask.size ?: ""
                 }
             }
         } else {
@@ -105,6 +111,9 @@ class TaskEntityViewModel(
 
             if (foundFiles != null)
                 _foundFiles.value = foundFiles
+
+            if(folderSize != null)
+                _folderSize.value = folderSize
         }
 
         taskScope.launch {
@@ -113,6 +122,7 @@ class TaskEntityViewModel(
                 _path.value = dbTask.path
                 _startedAt.value = dbTask.startedAt
                 _finishedAt.value = dbTask.finishedAt
+                _totalFiles.value = dbTask.filesCount ?: 0L
 
                 _foundAttributes.value =
                     TaskFileScanResults
@@ -174,6 +184,10 @@ class TaskEntityViewModel(
                     if (_selectedFiles.value == _scannedFiles.value + _skippedFiles.value) {
                         if (_state.value != TaskState.COMPLETED) {
                             setState(TaskState.COMPLETED)
+                            logger.info(
+                                throwable = null,
+                                LogMarkers.UserAction
+                            ) { "Scanning task completed. ID: ${_id.value}. Path: \"${_path.value}\"" }
                         }
                     }
                 }
@@ -184,9 +198,14 @@ class TaskEntityViewModel(
     }
 
     fun setState(state: TaskState) {
-        _state.value = state
+        logger.debug { "Task state changed to $state. ID: ${_id.value}. Path: \"${_path.value}\"" }
 
         taskScope.launch {
+            while (_busy.value)
+                delay(1000)
+
+            _state.value = state
+
             _busy.value = true
             database.transaction {
                 dbTask.taskState = state
@@ -238,7 +257,6 @@ class TaskEntityViewModel(
                 }
             }
 
-
             if (state == TaskState.STOPPED) {
                 while (true) {
                     val cnt = database.transaction {
@@ -246,7 +264,9 @@ class TaskEntityViewModel(
                             .selectAll()
                             .where {
                                 TaskFiles.task.eq(dbTask.id) and
-                                        TaskFiles.state.neq(TaskState.SCANNING)
+                                        TaskFiles.state.neq(TaskState.STOPPED) and
+                                        TaskFiles.state.neq(TaskState.COMPLETED) and
+                                        TaskFiles.state.neq(TaskState.FAILED)
                             }
                             .count()
                     }
@@ -265,18 +285,23 @@ class TaskEntityViewModel(
             setState(TaskState.STOPPED)
     }
 
-    fun resume(rescan: Boolean) {
-        if (rescan) {
-            start(rescan = true)
-        } else {
-            setState(TaskState.SCANNING)
+    fun resume(taskStarted: () -> Unit = {}) {
+        setState(TaskState.SCANNING)
+        taskStarted()
+    }
+
+    fun rescan(taskStarted: () -> Unit = {}) {
+        start(rescan = true) {
+            taskStarted()
         }
     }
 
-    fun start(rescan: Boolean = false) {
+    fun start(rescan: Boolean = false, taskStarted: () -> Unit = {}) {
         val path = dbTask.path
 
         taskScope.launch {
+            while (_busy.value)
+                delay(1000)
 
             val extensions = database.transaction {
                 dbTask.extensions.flatMap { it.extension.extensions }
@@ -316,11 +341,12 @@ class TaskEntityViewModel(
                     dbTask.size = directorySize.filesSize.toString()
                     dbTask.filesCount = directorySize.filesCount
                 }
-                _foundFiles.value = directorySize.filesCount
+                _totalFiles.value = directorySize.filesCount
                 _folderSize.value = directorySize.filesSize.toString()
             }
 
             setState(TaskState.SCANNING)
+            taskStarted()
         }
     }
 

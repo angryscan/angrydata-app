@@ -48,7 +48,7 @@ fun ScanTaskCard(
 
     val progress = if (selectedFiles > 0) 100 * (scanned + skipped) / selectedFiles else 0
 
-    val folderSize = taskEntity.dbTask.size ?: ""
+    val folderSize by taskEntity.folderSize.collectAsState()
 
     val dateFormat = LocalDateTime.Format {
         dayOfMonth()

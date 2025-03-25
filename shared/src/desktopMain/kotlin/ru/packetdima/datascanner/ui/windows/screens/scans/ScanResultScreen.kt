@@ -86,9 +86,15 @@ fun ScanResultScreen(
                 selectedAttributes.addAll(attributes)
                 attributesOnOpen.addAll(attributes)
             }
+
+        taskFilesViewModel.update()
     }
 
     val progress = if (selectedFiles > 0) 100 * (scanned + skipped) / selectedFiles else 0
+
+    LaunchedEffect(progress) {
+        taskFilesViewModel.update()
+    }
 
     val animatedProgress by
     animateFloatAsState(

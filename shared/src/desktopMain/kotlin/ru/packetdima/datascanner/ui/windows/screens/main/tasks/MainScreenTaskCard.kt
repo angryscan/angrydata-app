@@ -8,6 +8,7 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Pause
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.RestartAlt
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,19 +28,27 @@ import ru.packetdima.datascanner.db.models.TaskState
 import ru.packetdima.datascanner.scan.ScanService
 import ru.packetdima.datascanner.scan.TaskEntityViewModel
 import ru.packetdima.datascanner.ui.extensions.color
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 @Composable
 fun MainScreenTaskCard(taskEntity: TaskEntityViewModel, currentTime: Instant) {
     val scanService = koinInject<ScanService>()
     val state by taskEntity.state.collectAsState()
-    val completedAt = taskEntity.dbTask.finishedAt?.toInstant(TimeZone.currentSystemDefault())
-    val startedAt = taskEntity.dbTask.startedAt?.toInstant(TimeZone.currentSystemDefault())
+    val pausedAt by taskEntity.pausedAt.collectAsState()
+    val startedAt by taskEntity.startedAt.collectAsState()
+    val pausedAtInstant = pausedAt?.toInstant(TimeZone.currentSystemDefault())
+    val startedAtInstant = startedAt?.toInstant(TimeZone.currentSystemDefault())
+    val deltaSeconds by taskEntity.deltaSeconds.collectAsState()
+    val busy by taskEntity.busy.collectAsState()
+
+    val deltaDuration = (deltaSeconds?: 0L).toDuration(DurationUnit.SECONDS)
 
     val scanTime = if (startedAt != null) {
-        (if (completedAt != null)
-            completedAt - startedAt
+        (if (pausedAtInstant != null && startedAtInstant != null)
+            pausedAtInstant - startedAtInstant - deltaDuration
         else
-            currentTime - startedAt)
+            currentTime - startedAtInstant!! - deltaDuration)
             .toComponents { days, hours, minutes, seconds, _ ->
                 if(days > 0)
                     "$days:$hours:${minutes.toString().padStart(2, '0')}" +
@@ -97,29 +106,37 @@ fun MainScreenTaskCard(taskEntity: TaskEntityViewModel, currentTime: Instant) {
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 if (state != TaskState.COMPLETED) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(MaterialTheme.shapes.medium)
-                            .background(MaterialTheme.colorScheme.surface.copy(0.5f))
-                            .clickable {
-                                when (state) {
-                                    TaskState.SEARCHING, TaskState.SCANNING, TaskState.LOADING, TaskState.PENDING ->
-                                        scanService.stopTask(taskEntity)
-                                    TaskState.STOPPED -> scanService.resumeTask(taskEntity)
-                                    else -> scanService.rescanTask(taskEntity)
-                                }
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = when (state) {
-                                TaskState.SEARCHING, TaskState.SCANNING, TaskState.LOADING, TaskState.PENDING -> Icons.Outlined.Pause
-                                TaskState.STOPPED -> Icons.Outlined.PlayArrow
-                                else -> Icons.Outlined.RestartAlt
-                            },
-                            contentDescription = null
+                    if(busy || state in setOf(TaskState.SEARCHING, TaskState.LOADING, TaskState.PENDING)) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(40.dp)
                         )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(MaterialTheme.shapes.medium)
+                                .background(MaterialTheme.colorScheme.surface.copy(0.5f))
+                                .clickable {
+                                    when (state) {
+                                        TaskState.SCANNING ->
+                                            scanService.stopTask(taskEntity)
+
+                                        TaskState.STOPPED -> scanService.resumeTask(taskEntity)
+                                        else -> scanService.rescanTask(taskEntity)
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = when (state) {
+                                    TaskState.SEARCHING, TaskState.SCANNING, TaskState.LOADING, TaskState.PENDING -> Icons.Outlined.Pause
+                                    TaskState.STOPPED -> Icons.Outlined.PlayArrow
+                                    else -> Icons.Outlined.RestartAlt
+                                },
+                                contentDescription = null
+                            )
+                        }
                     }
                 } else {
                     Spacer(modifier = Modifier.width(40.dp))

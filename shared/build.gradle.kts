@@ -27,11 +27,14 @@ kotlin {
 
                 implementation(libs.sql.sqlite)
                 implementation(libs.sql.postgresql)
+                implementation(libs.sql.flyway)
+
                 api(libs.exposed.core)
                 api(libs.exposed.dao)
                 api(libs.exposed.jdbc)
                 api(libs.exposed.json)
                 api(libs.exposed.datetime)
+                implementation(libs.exposed.migration)
 
                 api(libs.datascanner)
 

@@ -1,26 +1,28 @@
 package ru.packetdima.datascanner.scan
 
+import MigrationUtils
 import info.downdetector.bigdatascanner.common.IDetectFunction
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.*
-import org.jetbrains.exposed.sql.SchemaUtils
+import org.flywaydb.core.Flyway
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.update
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import ru.packetdima.datascanner.common.AppFiles
 import ru.packetdima.datascanner.common.AppSettings
 import ru.packetdima.datascanner.common.LogMarkers
 import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.db.DatabaseConnector
 import ru.packetdima.datascanner.db.models.*
 import ru.packetdima.datascanner.scan.common.FileType
+import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 
 private val logger = KotlinLogging.logger {}
 
+@OptIn(ExperimentalDatabaseMigrationApi::class)
 class ScanService : KoinComponent {
     private val database: DatabaseConnector by inject()
 
@@ -35,6 +37,8 @@ class ScanService : KoinComponent {
 
     val changingThreadsCount = AtomicBoolean(false)
 
+    private var migrationRequired = false
+
     init {
         transaction(database.connection) {
             SchemaUtils.create(
@@ -44,7 +48,55 @@ class ScanService : KoinComponent {
                 TaskDetectFunctions,
                 TaskFileScanResults
             )
+
+            val statements = MigrationUtils.statementsRequiredForDatabaseMigration(Tasks, withLogs = false)
+            if(statements.isNotEmpty()) {
+                logger.info {
+                    "Database migration required."
+                }
+                migrationRequired = true
+                if(!File(AppFiles.MigrationsDirectory).exists()) {
+                    File(AppFiles.MigrationsDirectory).mkdir()
+                }
+                SchemaUtils.addMissingColumnsStatements(Tasks)
+                MigrationUtils.generateMigrationScript(
+                    Tasks,
+                    scriptDirectory = AppFiles.MigrationsDirectory,
+                    scriptName = "V2__AddMissingColumns",
+                )
+            }
         }
+
+        if(migrationRequired) {
+            val flyway = Flyway.configure()
+                .dataSource(database.dbSettings.url, "", "")
+                .defaultSchema("main")
+                .schemas("main")
+                .locations("filesystem:${AppFiles.MigrationsDirectory}")
+                .baselineOnMigrate(appSettings.firstMigration.value)
+                .load()
+
+
+            val m = runBlocking {
+                database.transaction {
+                    flyway.migrate()
+                }
+            }
+
+            if(m.success && m.successfulMigrations.isNotEmpty()) {
+                appSettings.firstMigration.value = false
+                appSettings.save()
+                migrationRequired = false
+                logger.info {
+                    "Database migration completed."
+                }
+            } else {
+                logger.error {
+                    "Database migration failed."
+                }
+            }
+        }
+
         scanThreads = Array(appSettings.threadCount.value) { ScanThread() }
         CoroutineScope(Dispatchers.IO).launch {
             database.transaction {
@@ -69,6 +121,8 @@ class ScanService : KoinComponent {
                         folderSize = task.size
                     )
                     if (task.taskState == TaskState.SCANNING) {
+                        task.pauseDate = task.lastFileDate
+
                         taskEntity.setState(TaskState.STOPPED)
                         TaskFiles.update(
                             where = {

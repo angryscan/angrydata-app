@@ -110,12 +110,14 @@
 
     <string name="Task-StartedAt">Начало: %1$s</string>
     <string name="Task-FinishedAt">Конец: %1$s</string>
+    <string name="Task-PausedAt">Пауза: %1$s</string>
     <string name="Task-Progress">Прогресс: %1$s%</string>
     <string name="Task-TotalFiles">Всего файлов</string>
     <string name="Task-SelectedFiles">Выбрано файлов</string>
     <string name="Task-FoundFiles">Найдено файлов</string>
     <string name="Task-FolderSize">Размер папки</string>
     <string name="Task-FoundAttributes">Найденные атрибуты:</string>
+    <string name="Task-ScanTime">Время сканирования</string>
 
     <string name="TaskStateChipFilter-Active">Активные</string>
     <string name="TaskStateChipFilter-Paused">На паузе</string>

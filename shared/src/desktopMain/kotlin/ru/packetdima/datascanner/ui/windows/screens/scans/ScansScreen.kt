@@ -12,6 +12,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
+import kotlinx.datetime.Clock
 import org.koin.compose.koinInject
 import ru.packetdima.datascanner.db.models.TaskState
 import ru.packetdima.datascanner.scan.ScanService
@@ -35,7 +37,18 @@ fun ScansScreen(onTaskClick: (Int) -> Unit) {
             task.state.value != TaskState.LOADING
         else
             task.state.value in filterTaskStates
-    }.sortedByDescending { it.finishedAt.value }.sortedByDescending { it.startedAt.value }
+    }.sortedByDescending { it.finishedAt.value }
+        .sortedByDescending { it.pausedAt.value }
+        .sortedByDescending { it.startedAt.value }
+
+    var currentTime by remember { mutableStateOf(Clock.System.now()) }
+
+    LaunchedEffect(currentTime) {
+        while (true) {
+            currentTime = Clock.System.now()
+            delay(1000)
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -53,7 +66,7 @@ fun ScansScreen(onTaskClick: (Int) -> Unit) {
                 error = error,
                 completed = completed,
                 onActiveClick = {
-                    active = !active;
+                    active = !active
                     if (active) {
                         filterTaskStates.addAll(
                             listOf(
@@ -73,7 +86,7 @@ fun ScansScreen(onTaskClick: (Int) -> Unit) {
                     }
                 },
                 onPausedClick = {
-                    paused = !paused;
+                    paused = !paused
                     if (paused) {
                         filterTaskStates.add(TaskState.STOPPED)
                     } else {
@@ -81,7 +94,7 @@ fun ScansScreen(onTaskClick: (Int) -> Unit) {
                     }
                 },
                 onErrorClick = {
-                    error = !error;
+                    error = !error
                     if (error) {
                         filterTaskStates.add(TaskState.FAILED)
                     } else {
@@ -89,7 +102,7 @@ fun ScansScreen(onTaskClick: (Int) -> Unit) {
                     }
                 },
                 onCompletedClick = {
-                    completed = !completed;
+                    completed = !completed
                     if (completed) {
                         filterTaskStates.add(TaskState.COMPLETED)
                     } else {
@@ -112,7 +125,8 @@ fun ScansScreen(onTaskClick: (Int) -> Unit) {
                         taskEntity = task,
                         onClick = {
                             onTaskClick(task.id.value!!)
-                        }
+                        },
+                        currentTime = currentTime
                     )
                 }
             }

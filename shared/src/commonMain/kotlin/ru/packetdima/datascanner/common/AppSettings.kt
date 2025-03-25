@@ -72,6 +72,10 @@ class AppSettings : KoinComponent {
     @Serializable(with = MutableStateSerializer::class)
     var debugMode: MutableState<Boolean> = mutableStateOf(false)
 
+    @Serializable(with = MutableStateSerializer::class)
+    var firstMigration = mutableStateOf(true)
+
+
     constructor() {
         try {
             val prop: AppSettings = Json.decodeFromString(settingsFile.readText())
@@ -91,6 +95,7 @@ class AppSettings : KoinComponent {
             this.hideOnMinimize = prop.hideOnMinimize
             this.reportSaveExtension = prop.reportSaveExtension
             this.debugMode = prop.debugMode
+            this.firstMigration = prop.firstMigration
         } catch (e: Exception) {
             logger.error {
                 "Failed to load app settings. Loading defaults."

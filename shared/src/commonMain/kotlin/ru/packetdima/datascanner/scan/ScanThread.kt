@@ -2,6 +2,9 @@ package ru.packetdima.datascanner.scan
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.*
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
@@ -108,6 +111,8 @@ class ScanThread : KoinComponent {
                 val filePath = dbFile[TaskFiles.path]
                 val fileObject = File(filePath)
                 val detectFunctions = database.transaction {
+                    taskEntity.dbTask.lastFileDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+
                     TaskDetectFunctions
                         .select(TaskDetectFunctions.function, TaskDetectFunctions.id)
                         .where { TaskDetectFunctions.task.eq(taskEntity.dbTask.id) }

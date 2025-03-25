@@ -12,6 +12,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
+import kotlinx.datetime.Clock
 import org.koin.compose.koinInject
 import ru.packetdima.datascanner.db.models.TaskState
 import ru.packetdima.datascanner.scan.ScanService
@@ -38,6 +40,15 @@ fun ScansScreen(onTaskClick: (Int) -> Unit) {
     }.sortedByDescending { it.finishedAt.value }
         .sortedByDescending { it.pausedAt.value }
         .sortedByDescending { it.startedAt.value }
+
+    var currentTime by remember { mutableStateOf(Clock.System.now()) }
+
+    LaunchedEffect(currentTime) {
+        while (true) {
+            currentTime = Clock.System.now()
+            delay(1000)
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -114,7 +125,8 @@ fun ScansScreen(onTaskClick: (Int) -> Unit) {
                         taskEntity = task,
                         onClick = {
                             onTaskClick(task.id.value!!)
-                        }
+                        },
+                        currentTime = currentTime
                     )
                 }
             }

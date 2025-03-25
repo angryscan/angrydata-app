@@ -121,7 +121,7 @@ class ScanService : KoinComponent {
                         folderSize = task.size
                     )
                     if (task.taskState == TaskState.SCANNING) {
-                        taskEntity.dbTask.pauseDate = taskEntity.dbTask.lastFileDate
+                        task.pauseDate = task.lastFileDate
 
                         taskEntity.setState(TaskState.STOPPED)
                         TaskFiles.update(

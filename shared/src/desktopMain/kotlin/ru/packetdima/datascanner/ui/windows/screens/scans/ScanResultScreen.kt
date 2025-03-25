@@ -23,9 +23,13 @@ import info.downdetector.bigdatascanner.common.IDetectFunction
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.dialogs.compose.rememberFileSaverLauncher
 import io.github.vinceglb.filekit.path
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.char
+import kotlinx.datetime.toInstant
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -43,8 +47,10 @@ import ru.packetdima.datascanner.ui.extensions.color
 import ru.packetdima.datascanner.ui.extensions.icon
 import ru.packetdima.datascanner.ui.strings.composableName
 import ru.packetdima.datascanner.ui.windows.screens.scans.components.*
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
-@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ScanResultScreen(
     taskId: Int,
@@ -77,9 +83,48 @@ fun ScanResultScreen(
     val folderSize by task.folderSize.collectAsState()
 
     val foundAttributes by task.foundAttributes.collectAsState()
+
+    val busy by task.busy.collectAsState()
+
     val attributesOnOpen = remember { mutableStateListOf<IDetectFunction>() }
 
     val selectedAttributes = remember { mutableStateListOf<IDetectFunction>() }
+
+
+    val pausedAtInstant = pausedAt?.toInstant(TimeZone.currentSystemDefault())
+    val startedAtInstant = startedAt?.toInstant(TimeZone.currentSystemDefault())
+    val deltaSeconds by task.deltaSeconds.collectAsState()
+    val deltaDuration = (deltaSeconds?: 0L).toDuration(DurationUnit.SECONDS)
+
+    var currentTime by remember { mutableStateOf(Clock.System.now()) }
+
+    LaunchedEffect(currentTime) {
+        while (true) {
+            currentTime = Clock.System.now()
+            delay(1000)
+        }
+    }
+
+    val scanTime = if (startedAt != null) {
+        when (state) {
+            TaskState.COMPLETED -> finishedAt!!.toInstant(TimeZone.currentSystemDefault()) - startedAtInstant!! - deltaDuration
+            TaskState.STOPPED -> pausedAtInstant!! - startedAtInstant!! - deltaDuration
+            else -> currentTime - startedAtInstant!! - deltaDuration
+        }
+            .toComponents { days, hours, minutes, seconds, _ ->
+                if (days > 0)
+                    "$days:$hours:${minutes.toString().padStart(2, '0')}" +
+                            ":${seconds.toString().padStart(2, '0')}"
+                else if (hours > 0)
+                    "$hours:${minutes.toString().padStart(2, '0')}" +
+                            ":${seconds.toString().padStart(2, '0')}"
+                else
+                    minutes.toString().padStart(2, '0') +
+                            ":${seconds.toString().padStart(2, '0')}"
+            }
+    } else {
+        "00:00:00"
+    }
 
     LaunchedEffect(foundAttributes) {
         foundAttributes.filter { it !in attributesOnOpen }
@@ -353,30 +398,37 @@ fun ScanResultScreen(
                     horizontalArrangement = Arrangement.spacedBy(14.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(MaterialTheme.shapes.medium)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
-                            .clickable {
-                                when (state) {
-                                    TaskState.SEARCHING, TaskState.SCANNING, TaskState.LOADING, TaskState.PENDING ->
-                                        scanService.stopTask(task)
-
-                                    TaskState.STOPPED -> scanService.resumeTask(task)
-                                    else -> scanService.rescanTask(task)
-                                }
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = when (state) {
-                                TaskState.SEARCHING, TaskState.SCANNING, TaskState.LOADING, TaskState.PENDING -> Icons.Outlined.Pause
-                                TaskState.STOPPED -> Icons.Outlined.PlayArrow
-                                else -> Icons.Outlined.RestartAlt
-                            },
-                            contentDescription = null
+                    if(busy) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(40.dp)
                         )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(MaterialTheme.shapes.medium)
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+                                .clickable {
+                                    when (state) {
+                                        TaskState.SEARCHING, TaskState.SCANNING, TaskState.LOADING, TaskState.PENDING ->
+                                            scanService.stopTask(task)
+
+                                        TaskState.STOPPED -> scanService.resumeTask(task)
+                                        else -> scanService.rescanTask(task)
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = when (state) {
+                                    TaskState.SEARCHING, TaskState.SCANNING, TaskState.LOADING, TaskState.PENDING -> Icons.Outlined.Pause
+                                    TaskState.STOPPED -> Icons.Outlined.PlayArrow
+                                    else -> Icons.Outlined.RestartAlt
+                                },
+                                contentDescription = null
+                            )
+                        }
                     }
                     LinearProgressIndicator(
                         progress = {
@@ -476,6 +528,27 @@ fun ScanResultScreen(
                     )
                     Text(
                         text = folderSize,
+                        fontSize = 14.sp,
+                        letterSpacing = 0.1.sp,
+                    )
+                }
+                VerticalDivider(
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = stringResource(Res.string.Task_ScanTime),
+                        fontSize = 14.sp,
+                        letterSpacing = 0.1.sp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = scanTime,
                         fontSize = 14.sp,
                         letterSpacing = 0.1.sp,
                     )

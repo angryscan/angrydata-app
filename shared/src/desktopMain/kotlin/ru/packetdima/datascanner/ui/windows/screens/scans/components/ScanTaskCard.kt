@@ -17,20 +17,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.char
+import kotlinx.datetime.toInstant
 import org.jetbrains.compose.resources.stringResource
 import ru.packetdima.datascanner.db.models.TaskState
 import ru.packetdima.datascanner.resources.*
 import ru.packetdima.datascanner.scan.TaskEntityViewModel
 import ru.packetdima.datascanner.ui.extensions.color
 import ru.packetdima.datascanner.ui.extensions.icon
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ScanTaskCard(
     taskEntity: TaskEntityViewModel,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    currentTime: Instant
 ) {
     val state by taskEntity.state.collectAsState()
     val fastScan by taskEntity.fastScan.collectAsState()
@@ -50,6 +56,33 @@ fun ScanTaskCard(
     val progress = if (selectedFiles > 0) 100 * (scanned + skipped) / selectedFiles else 0
 
     val folderSize by taskEntity.folderSize.collectAsState()
+
+    val pausedAtInstant = pausedAt?.toInstant(TimeZone.currentSystemDefault())
+    val startedAtInstant = startedAt?.toInstant(TimeZone.currentSystemDefault())
+    val deltaSeconds by taskEntity.deltaSeconds.collectAsState()
+
+    val deltaDuration = (deltaSeconds ?: 0L).toDuration(DurationUnit.SECONDS)
+
+    val scanTime = if (startedAt != null) {
+        when (state) {
+            TaskState.COMPLETED -> finishedAt!!.toInstant(TimeZone.currentSystemDefault()) - startedAtInstant!! - deltaDuration
+            TaskState.STOPPED -> pausedAtInstant!! - startedAtInstant!! - deltaDuration
+            else -> currentTime - startedAtInstant!! - deltaDuration
+        }
+            .toComponents { days, hours, minutes, seconds, _ ->
+                if (days > 0)
+                    "$days:$hours:${minutes.toString().padStart(2, '0')}" +
+                            ":${seconds.toString().padStart(2, '0')}"
+                else if (hours > 0)
+                    "$hours:${minutes.toString().padStart(2, '0')}" +
+                            ":${seconds.toString().padStart(2, '0')}"
+                else
+                    minutes.toString().padStart(2, '0') +
+                            ":${seconds.toString().padStart(2, '0')}"
+            }
+    } else {
+        "00:00:00"
+    }
 
     val dateFormat = LocalDateTime.Format {
         dayOfMonth()
@@ -256,6 +289,28 @@ fun ScanTaskCard(
                     )
                     Text(
                         text = folderSize,
+                        fontSize = 14.sp,
+                        letterSpacing = 0.1.sp,
+                    )
+                }
+
+                VerticalDivider(
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = stringResource(Res.string.Task_ScanTime),
+                        fontSize = 14.sp,
+                        letterSpacing = 0.1.sp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = scanTime,
                         fontSize = 14.sp,
                         letterSpacing = 0.1.sp,
                     )

@@ -398,7 +398,7 @@ fun ScanResultScreen(
                     horizontalArrangement = Arrangement.spacedBy(14.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if(busy) {
+                    if(busy || state in listOf(TaskState.LOADING, TaskState.SEARCHING, TaskState.PENDING)) {
                         CircularProgressIndicator(
                             modifier = Modifier
                                 .size(40.dp)
@@ -411,7 +411,7 @@ fun ScanResultScreen(
                                 .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
                                 .clickable {
                                     when (state) {
-                                        TaskState.SEARCHING, TaskState.SCANNING, TaskState.LOADING, TaskState.PENDING ->
+                                        TaskState.SCANNING ->
                                             scanService.stopTask(task)
 
                                         TaskState.STOPPED -> scanService.resumeTask(task)

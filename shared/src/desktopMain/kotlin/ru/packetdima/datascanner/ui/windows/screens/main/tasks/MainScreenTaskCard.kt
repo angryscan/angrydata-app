@@ -106,7 +106,7 @@ fun MainScreenTaskCard(taskEntity: TaskEntityViewModel, currentTime: Instant) {
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 if (state != TaskState.COMPLETED) {
-                    if(busy) {
+                    if(busy || state in setOf(TaskState.SEARCHING, TaskState.LOADING, TaskState.PENDING)) {
                         CircularProgressIndicator(
                             modifier = Modifier
                                 .size(40.dp)
@@ -119,7 +119,7 @@ fun MainScreenTaskCard(taskEntity: TaskEntityViewModel, currentTime: Instant) {
                                 .background(MaterialTheme.colorScheme.surface.copy(0.5f))
                                 .clickable {
                                     when (state) {
-                                        TaskState.SEARCHING, TaskState.SCANNING, TaskState.LOADING, TaskState.PENDING ->
+                                        TaskState.SCANNING ->
                                             scanService.stopTask(taskEntity)
 
                                         TaskState.STOPPED -> scanService.resumeTask(taskEntity)

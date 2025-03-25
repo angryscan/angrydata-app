@@ -42,7 +42,9 @@ fun MainScreenTasks(
     val allTasks by scanService.tasks.tasks.collectAsState()
     val activeTasks = allTasks.filter {
         it.state.value != TaskState.COMPLETED
-    }.sortedByDescending { it.finishedAt.value }.sortedByDescending { it.startedAt.value }
+    }.sortedByDescending { it.finishedAt.value }
+        .sortedByDescending { it.pausedAt.value }
+        .sortedByDescending { it.startedAt.value }
 
     val scanStateIconRotation = remember { Animatable(270f) }
 

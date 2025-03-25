@@ -37,6 +37,7 @@ fun ScanTaskCard(
     val path by taskEntity.path.collectAsState()
     val startedAt by taskEntity.startedAt.collectAsState()
     val finishedAt by taskEntity.finishedAt.collectAsState()
+    val pausedAt by taskEntity.pausedAt.collectAsState()
 
     val scanned by taskEntity.scannedFiles.collectAsState()
     val skipped by taskEntity.skippedFiles.collectAsState()
@@ -143,6 +144,17 @@ fun ScanTaskCard(
                                 text = stringResource(
                                     resource = Res.string.Task_FinishedAt,
                                     finishedAt?.let {
+                                        dateFormat.format(it)
+                                    } ?: ""
+                                ),
+                                fontSize = 14.sp,
+                                letterSpacing = 0.1.sp
+                            )
+                        } else if (pausedAt != null && state == TaskState.STOPPED) {
+                            Text(
+                                text = stringResource(
+                                    resource = Res.string.Task_PausedAt,
+                                    pausedAt?.let {
                                         dateFormat.format(it)
                                     } ?: ""
                                 ),

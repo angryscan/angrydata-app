@@ -115,6 +115,7 @@
 
     <string name="Task-StartedAt">Started: %1$s</string>
     <string name="Task-FinishedAt">Finished: %1$s</string>
+    <string name="Task-PausedAt">Paused: %1$s</string>
     <string name="Task-Progress">Progress: %1$s%</string>
     <string name="Task-TotalFiles">Total files</string>
     <string name="Task-SelectedFiles">Selected files</string>

@@ -66,6 +66,7 @@ fun ScanResultScreen(
     val fastScan by task.fastScan.collectAsState()
     val startedAt by task.startedAt.collectAsState()
     val finishedAt by task.finishedAt.collectAsState()
+    val pausedAt by task.pausedAt.collectAsState()
 
     val scanned by task.scannedFiles.collectAsState()
     val skipped by task.skippedFiles.collectAsState()
@@ -500,6 +501,17 @@ fun ScanResultScreen(
                             text = stringResource(
                                 resource = Res.string.Task_FinishedAt,
                                 finishedAt?.let {
+                                    dateFormat.format(it)
+                                } ?: ""
+                            ),
+                            fontSize = 14.sp,
+                            letterSpacing = 0.1.sp
+                        )
+                    } else if (pausedAt != null && state == TaskState.STOPPED) {
+                        Text(
+                            text = stringResource(
+                                resource = Res.string.Task_PausedAt,
+                                pausedAt?.let {
                                     dateFormat.format(it)
                                 } ?: ""
                             ),

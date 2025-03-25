@@ -9,7 +9,7 @@ import org.koin.core.component.inject
 import java.sql.Connection
 
 class DatabaseConnector() : KoinComponent {
-    private val dbSettings: DatabaseSettings by inject()
+    val dbSettings: DatabaseSettings by inject()
 
     val connection: Database = Database.connect(
         url = dbSettings.url,

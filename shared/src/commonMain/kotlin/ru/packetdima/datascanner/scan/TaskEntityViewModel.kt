@@ -9,12 +9,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import org.jetbrains.exposed.sql.*
+import kotlinx.datetime.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.update
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import ru.packetdima.datascanner.common.LogMarkers
@@ -23,6 +23,8 @@ import ru.packetdima.datascanner.db.models.*
 import ru.packetdima.datascanner.scan.common.FilesCounter
 import ru.packetdima.datascanner.scan.functions.UserSignature
 import java.io.File
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.time.DurationUnit
 
 private val logger = KotlinLogging.logger {}
 
@@ -42,9 +44,7 @@ class TaskEntityViewModel(
     val state
         get() = _state.asStateFlow()
 
-    private var _busy = MutableStateFlow(false)
-    val busy
-        get() = _busy.asStateFlow()
+    private val busy = AtomicBoolean(false)
 
     private var _id = MutableStateFlow<Int?>(null)
     val id = _id.asStateFlow()
@@ -89,6 +89,10 @@ class TaskEntityViewModel(
     val finishedAt
         get() = _finishedAt.asStateFlow()
 
+    private var _pausedAt = MutableStateFlow<LocalDateTime?>(null)
+    val pausedAt
+        get() = _pausedAt.asStateFlow()
+
     private var _folderSize = MutableStateFlow("")
     val folderSize
         get() = _folderSize.asStateFlow()
@@ -112,7 +116,7 @@ class TaskEntityViewModel(
             if (foundFiles != null)
                 _foundFiles.value = foundFiles
 
-            if(folderSize != null)
+            if (folderSize != null)
                 _folderSize.value = folderSize
         }
 
@@ -121,6 +125,7 @@ class TaskEntityViewModel(
                 _fastScan.value = dbTask.fastScan
                 _path.value = dbTask.path
                 _startedAt.value = dbTask.startedAt
+                _pausedAt.value = dbTask.pauseDate
                 _finishedAt.value = dbTask.finishedAt
                 _totalFiles.value = dbTask.filesCount ?: 0L
 
@@ -192,7 +197,7 @@ class TaskEntityViewModel(
                     }
                 }
 
-                _busy.value = false
+                busy.set(false)
             }
         }
     }
@@ -201,12 +206,10 @@ class TaskEntityViewModel(
         logger.debug { "Task state changed to $state. ID: ${_id.value}. Path: \"${_path.value}\"" }
 
         taskScope.launch {
-            while (_busy.value)
+            while (busy.get())
                 delay(1000)
 
-            _state.value = state
-
-            _busy.value = true
+            busy.set(true)
             database.transaction {
                 dbTask.taskState = state
 
@@ -215,8 +218,13 @@ class TaskEntityViewModel(
                         dbTask.startedAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
                         _startedAt.value = dbTask.startedAt
 
-                        dbTask.finishedAt = null
-                        _finishedAt.value = dbTask.finishedAt
+                        if(dbTask.pauseDate != null) {
+                            dbTask.delta = (dbTask.delta ?: 0L) +
+                                (Clock.System.now() - dbTask.pauseDate!!.toInstant(TimeZone.currentSystemDefault()))
+                                    .toLong(DurationUnit.SECONDS)
+                            dbTask.pauseDate = null
+                            _pausedAt.value = null
+                        }
                     }
 
                     TaskState.COMPLETED -> {
@@ -235,8 +243,8 @@ class TaskEntityViewModel(
                         ) {
                             it[TaskFiles.state] = TaskState.STOPPED
                         }
-                        dbTask.finishedAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-                        _finishedAt.value = dbTask.finishedAt
+                        dbTask.pauseDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+                        _pausedAt.value = dbTask.pauseDate
                     }
 
                     TaskState.SCANNING -> {
@@ -249,13 +257,21 @@ class TaskEntityViewModel(
                         ) {
                             it[TaskFiles.state] = TaskState.SEARCHING
                         }
-                        dbTask.finishedAt = null
-                        _finishedAt.value = dbTask.finishedAt
+
+                        if(dbTask.pauseDate != null) {
+                            dbTask.delta = (dbTask.delta ?: 0L) +
+                                    (Clock.System.now() - dbTask.pauseDate!!.toInstant(TimeZone.currentSystemDefault()))
+                                        .toLong(DurationUnit.SECONDS)
+                            dbTask.pauseDate = null
+                            _pausedAt.value = null
+                        }
                     }
 
                     else -> {}
                 }
             }
+
+            _state.value = state
 
             if (state == TaskState.STOPPED) {
                 while (true) {
@@ -276,7 +292,7 @@ class TaskEntityViewModel(
                 }
             }
 
-            _busy.value = false
+            busy.set(false)
         }
     }
 
@@ -300,7 +316,7 @@ class TaskEntityViewModel(
         val path = dbTask.path
 
         taskScope.launch {
-            while (_busy.value)
+            while (busy.get())
                 delay(1000)
 
             val extensions = database.transaction {

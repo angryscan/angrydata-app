@@ -35,7 +35,9 @@ fun ScansScreen(onTaskClick: (Int) -> Unit) {
             task.state.value != TaskState.LOADING
         else
             task.state.value in filterTaskStates
-    }.sortedByDescending { it.finishedAt.value }.sortedByDescending { it.startedAt.value }
+    }.sortedByDescending { it.finishedAt.value }
+        .sortedByDescending { it.pausedAt.value }
+        .sortedByDescending { it.startedAt.value }
 
     Column(
         modifier = Modifier
@@ -53,7 +55,7 @@ fun ScansScreen(onTaskClick: (Int) -> Unit) {
                 error = error,
                 completed = completed,
                 onActiveClick = {
-                    active = !active;
+                    active = !active
                     if (active) {
                         filterTaskStates.addAll(
                             listOf(
@@ -73,7 +75,7 @@ fun ScansScreen(onTaskClick: (Int) -> Unit) {
                     }
                 },
                 onPausedClick = {
-                    paused = !paused;
+                    paused = !paused
                     if (paused) {
                         filterTaskStates.add(TaskState.STOPPED)
                     } else {
@@ -81,7 +83,7 @@ fun ScansScreen(onTaskClick: (Int) -> Unit) {
                     }
                 },
                 onErrorClick = {
-                    error = !error;
+                    error = !error
                     if (error) {
                         filterTaskStates.add(TaskState.FAILED)
                     } else {
@@ -89,7 +91,7 @@ fun ScansScreen(onTaskClick: (Int) -> Unit) {
                     }
                 },
                 onCompletedClick = {
-                    completed = !completed;
+                    completed = !completed
                     if (completed) {
                         filterTaskStates.add(TaskState.COMPLETED)
                     } else {

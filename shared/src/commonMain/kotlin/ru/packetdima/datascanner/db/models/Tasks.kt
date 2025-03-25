@@ -14,6 +14,9 @@ object Tasks : IntIdTable() {
     val size = text("size").nullable()
     val filesCount = long("files_count").nullable()
     val fastScan = bool("fast_scan").default(false)
+    val pauseDate = datetime("pause_date").nullable()
+    val lastFileDate = datetime("last_file_date").nullable()
+    val delta = long("delta").nullable()
 }
 
 class Task(id: EntityID<Int>) : IntEntity(id) {
@@ -26,6 +29,9 @@ class Task(id: EntityID<Int>) : IntEntity(id) {
     var size by Tasks.size
     var filesCount by Tasks.filesCount
     var fastScan by Tasks.fastScan
+    var pauseDate by Tasks.pauseDate
+    var lastFileDate by Tasks.lastFileDate
+    var delta by Tasks.delta
 
     val files by TaskFile referrersOn TaskFiles.task
     val extensions by TaskFileExtension referrersOn TaskFileExtensions.task

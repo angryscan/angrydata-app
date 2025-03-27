@@ -13,23 +13,28 @@ import androidx.compose.ui.unit.sp
 import info.downdetector.bigdatascanner.common.DetectFunction
 import info.downdetector.bigdatascanner.common.IDetectFunction
 import ru.packetdima.datascanner.ui.strings.composableName
+import ru.packetdima.datascanner.ui.windows.components.DetectFunctionTooltip
 
 @Composable
 fun AttributeCard(attribute: IDetectFunction) {
-    Box(
-        modifier = Modifier
-            .clip(
-                MaterialTheme.shapes.small
-            )
-            .background(color = MaterialTheme.colorScheme.secondary)
-            .padding(4.dp)
+    DetectFunctionTooltip(
+        detectFunction = attribute
     ) {
-        Text(
-            text = if (attribute is DetectFunction) attribute.composableName() else attribute.writeName,
-            fontSize = 14.sp,
-            lineHeight = 14.sp,
-            letterSpacing = 0.1.sp,
-            color = MaterialTheme.colorScheme.onSecondary
-        )
+        Box(
+            modifier = Modifier
+                .clip(
+                    MaterialTheme.shapes.small
+                )
+                .background(color = MaterialTheme.colorScheme.secondary)
+                .padding(4.dp)
+        ) {
+            Text(
+                text = if (attribute is DetectFunction) attribute.composableName() else attribute.writeName,
+                fontSize = 14.sp,
+                lineHeight = 14.sp,
+                letterSpacing = 0.1.sp,
+                color = MaterialTheme.colorScheme.onSecondary
+            )
+        }
     }
 }

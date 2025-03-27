@@ -92,7 +92,6 @@
     <string name="DetectFunction-INN">INN</string>
     <string name="DetectFunction-AccountNumber">Account number</string>
     <string name="DetectFunction-Address">Address</string>
-    <string name="DetectFunction-BlackList">Black list</string>
     <string name="DetectFunction-ValuableInfo">Valuable info</string>
     <string name="DetectFunction-Login">Login</string>
     <string name="DetectFunction-Password">Password</string>
@@ -100,6 +99,23 @@
     <string name="DetectFunction-Name">Full name</string>
     <string name="DetectFunction-IP">IP</string>
     <string name="DetectFunction-IPv6">IPv6</string>
+    <string name="DetectFunction-Description-Emails">Email</string>
+    <string name="DetectFunction-Description-Phones">Phone (+7)</string>
+    <string name="DetectFunction-Description-CardNumbers">Card number with BINs of russian banks</string>
+    <string name="DetectFunction-Description-CarNumber">Russian car numbers</string>
+    <string name="DetectFunction-Description-SNILS">SNILS</string>
+    <string name="DetectFunction-Description-Passport">Passport</string>
+    <string name="DetectFunction-Description-OMS">OMS</string>
+    <string name="DetectFunction-Description-INN">INN</string>
+    <string name="DetectFunction-Description-AccountNumber">Account number</string>
+    <string name="DetectFunction-Description-Address">Address</string>
+    <string name="DetectFunction-Description-ValuableInfo">Searching words. For example: </string>
+    <string name="DetectFunction-Description-Login">Login</string>
+    <string name="DetectFunction-Description-Password">Password</string>
+    <string name="DetectFunction-Description-CVV">CVV of credit card</string>
+    <string name="DetectFunction-Description-Name">Full name</string>
+    <string name="DetectFunction-Description-IP">IP address</string>
+    <string name="DetectFunction-Description-IPv6">IP address v6</string>
 
     <string name="SettingsScreen-ThreadsCount">Threads count</string>
     <string name="SettingsScreen-ContextMenu">Context menu</string>

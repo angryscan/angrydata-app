@@ -42,6 +42,7 @@ import ru.packetdima.datascanner.ui.dialogs.DesktopAlertDialog
 import ru.packetdima.datascanner.ui.extensions.color
 import ru.packetdima.datascanner.ui.extensions.icon
 import ru.packetdima.datascanner.ui.strings.composableName
+import ru.packetdima.datascanner.ui.windows.components.DetectFunctionTooltip
 import ru.packetdima.datascanner.ui.windows.screens.scans.components.*
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
@@ -545,17 +546,21 @@ fun ScanResultScreen(
                             }
                         )
                         attributesOnOpen.forEach { attr ->
-                            AttributeFilterChip(
-                                text = if (attr is DetectFunction) attr.composableName() else attr.writeName,
-                                selected = attr in selectedAttributes,
-                                onClick = {
-                                    if (attr in selectedAttributes) {
-                                        selectedAttributes -= attr
-                                    } else {
-                                        selectedAttributes += attr
+                            DetectFunctionTooltip(
+                                detectFunction = attr
+                            ) {
+                                AttributeFilterChip(
+                                    text = if (attr is DetectFunction) attr.composableName() else attr.writeName,
+                                    selected = attr in selectedAttributes,
+                                    onClick = {
+                                        if (attr in selectedAttributes) {
+                                            selectedAttributes -= attr
+                                        } else {
+                                            selectedAttributes += attr
+                                        }
                                     }
-                                }
-                            )
+                                )
+                            }
                         }
                     }
                 }

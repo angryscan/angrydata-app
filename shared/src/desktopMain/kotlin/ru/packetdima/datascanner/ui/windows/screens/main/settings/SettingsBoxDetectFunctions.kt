@@ -26,6 +26,7 @@ import ru.packetdima.datascanner.resources.ScanSettings_DetectFunctions
 import ru.packetdima.datascanner.resources.ScanSettings_SelectAll
 import ru.packetdima.datascanner.scan.common.FileType
 import ru.packetdima.datascanner.ui.strings.composableName
+import ru.packetdima.datascanner.ui.windows.components.DetectFunctionTooltip
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,7 +66,11 @@ fun SettingsBoxDetectFunctions(scanSettings: ScanSettings) {
                         checked = scanSettings.detectFunctions.containsAll(DetectFunction.entries),
                         onCheckedChange = { checked ->
                             if (checked) {
-                                scanSettings.detectFunctions.addAll(DetectFunction.entries.filter { !scanSettings.detectFunctions.contains(it) })
+                                scanSettings.detectFunctions.addAll(DetectFunction.entries.filter {
+                                    !scanSettings.detectFunctions.contains(
+                                        it
+                                    )
+                                })
                             } else {
                                 scanSettings.detectFunctions.clear()
                             }
@@ -77,8 +82,12 @@ fun SettingsBoxDetectFunctions(scanSettings: ScanSettings) {
                             text = stringResource(Res.string.ScanSettings_SelectAll),
                             fontSize = 14.sp,
                             modifier = Modifier.clickable {
-                                if(!scanSettings.detectFunctions.containsAll(DetectFunction.entries))
-                                    scanSettings.detectFunctions.addAll(DetectFunction.entries.filter { !scanSettings.detectFunctions.contains(it) })
+                                if (!scanSettings.detectFunctions.containsAll(DetectFunction.entries))
+                                    scanSettings.detectFunctions.addAll(DetectFunction.entries.filter {
+                                        !scanSettings.detectFunctions.contains(
+                                            it
+                                        )
+                                    })
                                 else
                                     scanSettings.detectFunctions.clear()
                                 scanSettings.save()
@@ -104,17 +113,21 @@ fun SettingsBoxDetectFunctions(scanSettings: ScanSettings) {
                         }
                     )
                     CompositionLocalProvider(LocalRippleConfiguration provides null) {
-                        Text(
-                            text = detectFunction.composableName(),
-                            fontSize = 14.sp,
-                            modifier = Modifier.clickable {
-                                if(scanSettings.detectFunctions.contains(detectFunction))
-                                    scanSettings.detectFunctions.remove(detectFunction)
-                                else
-                                    scanSettings.detectFunctions.add(detectFunction)
-                                scanSettings.save()
-                            }
-                        )
+                        DetectFunctionTooltip(
+                            detectFunction = detectFunction
+                        ) {
+                            Text(
+                                text = detectFunction.composableName(),
+                                fontSize = 14.sp,
+                                modifier = Modifier.clickable {
+                                    if (scanSettings.detectFunctions.contains(detectFunction))
+                                        scanSettings.detectFunctions.remove(detectFunction)
+                                    else
+                                        scanSettings.detectFunctions.add(detectFunction)
+                                    scanSettings.save()
+                                }
+                            )
+                        }
                     }
                 }
             }

@@ -32,7 +32,7 @@ internal class SensitiveSearcherTest: KoinComponent {
             module {
                 single {
                     DatabaseSettings(
-                        url = "jdbc:sqlite:test.db",
+                        url = "jdbc:sqlite:build/tmp/test.db",
                         driver = "org.sqlite.JDBC"
                     )
                 }

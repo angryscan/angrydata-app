@@ -58,7 +58,6 @@ class ScanService : KoinComponent {
                 if(!File(AppFiles.MigrationsDirectory).exists()) {
                     File(AppFiles.MigrationsDirectory).mkdir()
                 }
-                SchemaUtils.addMissingColumnsStatements(Tasks)
                 MigrationUtils.generateMigrationScript(
                     Tasks,
                     scriptDirectory = AppFiles.MigrationsDirectory,

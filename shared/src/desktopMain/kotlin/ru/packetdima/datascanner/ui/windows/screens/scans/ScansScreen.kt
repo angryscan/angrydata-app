@@ -126,7 +126,7 @@ fun ScansScreen(onTaskClick: (Int) -> Unit) {
                         onClick = {
                             onTaskClick(task.id.value!!)
                         },
-                        currentTime = currentTime
+                        currentTime = currentTime,
                     )
                 }
             }

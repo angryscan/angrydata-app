@@ -24,7 +24,7 @@ data class TaskFileResult(
     val score: Int
 )
 
-class TaskFilesViewModel(val task: Task) : KoinComponent, ViewModel() {
+class TaskFilesViewModel(val task: Task) : KoinComponent, ViewModel(){
     private val database: DatabaseConnector by inject()
 
     private val taskScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -32,6 +32,10 @@ class TaskFilesViewModel(val task: Task) : KoinComponent, ViewModel() {
     private val _taskFiles = MutableStateFlow<List<TaskFileResult>>(listOf())
     val taskFiles
         get() = _taskFiles.asStateFlow()
+
+    private val _scoreSum = MutableStateFlow(0L)
+    val scoreSum
+        get() = _scoreSum.asStateFlow()
 
     init {
         update()
@@ -77,6 +81,7 @@ class TaskFilesViewModel(val task: Task) : KoinComponent, ViewModel() {
                         }
                     )
                 }
+                _scoreSum.value = _taskFiles.value.sumOf { it.score.toLong() }
 
             }
         }

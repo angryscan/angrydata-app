@@ -18,14 +18,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.format.char
 import kotlinx.datetime.toInstant
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
+import org.koin.core.parameter.parametersOf
 import ru.packetdima.datascanner.db.models.TaskState
-import ru.packetdima.datascanner.resources.*
+import ru.packetdima.datascanner.resources.Res
+import ru.packetdima.datascanner.resources.Task_FoundAttributes
 import ru.packetdima.datascanner.scan.TaskEntityViewModel
+import ru.packetdima.datascanner.scan.TaskFilesViewModel
 import ru.packetdima.datascanner.ui.extensions.color
 import ru.packetdima.datascanner.ui.extensions.icon
 import kotlin.time.DurationUnit
@@ -63,6 +65,9 @@ fun ScanTaskCard(
 
     val deltaDuration = (deltaSeconds ?: 0L).toDuration(DurationUnit.SECONDS)
 
+    val taskFilesViewModel = koinInject<TaskFilesViewModel> { parametersOf(taskEntity.dbTask) }
+    val scoreSum by taskFilesViewModel.scoreSum.collectAsState()
+
     val scanTime = if (startedAt != null) {
         when (state) {
             TaskState.COMPLETED -> finishedAt!!.toInstant(TimeZone.currentSystemDefault()) - startedAtInstant!! - deltaDuration
@@ -84,19 +89,6 @@ fun ScanTaskCard(
         "00:00:00"
     }
 
-    val dateFormat = LocalDateTime.Format {
-        dayOfMonth()
-        char('.')
-        monthNumber()
-        char('.')
-        year()
-        char(' ')
-        hour()
-        char(':')
-        minute()
-        char(':')
-        second()
-    }
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -160,161 +152,27 @@ fun ScanTaskCard(
                         color = MaterialTheme.colorScheme.primary
                     )
 
-                    Column {
-                        Text(
-                            text = stringResource(
-                                resource = Res.string.Task_StartedAt,
-                                startedAt?.let {
-                                    dateFormat.format(it)
-                                } ?: ""
-                            ),
-                            fontSize = 14.sp,
-                            letterSpacing = 0.1.sp
-                        )
-
-                        if (finishedAt != null && state == TaskState.COMPLETED) {
-                            Text(
-                                text = stringResource(
-                                    resource = Res.string.Task_FinishedAt,
-                                    finishedAt?.let {
-                                        dateFormat.format(it)
-                                    } ?: ""
-                                ),
-                                fontSize = 14.sp,
-                                letterSpacing = 0.1.sp
-                            )
-                        } else if (pausedAt != null && state == TaskState.STOPPED) {
-                            Text(
-                                text = stringResource(
-                                    resource = Res.string.Task_PausedAt,
-                                    pausedAt?.let {
-                                        dateFormat.format(it)
-                                    } ?: ""
-                                ),
-                                fontSize = 14.sp,
-                                letterSpacing = 0.1.sp
-                            )
-                        } else {
-                            Text(
-                                text = stringResource(
-                                    resource = Res.string.Task_Progress,
-                                    progress
-                                ),
-                                fontSize = 14.sp,
-                                letterSpacing = 0.1.sp
-                            )
-                        }
-                    }
+                    ScanTimeStatItem(
+                        startedAt = startedAt,
+                        finishedAt = finishedAt,
+                        pausedAt = pausedAt,
+                        state = state,
+                        progress = progress
+                    )
                 }
             }
 
             Row(
                 horizontalArrangement = Arrangement.spacedBy(30.dp)
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Text(
-                        text = stringResource(Res.string.Task_TotalFiles),
-                        fontSize = 14.sp,
-                        letterSpacing = 0.1.sp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = totalFiles.toString(),
-                        fontSize = 14.sp,
-                        letterSpacing = 0.1.sp,
-                    )
-                }
-
-                VerticalDivider(
-                    thickness = 1.dp,
-                    color = MaterialTheme.colorScheme.primary
+                ScanStat(
+                    totalFiles = totalFiles,
+                    selectedFiles = selectedFiles,
+                    foundFiles = foundFiles,
+                    folderSize = folderSize,
+                    scanTime = scanTime,
+                    scoreSum = scoreSum
                 )
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Text(
-                        text = stringResource(Res.string.Task_SelectedFiles),
-                        fontSize = 14.sp,
-                        letterSpacing = 0.1.sp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = selectedFiles.toString(),
-                        fontSize = 14.sp,
-                        letterSpacing = 0.1.sp,
-                    )
-                }
-
-                VerticalDivider(
-                    thickness = 1.dp,
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Text(
-                        text = stringResource(Res.string.Task_FoundFiles),
-                        fontSize = 14.sp,
-                        letterSpacing = 0.1.sp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = foundFiles.toString(),
-                        fontSize = 14.sp,
-                        letterSpacing = 0.1.sp,
-                    )
-                }
-
-                VerticalDivider(
-                    thickness = 1.dp,
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Text(
-                        text = stringResource(Res.string.Task_FolderSize),
-                        fontSize = 14.sp,
-                        letterSpacing = 0.1.sp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = folderSize,
-                        fontSize = 14.sp,
-                        letterSpacing = 0.1.sp,
-                    )
-                }
-
-                VerticalDivider(
-                    thickness = 1.dp,
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Text(
-                        text = stringResource(Res.string.Task_ScanTime),
-                        fontSize = 14.sp,
-                        letterSpacing = 0.1.sp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = scanTime,
-                        fontSize = 14.sp,
-                        letterSpacing = 0.1.sp,
-                    )
-                }
             }
 
             if (foundAttributes.isNotEmpty()) {

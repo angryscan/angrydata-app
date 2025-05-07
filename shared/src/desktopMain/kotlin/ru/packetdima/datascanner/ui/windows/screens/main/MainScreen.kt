@@ -26,6 +26,9 @@ import ru.packetdima.datascanner.resources.MainScreen_SelectPathPlaceholder
 import ru.packetdima.datascanner.resources.Res
 import ru.packetdima.datascanner.scan.ScanService
 import ru.packetdima.datascanner.scan.common.ScanPathHelper
+import ru.packetdima.datascanner.scan.common.files.FileType
+import ru.packetdima.datascanner.scan.functions.CertDetectFun
+import ru.packetdima.datascanner.scan.functions.CodeDetectFun
 import ru.packetdima.datascanner.ui.windows.screens.main.settings.SettingsBox
 import ru.packetdima.datascanner.ui.windows.screens.main.settings.SettingsButton
 import ru.packetdima.datascanner.ui.windows.screens.main.tasks.MainScreenTasks
@@ -166,10 +169,23 @@ fun MainScreen() {
                             onClick = {
                                 if (File(path).exists()) {
                                     coroutineScope.launch {
+                                        val extensions = scanSettings.extensions
+                                        if(scanSettings.detectCode.value)
+                                            extensions.add(FileType.CODE)
+                                        if(scanSettings.detectCert.value)
+                                            extensions.add(FileType.CERT)
+
+                                        val detectFunctions = (scanSettings.detectFunctions + scanSettings.userSignatures)
+                                            .toMutableList()
+                                        if(scanSettings.detectCert.value)
+                                            detectFunctions.add(CertDetectFun)
+                                        if(scanSettings.detectCode.value)
+                                            detectFunctions.add(CodeDetectFun)
+
                                         val task = scanService.createTask(
                                             path = path,
                                             extensions = scanSettings.extensions,
-                                            detectFunctions = scanSettings.detectFunctions + scanSettings.userSignatures,
+                                            detectFunctions = detectFunctions,
                                             fastScan = scanSettings.fastScan.value
                                         )
                                         scanService.startTask(task)

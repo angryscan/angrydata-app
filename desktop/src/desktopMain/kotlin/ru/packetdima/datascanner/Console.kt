@@ -10,7 +10,7 @@ import me.tongfei.progressbar.ProgressBar
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import ru.packetdima.datascanner.common.*
-import ru.packetdima.datascanner.scan.common.FileType
+import ru.packetdima.datascanner.scan.common.files.FileType
 import ru.packetdima.datascanner.searcher.ConsoleFilesCounter
 import ru.packetdima.datascanner.searcher.SensitiveSearcher
 import ru.packetdima.datascanner.searcher.Writer

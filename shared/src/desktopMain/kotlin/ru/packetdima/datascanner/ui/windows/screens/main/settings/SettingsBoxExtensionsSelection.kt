@@ -23,7 +23,7 @@ import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.resources.Res
 import ru.packetdima.datascanner.resources.ScanSettings_FileExtensions
 import ru.packetdima.datascanner.resources.ScanSettings_SelectAll
-import ru.packetdima.datascanner.scan.common.FileType
+import ru.packetdima.datascanner.scan.common.files.FileType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,7 +38,8 @@ fun SettingsBoxExtensionsSelection(scanSettings: ScanSettings) {
             expanded = !expanded
         }
     ) {
-        val rows = FileType.entries.size / 5 + if (FileType.entries.size % 5 > 0) 1 else 0
+        val fileTypeEntries = FileType.entries.filter { it != FileType.CODE && it != FileType.CERT }
+        val rows = fileTypeEntries.size / 5 + if (fileTypeEntries.size % 5 > 0) 1 else 0
 
         val height = (24 * rows + (6 * (rows - 1))).dp + 52.dp
 
@@ -56,10 +57,10 @@ fun SettingsBoxExtensionsSelection(scanSettings: ScanSettings) {
                     modifier = Modifier.height(42.dp)
                 ) {
                     Checkbox(
-                        checked = scanSettings.extensions.containsAll(FileType.entries),
+                        checked = scanSettings.extensions.containsAll(fileTypeEntries),
                         onCheckedChange = { checked ->
                             if (checked) {
-                                scanSettings.extensions.addAll(FileType.entries.filter { !scanSettings.extensions.contains(it) })
+                                scanSettings.extensions.addAll(fileTypeEntries.filter { !scanSettings.extensions.contains(it) })
                             } else {
                                 scanSettings.extensions.clear()
                             }
@@ -71,8 +72,8 @@ fun SettingsBoxExtensionsSelection(scanSettings: ScanSettings) {
                             text = stringResource(Res.string.ScanSettings_SelectAll),
                             fontSize = 14.sp,
                             modifier = Modifier.clickable {
-                                if(!scanSettings.extensions.containsAll(FileType.entries))
-                                    scanSettings.extensions.addAll(FileType.entries.filter { !scanSettings.extensions.contains(it) })
+                                if(!scanSettings.extensions.containsAll(fileTypeEntries))
+                                    scanSettings.extensions.addAll(fileTypeEntries.filter { !scanSettings.extensions.contains(it) })
                                 else
                                     scanSettings.extensions.clear()
                                 scanSettings.save()
@@ -81,7 +82,7 @@ fun SettingsBoxExtensionsSelection(scanSettings: ScanSettings) {
                     }
                 }
             }
-            items(FileType.entries) { extension ->
+            items(fileTypeEntries) { extension ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(1f)

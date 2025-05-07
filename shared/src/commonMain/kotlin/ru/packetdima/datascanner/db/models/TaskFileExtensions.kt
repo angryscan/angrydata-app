@@ -4,7 +4,7 @@ import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
-import ru.packetdima.datascanner.scan.common.FileType
+import ru.packetdima.datascanner.scan.common.files.FileType
 
 object TaskFileExtensions : IntIdTable() {
     val task = reference("task", Tasks)

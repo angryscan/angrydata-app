@@ -9,17 +9,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import info.downdetector.bigdatascanner.common.DetectFunction
 import info.downdetector.bigdatascanner.common.IDetectFunction
-import org.jetbrains.compose.resources.stringResource
-import ru.packetdima.datascanner.resources.Res
-import ru.packetdima.datascanner.resources.Signature_Title
-import ru.packetdima.datascanner.scan.functions.UserSignature
 import ru.packetdima.datascanner.ui.strings.description
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DetectFunctionTooltip(detectFunction: IDetectFunction, block: @Composable () -> Unit) {
+    DetectFunctionTooltip(
+        description = detectFunction.description(),
+        block = block
+    )
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun DetectFunctionTooltip(description: String, block: @Composable () -> Unit) {
     TooltipArea(
         tooltip = {
             Surface(
@@ -29,13 +33,7 @@ fun DetectFunctionTooltip(detectFunction: IDetectFunction, block: @Composable ()
                 shadowElevation = 4.dp
             ) {
                 Text(
-                    text =
-                        if (detectFunction is DetectFunction)
-                            detectFunction.description()
-                        else if (detectFunction is UserSignature)
-                            stringResource(Res.string.Signature_Title)
-                        else
-                            detectFunction.writeName,
+                    text = description,
                     modifier = Modifier.padding(8.dp),
                     fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                     fontWeight = MaterialTheme.typography.bodyMedium.fontWeight,

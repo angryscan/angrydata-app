@@ -25,7 +25,7 @@ import org.koin.compose.koinInject
 import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.common.UserSignatureSettings
 import ru.packetdima.datascanner.resources.*
-import ru.packetdima.datascanner.scan.common.FileType
+import ru.packetdima.datascanner.scan.common.files.FileType
 import ru.packetdima.datascanner.scan.functions.UserSignature
 import javax.swing.JOptionPane
 
@@ -51,7 +51,7 @@ fun SettingsBoxUserSignature(scanSettings: ScanSettings) {
                 userSignatureEditorVisibility = false
             },
             onSaveRequest = { signature ->
-                if(scanSettings.userSignatures.filter { it.name == signature.name }.isNotEmpty() && editedUserSignature == null) {
+                if(scanSettings.userSignatures.any { it.name == signature.name } && editedUserSignature == null) {
                     coroutineScope.launch {
                         JOptionPane.showConfirmDialog(
                             null,

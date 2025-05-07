@@ -1,33 +1,33 @@
-package ru.packetdima.datascanner.scan.common
+package ru.packetdima.datascanner.scan.common.files
 
 import com.github.junrar.Archive
+import info.downdetector.bigdatascanner.common.Cleaner
+import info.downdetector.bigdatascanner.common.IDetectFunction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.text.PDFTextStripper
+import org.apache.poi.hslf.usermodel.HSLFSlideShow
+import org.apache.poi.hslf.usermodel.HSLFTable
+import org.apache.poi.hslf.usermodel.HSLFTextBox
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.hwpf.HWPFDocument
 import org.apache.poi.hwpf.HWPFOldDocument
 import org.apache.poi.hwpf.extractor.WordExtractor
 import org.apache.poi.poifs.filesystem.POIFSFileSystem
 import org.apache.poi.ss.usermodel.CellType
-import org.apache.poi.xwpf.usermodel.XWPFDocument
-import org.apache.poi.xwpf.usermodel.XWPFParagraph
-import org.apache.poi.xwpf.usermodel.XWPFTable
-import org.dhatim.fastexcel.reader.ReadableWorkbook
-import org.mozilla.universalchardet.UniversalDetector
-import info.downdetector.bigdatascanner.common.Cleaner
-import info.downdetector.bigdatascanner.common.IDetectFunction
-import org.apache.poi.hslf.usermodel.HSLFSlideShow
-import org.apache.poi.hslf.usermodel.HSLFTable
-import org.apache.poi.hslf.usermodel.HSLFTextBox
 import org.apache.poi.ss.usermodel.DataFormatter
 import org.apache.poi.xslf.usermodel.XMLSlideShow
 import org.apache.poi.xslf.usermodel.XSLFTable
 import org.apache.poi.xslf.usermodel.XSLFTextBox
+import org.apache.poi.xwpf.usermodel.XWPFDocument
+import org.apache.poi.xwpf.usermodel.XWPFParagraph
+import org.apache.poi.xwpf.usermodel.XWPFTable
+import org.dhatim.fastexcel.reader.ReadableWorkbook
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import org.mozilla.universalchardet.UniversalDetector
 import org.odftoolkit.odfdom.doc.OdfSpreadsheetDocument
 import org.odftoolkit.odfdom.doc.OdfTextDocument
 import org.odftoolkit.odfdom.dom.element.table.TableTableCellElement
@@ -36,6 +36,9 @@ import org.odftoolkit.odfdom.dom.element.table.TableTableRowElement
 import org.odftoolkit.odfdom.incubator.doc.text.OdfTextParagraph
 import org.odftoolkit.simple.PresentationDocument
 import ru.packetdima.datascanner.common.ScanSettings
+import ru.packetdima.datascanner.scan.common.Document
+import ru.packetdima.datascanner.scan.functions.CertFileType
+import ru.packetdima.datascanner.scan.functions.CodeFileType
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileInputStream
@@ -44,7 +47,6 @@ import java.nio.charset.Charset
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import kotlin.coroutines.CoroutineContext
-
 
 enum class FileType(val extensions: List<String>) : KoinComponent {
     XLSX(listOf("xlsx")) {
@@ -65,7 +67,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                                 sheets.forEach sheet@{ sheet ->
                                     sheet?.openStream().use { rowStream ->
                                         rowStream?.forEach rowStream@{ row ->
-                                            if(isSampleOverload(sample, fastScan) || !isActive) return@rowStream
+                                            if (isSampleOverload(sample, fastScan) || !isActive) return@rowStream
                                             row?.forEach { cell ->
                                                 if (cell != null) {
                                                     str.append(cell.text).append("\n")
@@ -133,7 +135,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                         }
                     }
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 try {
                     withContext(Dispatchers.IO) {
                         FileInputStream(file).use { fileInputStream ->
@@ -152,7 +154,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                             }
                         }
                     }
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     res.skip()
                     return res
                 }
@@ -232,7 +234,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                         }
                     }
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 res.skip()
                 return res
             }
@@ -311,7 +313,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                         }
                     }
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 res.skip()
                 return res
             }
@@ -331,7 +333,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
         ): Document {
             val str = StringBuilder()
             val res = Document(file.length(), file.absolutePath)
-            val cbuf = CharArray(1000)
+            val buf = CharArray(1000)
             var sample = 0
             try {
                 val encoding = UniversalDetector.detectCharset(file)
@@ -340,12 +342,12 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                         fileInputStream.bufferedReader(charset = Charset.forName(encoding)).use { reader ->
                             var actualRead: Int
                             while (true) {
-                                actualRead = reader.read(cbuf)
+                                actualRead = reader.read(buf)
                                 if (actualRead <= 0) {
                                     break
                                 }
 
-                                str.append(cbuf)
+                                str.append(buf)
 
                                 if (str.length >= scanSettings.sampleLength || !isActive) {
                                     res + withContext(context) { scan(str.toString(), detectFunctions) }
@@ -394,7 +396,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                         }
                     }
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 try {
                     withContext(Dispatchers.IO) {
                         POIFSFileSystem(file).use { inputStream ->
@@ -411,7 +413,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                             }
                         }
                     }
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     res.skip()
                     return res
                 }
@@ -447,7 +449,9 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                                                 CellType.NUMERIC -> str.append(dataFormatter.formatCellValue(cell))
                                                     .append("\n")
 
-                                                CellType.STRING -> str.append(dataFormatter.formatCellValue(cell)).append("\n")
+                                                CellType.STRING -> str.append(dataFormatter.formatCellValue(cell))
+                                                    .append("\n")
+
                                                 else -> {}
                                             }
                                             if (str.length >= scanSettings.sampleLength || !isActive) {
@@ -463,7 +467,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                         }
                     }
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 res.skip()
                 return res
             }
@@ -497,7 +501,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                         }
                     }
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 res.skip()
                 return res
             }
@@ -575,7 +579,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                         }
                     }
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 res.skip()
                 return res
             }
@@ -662,7 +666,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                         }
                     }
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 res.skip()
                 return res
             }
@@ -721,7 +725,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                         }
                     }
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 res.skip()
                 return res
             }
@@ -758,9 +762,9 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                                             if (it == null)
                                                 reading = false
                                         }
-                                    } catch (e: NullPointerException) {
+                                    } catch (_: NullPointerException) {
                                         null
-                                    } catch (e: IllegalArgumentException) {
+                                    } catch (_: IllegalArgumentException) {
                                         null
                                     }
                                     if (zipEntry == null) continue
@@ -793,7 +797,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                                                 }
                                             }
                                         all++
-                                    } catch (e: IOException) {
+                                    } catch (_: IOException) {
                                         continue
                                     } finally {
                                         tmpFile.delete()
@@ -804,7 +808,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                         }
                     }
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 if (res.isEmpty()) {
                     res.skip()
                     return res
@@ -849,14 +853,14 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                                 }
                             }
                             all++
-                        } catch (e: IOException) {
+                        } catch (_: IOException) {
                             continue
                         } finally {
                             tmpFile.delete()
                         }
                     }
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 if (res.isEmpty()) {
                     res.skip()
                     return res
@@ -865,6 +869,38 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
             if (skipped == all)
                 res.skip()
             return res
+        }
+    },
+    CERT(CertFileType.entries.flatMap { it.extensions }) {
+        override suspend fun scanFile(
+            file: File,
+            context: CoroutineContext,
+            detectFunctions: List<IDetectFunction>,
+            fastScan: Boolean
+        ): Document {
+            return CertFileType
+                .entries.find { it.extensions.contains(file.extension) }
+                ?.scanFile(
+                    file,
+                    context,
+                    detectFunctions,
+                    fastScan
+                ) ?: Document(file.length(), file.absolutePath)
+                .also {
+                    it.skip()
+                }
+        }
+    },
+    CODE(CodeFileType.entries.flatMap { it.extensions }) {
+        override suspend fun scanFile(
+            file: File,
+            context: CoroutineContext,
+            detectFunctions: List<IDetectFunction>,
+            fastScan: Boolean
+        ): Document {
+            return CodeFileType.scanFile(
+                file
+            )
         }
     };
 
@@ -876,12 +912,8 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
     ): Document
 
     protected fun scan(text: String, detectFunctions: List<IDetectFunction>): Map<IDetectFunction, Int> {
-        val cleanText = Cleaner.cleanText(text)
+        val cleanText = Cleaner.Companion.cleanText(text)
         return detectFunctions.map { f ->
-            f to f.scan(cleanText).takeIf { it > 0 }
-        }.mapNotNull { p ->
-            p.second?.let { p.first to it }
-        }.toMap() + scanSettings.userSignatures.map { f ->
             f to f.scan(cleanText).takeIf { it > 0 }
         }.mapNotNull { p ->
             p.second?.let { p.first to it }
@@ -894,8 +926,8 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
         }
 
         private fun selectedExtension(fileName: String): Boolean =
-            FileType.entries.filter {
-                scanSettings.extensions.contains(it)
+            entries.filter {
+                scanSettings.extensions.contains(it) // Заменить на загруженные из задачи, а не из текущих настроек
             }.flatMap {
                 it.extensions
             }.any { fileName.endsWith(it) }

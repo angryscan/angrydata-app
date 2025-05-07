@@ -16,7 +16,7 @@ import ru.packetdima.datascanner.db.models.TaskDetectFunctions
 import ru.packetdima.datascanner.db.models.TaskFileScanResults
 import ru.packetdima.datascanner.db.models.TaskFiles
 import ru.packetdima.datascanner.db.models.TaskState
-import ru.packetdima.datascanner.scan.common.FileType
+import ru.packetdima.datascanner.scan.common.files.FileType
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger

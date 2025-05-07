@@ -10,31 +10,39 @@ import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import ru.packetdima.datascanner.scan.common.FileType
+import ru.packetdima.datascanner.scan.common.files.FileType
 import ru.packetdima.datascanner.scan.functions.UserSignature
 import ru.packetdima.datascanner.serializers.MutableStateSerializer
 import java.io.File
 
 @Serializable
-class ScanSettings: KoinComponent {
+class ScanSettings : KoinComponent {
     @Transient
-    private val logger = KotlinLogging.logger{}
-    class SettingsFile(path: String): File(path)
+    private val logger = KotlinLogging.logger {}
+
+    class SettingsFile(path: String) : File(path)
 
     private val settingsFile: SettingsFile by inject()
 
     @Serializable
     val extensions: MutableList<FileType> = mutableStateListOf()
+
     @Serializable(with = MutableStateSerializer::class)
     var extensionsExpanded: MutableState<Boolean>
 
     @Serializable
     val detectFunctions: MutableList<DetectFunction> = mutableStateListOf()
     @Serializable(with = MutableStateSerializer::class)
+    var detectCode: MutableState<Boolean>
+    @Serializable(with = MutableStateSerializer::class)
+    var detectCert: MutableState<Boolean>
+
+    @Serializable(with = MutableStateSerializer::class)
     var detectFunctionsExpanded: MutableState<Boolean>
 
     @Serializable
     val userSignatures: MutableList<UserSignature> = mutableStateListOf()
+
     @Serializable(with = MutableStateSerializer::class)
     var userSignatureExpanded: MutableState<Boolean>
 
@@ -58,18 +66,27 @@ class ScanSettings: KoinComponent {
 
             this.userSignatures.addAll(prop.userSignatures.filter { it in userSignatureSettings.userSignatures })
             this.userSignatureExpanded = prop.userSignatureExpanded
-        } catch (ex: Exception) {
+            this.detectCert = prop.detectCert
+            this.detectCode = prop.detectCode
+        } catch (_: Exception) {
             logger.error {
                 "Failed to load ScanSettings. Loading default."
             }
             this.extensions.clear()
-            this.extensions.addAll(FileType.entries.filter { it != FileType.ZIP && it != FileType.RAR })
+            this.extensions.addAll(FileType.entries.filter {
+                it != FileType.ZIP &&
+                        it != FileType.RAR &&
+                        it != FileType.CERT &&
+                        it != FileType.CODE
+            })
             this.extensionsExpanded = mutableStateOf(false)
             this.detectFunctions.clear()
             this.detectFunctions.addAll(DetectFunction.entries.toTypedArray())
             this.detectFunctionsExpanded = mutableStateOf(false)
             this.fastScan = mutableStateOf(false)
             this.userSignatureExpanded = mutableStateOf(false)
+            this.detectCert = mutableStateOf(false)
+            this.detectCode = mutableStateOf(false)
         }
     }
 

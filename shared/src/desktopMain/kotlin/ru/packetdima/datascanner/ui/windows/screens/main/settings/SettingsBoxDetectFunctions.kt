@@ -21,10 +21,13 @@ import androidx.compose.ui.unit.sp
 import info.downdetector.bigdatascanner.common.DetectFunction
 import org.jetbrains.compose.resources.stringResource
 import ru.packetdima.datascanner.common.ScanSettings
+import ru.packetdima.datascanner.resources.DetectFunction_Cert
+import ru.packetdima.datascanner.resources.DetectFunction_Code
+import ru.packetdima.datascanner.resources.DetectFunction_Description_Cert
+import ru.packetdima.datascanner.resources.DetectFunction_Description_Code
 import ru.packetdima.datascanner.resources.Res
 import ru.packetdima.datascanner.resources.ScanSettings_DetectFunctions
 import ru.packetdima.datascanner.resources.ScanSettings_SelectAll
-import ru.packetdima.datascanner.scan.common.FileType
 import ru.packetdima.datascanner.ui.strings.composableName
 import ru.packetdima.datascanner.ui.windows.components.DetectFunctionTooltip
 
@@ -33,8 +36,10 @@ import ru.packetdima.datascanner.ui.windows.components.DetectFunctionTooltip
 fun SettingsBoxDetectFunctions(scanSettings: ScanSettings) {
     val detectFunctions = remember { scanSettings.detectFunctions }
     var expanded by remember { scanSettings.detectFunctionsExpanded }
+    var detectCode by remember { scanSettings.detectCode }
+    var detectCert by remember { scanSettings.detectCert }
 
-    LaunchedEffect(detectFunctions, expanded) {
+    LaunchedEffect(detectFunctions, expanded, detectCert, detectCode) {
         scanSettings.save()
     }
 
@@ -45,7 +50,8 @@ fun SettingsBoxDetectFunctions(scanSettings: ScanSettings) {
             expanded = !expanded
         }
     ) {
-        val rows = FileType.entries.size / 3 + if (FileType.entries.size % 3 > 0) 1 else 0
+        val size = DetectFunction.entries.size + 2
+        val rows = size / 3 + if (size % 3 > 0) 1 else 0
 
         val height = (24 * rows + (6 * (rows - 1))).dp + 52.dp + 24.dp
 
@@ -63,7 +69,10 @@ fun SettingsBoxDetectFunctions(scanSettings: ScanSettings) {
                     modifier = Modifier.height(42.dp)
                 ) {
                     Checkbox(
-                        checked = scanSettings.detectFunctions.containsAll(DetectFunction.entries),
+                        checked = scanSettings.detectFunctions.containsAll(DetectFunction.entries)
+                                && scanSettings.detectCert.value
+                                && scanSettings.detectCode.value
+                        ,
                         onCheckedChange = { checked ->
                             if (checked) {
                                 scanSettings.detectFunctions.addAll(DetectFunction.entries.filter {
@@ -71,8 +80,12 @@ fun SettingsBoxDetectFunctions(scanSettings: ScanSettings) {
                                         it
                                     )
                                 })
+                                scanSettings.detectCert.value = true
+                                scanSettings.detectCode.value = true
                             } else {
                                 scanSettings.detectFunctions.clear()
+                                scanSettings.detectCert.value = false
+                                scanSettings.detectCode.value = false
                             }
                             scanSettings.save()
                         }
@@ -82,14 +95,20 @@ fun SettingsBoxDetectFunctions(scanSettings: ScanSettings) {
                             text = stringResource(Res.string.ScanSettings_SelectAll),
                             fontSize = 14.sp,
                             modifier = Modifier.clickable {
-                                if (!scanSettings.detectFunctions.containsAll(DetectFunction.entries))
+                                if (!scanSettings.detectFunctions.containsAll(DetectFunction.entries)) {
                                     scanSettings.detectFunctions.addAll(DetectFunction.entries.filter {
                                         !scanSettings.detectFunctions.contains(
                                             it
                                         )
                                     })
-                                else
+                                    scanSettings.detectCert.value = true
+                                    scanSettings.detectCode.value = true
+                                }
+                                else {
                                     scanSettings.detectFunctions.clear()
+                                    scanSettings.detectCert.value = false
+                                    scanSettings.detectCode.value = false
+                                }
                                 scanSettings.save()
                             }
                         )
@@ -124,6 +143,64 @@ fun SettingsBoxDetectFunctions(scanSettings: ScanSettings) {
                                         scanSettings.detectFunctions.remove(detectFunction)
                                     else
                                         scanSettings.detectFunctions.add(detectFunction)
+                                    scanSettings.save()
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(1f)
+                        .height(24.dp)
+                ) {
+                    Checkbox(
+                        checked = scanSettings.detectCode.value,
+                        onCheckedChange = { checked ->
+                            scanSettings.detectCode.value = checked
+                            scanSettings.save()
+                        }
+                    )
+                    CompositionLocalProvider(LocalRippleConfiguration provides null) {
+                        DetectFunctionTooltip(
+                            description = stringResource(Res.string.DetectFunction_Description_Code)
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.DetectFunction_Code),
+                                fontSize = 14.sp,
+                                modifier = Modifier.clickable {
+                                    scanSettings.detectCode.value = !scanSettings.detectCode.value
+                                    scanSettings.save()
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(1f)
+                        .height(24.dp)
+                ) {
+                    Checkbox(
+                        checked = scanSettings.detectCert.value,
+                        onCheckedChange = { checked ->
+                            scanSettings.detectCert.value = checked
+                            scanSettings.save()
+                        }
+                    )
+                    CompositionLocalProvider(LocalRippleConfiguration provides null) {
+                        DetectFunctionTooltip(
+                            description = stringResource(Res.string.DetectFunction_Description_Cert)
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.DetectFunction_Cert),
+                                fontSize = 14.sp,
+                                modifier = Modifier.clickable {
+                                    scanSettings.detectCert.value = !scanSettings.detectCert.value
                                     scanSettings.save()
                                 }
                             )

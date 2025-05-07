@@ -16,7 +16,9 @@ import ru.packetdima.datascanner.common.LogMarkers
 import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.db.DatabaseConnector
 import ru.packetdima.datascanner.db.models.*
-import ru.packetdima.datascanner.scan.common.FileType
+import ru.packetdima.datascanner.scan.common.files.FileType
+import ru.packetdima.datascanner.scan.functions.CertDetectFun
+import ru.packetdima.datascanner.scan.functions.CodeDetectFun
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -50,12 +52,12 @@ class ScanService : KoinComponent {
             )
 
             val statements = MigrationUtils.statementsRequiredForDatabaseMigration(Tasks, withLogs = false)
-            if(statements.isNotEmpty()) {
+            if (statements.isNotEmpty()) {
                 logger.info {
                     "Database migration required."
                 }
                 migrationRequired = true
-                if(!File(AppFiles.MigrationsDirectory).exists()) {
+                if (!File(AppFiles.MigrationsDirectory).exists()) {
                     File(AppFiles.MigrationsDirectory).mkdir()
                 }
                 MigrationUtils.generateMigrationScript(
@@ -66,7 +68,7 @@ class ScanService : KoinComponent {
             }
         }
 
-        if(migrationRequired) {
+        if (migrationRequired) {
             val flyway = Flyway.configure()
                 .dataSource(database.dbSettings.url, "", "")
                 .defaultSchema("main")
@@ -82,7 +84,7 @@ class ScanService : KoinComponent {
                 }
             }
 
-            if(m.success && m.successfulMigrations.isNotEmpty()) {
+            if (m.success && m.successfulMigrations.isNotEmpty()) {
                 appSettings.firstMigration.value = false
                 appSettings.save()
                 migrationRequired = false
@@ -150,7 +152,7 @@ class ScanService : KoinComponent {
             "Starting scan threads"
         }
         coroutineScope.launch {
-            while(changingThreadsCount.get())
+            while (changingThreadsCount.get())
                 delay(1000)
 
             scanThreads.forEach {
@@ -217,7 +219,13 @@ class ScanService : KoinComponent {
                         "Detect functions: ${
                             (if (detectFunctions != null)
                                 detectFunctions
-                            else (scanSettings.detectFunctions + scanSettings.userSignatures)
+                            else (scanSettings.detectFunctions
+                                    + scanSettings.userSignatures
+                                    + (if (scanSettings.detectCert.value)
+                                listOf(CertDetectFun) else listOf())
+                                    + (if (scanSettings.detectCode.value)
+                                listOf(CodeDetectFun) else listOf())
+                                    )
                                     ).joinToString { it.name }
                         }. " +
                         "Fast scan: ${fastScan ?: scanSettings.fastScan.value}. " +
@@ -235,6 +243,18 @@ class ScanService : KoinComponent {
                     TaskFileExtension.new {
                         this.task = task
                         this.extension = ext
+                    }
+                }
+                if (scanSettings.detectCert.value) {
+                    TaskFileExtension.new {
+                        this.task = task
+                        this.extension = FileType.CERT
+                    }
+                }
+                if (scanSettings.detectCode.value) {
+                    TaskFileExtension.new {
+                        this.task = task
+                        this.extension = FileType.CODE
                     }
                 }
             }
@@ -258,7 +278,18 @@ class ScanService : KoinComponent {
                         this.task = task
                         this.function = df
                     }
-
+                }
+                if (scanSettings.detectCert.value) {
+                    TaskDetectFunction.new {
+                        this.task = task
+                        this.function = CertDetectFun
+                    }
+                }
+                if (scanSettings.detectCode.value) {
+                    TaskDetectFunction.new {
+                        this.task = task
+                        this.function = CertDetectFun
+                    }
                 }
             }
 

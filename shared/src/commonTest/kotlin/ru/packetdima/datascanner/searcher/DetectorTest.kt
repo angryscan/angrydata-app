@@ -13,7 +13,7 @@ import ru.packetdima.datascanner.common.UserSignatureSettings
 import ru.packetdima.datascanner.db.DatabaseSettings
 import ru.packetdima.datascanner.di.scanModule
 import ru.packetdima.datascanner.scan.common.Document
-import ru.packetdima.datascanner.scan.common.FileType
+import ru.packetdima.datascanner.scan.common.files.FileType
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals

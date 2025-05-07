@@ -43,6 +43,10 @@ class Document(val size: Long, val path: String) {
         }
         return this
     }
+    operator fun plus(other: Pair<IDetectFunction, Int>): Document {
+        updateDocument(other.first, other.second)
+        return this
+    }
 
     override fun toString(): String {
         return this.getDocumentFields().toString()

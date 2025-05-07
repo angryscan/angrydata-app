@@ -18,7 +18,6 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import info.downdetector.bigdatascanner.common.DetectFunction
 import info.downdetector.bigdatascanner.common.IDetectFunction
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.dialogs.compose.rememberFileSaverLauncher
@@ -46,7 +45,10 @@ import ru.packetdima.datascanner.ui.extensions.color
 import ru.packetdima.datascanner.ui.extensions.icon
 import ru.packetdima.datascanner.ui.strings.composableName
 import ru.packetdima.datascanner.ui.windows.components.DetectFunctionTooltip
-import ru.packetdima.datascanner.ui.windows.screens.scans.components.*
+import ru.packetdima.datascanner.ui.windows.screens.scans.components.AttributeFilterChip
+import ru.packetdima.datascanner.ui.windows.screens.scans.components.ResultTable
+import ru.packetdima.datascanner.ui.windows.screens.scans.components.SortColumn
+import ru.packetdima.datascanner.ui.windows.screens.scans.components.comparator
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -58,7 +60,12 @@ fun ScanResultScreen(
 ) {
     val scanService = koinInject<ScanService>()
     val appSettings = koinInject<AppSettings>()
-    val task = scanService.tasks.tasks.value.first { it.id.value == taskId }
+    val task = scanService.tasks.tasks.value.firstOrNull { it.id.value == taskId }
+
+    if(task == null) {
+        onCloseClick()
+        return
+    }
 
     val taskFilesViewModel = koinInject<TaskFilesViewModel> { parametersOf(task.dbTask) }
     val taskFiles by taskFilesViewModel.taskFiles.collectAsState()
@@ -491,7 +498,7 @@ fun ScanResultScreen(
                                 detectFunction = attr
                             ) {
                                 AttributeFilterChip(
-                                    text = if (attr is DetectFunction) attr.composableName() else attr.writeName,
+                                    text = attr.composableName(),
                                     selected = attr in selectedAttributes,
                                     onClick = {
                                         if (attr in selectedAttributes) {

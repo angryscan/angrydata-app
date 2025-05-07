@@ -97,6 +97,8 @@
     <string name="DetectFunction-Login">Логин</string>
     <string name="DetectFunction-Password">Пароль</string>
     <string name="DetectFunction-Name">ФИО</string>
+    <string name="DetectFunction-Code">Программный код</string>
+    <string name="DetectFunction-Cert">Сертификат</string>
     <string name="DetectFunction-Description-Emails">Электронная почта</string>
     <string name="DetectFunction-Description-Phones">Номер телефона (+7)</string>
     <string name="DetectFunction-Description-CardNumbers">Номера карт с БИНами русских банков</string>
@@ -114,6 +116,8 @@
     <string name="DetectFunction-Description-Name">Фамилия, имя и отчество</string>
     <string name="DetectFunction-Description-IP">IP адрес</string>
     <string name="DetectFunction-Description-IPv6">IP адрес v6</string>
+    <string name="DetectFunction-Description-Code">Программный код</string>
+    <string name="DetectFunction-Description-Cert">Сертификат</string>
 
     <string name="SettingsScreen-ThreadsCount">Количество потоков</string>
     <string name="SettingsScreen-ContextMenu">Контекстное меню</string>

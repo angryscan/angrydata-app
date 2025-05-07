@@ -25,7 +25,6 @@ suspend fun DetectFunction.readableName(): String {
         DetectFunction.CVV -> getString(Res.string.DetectFunction_CVV)
         DetectFunction.IP -> getString(Res.string.DetectFunction_IP)
         DetectFunction.IPv6 -> getString(Res.string.DetectFunction_IPv6)
-        else -> this.writeName
     }
 }
 
@@ -49,7 +48,6 @@ fun DetectFunction.composableName(): String {
         DetectFunction.CVV -> stringResource(Res.string.DetectFunction_CVV)
         DetectFunction.IP -> stringResource(Res.string.DetectFunction_IP)
         DetectFunction.IPv6 -> stringResource(Res.string.DetectFunction_IPv6)
-        else -> this.writeName
     }
 }
 

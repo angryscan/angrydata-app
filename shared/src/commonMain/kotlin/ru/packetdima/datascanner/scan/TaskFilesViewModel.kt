@@ -14,6 +14,8 @@ import org.koin.core.component.inject
 import ru.packetdima.datascanner.db.DatabaseConnector
 import ru.packetdima.datascanner.db.models.*
 import ru.packetdima.datascanner.scan.common.FileSize
+import ru.packetdima.datascanner.scan.functions.CertDetectFun
+import ru.packetdima.datascanner.scan.functions.CodeDetectFun
 
 data class TaskFileResult(
     val id: Int,
@@ -21,7 +23,7 @@ data class TaskFileResult(
     val size: FileSize,
     val foundAttributes: List<IDetectFunction>,
     val count: Int,
-    val score: Int
+    val score: Long
 )
 
 class TaskFilesViewModel(val task: Task) : KoinComponent, ViewModel(){
@@ -71,13 +73,15 @@ class TaskFilesViewModel(val task: Task) : KoinComponent, ViewModel(){
                         size = FileSize(fileRow[TaskFiles.size]),
                         foundAttributes = detectRows.map { it.first },
                         count = detectRows.sumOf { it.second },
-                        score = detectRows.sumOf { row ->
-                            if(containsFIO) 20 else 0 + when(row.first) {
-                                DetectFunction.Name -> 5
-                                DetectFunction.CardNumbers -> 30
-                                DetectFunction.AccountNumber -> 30
-                                else -> 1
-                            } * row.second
+                        score = (if(containsFIO) 20 else 0 + detectRows.size) * detectRows.sumOf { row ->
+                            (when(row.first) {
+                                DetectFunction.Name -> 5f
+                                DetectFunction.CardNumbers -> 30f
+                                DetectFunction.AccountNumber -> 30f
+                                CodeDetectFun -> 0.01f
+                                CertDetectFun -> 100f
+                                else -> 1f
+                            } * row.second).toLong()
                         }
                     )
                 }

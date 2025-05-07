@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import info.downdetector.bigdatascanner.common.DetectFunction
 import info.downdetector.bigdatascanner.common.IDetectFunction
 import ru.packetdima.datascanner.ui.strings.composableName
 import ru.packetdima.datascanner.ui.windows.components.DetectFunctionTooltip
@@ -29,7 +28,7 @@ fun AttributeCard(attribute: IDetectFunction) {
                 .padding(4.dp)
         ) {
             Text(
-                text = if (attribute is DetectFunction) attribute.composableName() else attribute.writeName,
+                text = attribute.composableName(),
                 fontSize = 14.sp,
                 lineHeight = 14.sp,
                 letterSpacing = 0.1.sp,

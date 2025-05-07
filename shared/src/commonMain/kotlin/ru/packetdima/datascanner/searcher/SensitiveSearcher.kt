@@ -8,7 +8,7 @@ import ru.packetdima.datascanner.common.AppSettings
 import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.scan.common.Document
 import ru.packetdima.datascanner.scan.common.FileSize
-import ru.packetdima.datascanner.scan.common.FileType
+import ru.packetdima.datascanner.scan.common.files.FileType
 import java.io.File
 import java.util.concurrent.Executors
 

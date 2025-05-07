@@ -176,7 +176,7 @@ fun MainWindow(
                                 val taskId = backStackEntry.arguments?.getString("taskId")?.toInt()
                                 ScanResultScreen(
                                     taskId!!,
-                                    onCloseClick = { navController.popBackStack() }
+                                    onCloseClick = { navController.navigate(AppScreens.Scans.name) }
                                 )
                             }
                             composable(route = AppScreens.Settings.name) {

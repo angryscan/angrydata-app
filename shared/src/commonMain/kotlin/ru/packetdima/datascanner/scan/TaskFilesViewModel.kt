@@ -73,7 +73,8 @@ class TaskFilesViewModel(val task: Task) : KoinComponent, ViewModel(){
                         size = FileSize(fileRow[TaskFiles.size]),
                         foundAttributes = detectRows.map { it.first },
                         count = detectRows.sumOf { it.second },
-                        score = (if(containsFIO) 20 else 0 + detectRows.size) * detectRows.sumOf { row ->
+                        score =  detectRows.sumOf { row ->
+                            (if(containsFIO) 20 else detectRows.size - 1) +
                             (when(row.first) {
                                 DetectFunction.Name -> 5f
                                 DetectFunction.CardNumbers -> 30f
@@ -85,7 +86,7 @@ class TaskFilesViewModel(val task: Task) : KoinComponent, ViewModel(){
                         }
                     )
                 }
-                _scoreSum.value = _taskFiles.value.sumOf { it.score.toLong() }
+                _scoreSum.value = _taskFiles.value.sumOf { it.score }
 
             }
         }

@@ -47,6 +47,8 @@ import ru.packetdima.datascanner.ui.strings.composableName
 import ru.packetdima.datascanner.ui.windows.components.DetectFunctionTooltip
 import ru.packetdima.datascanner.ui.windows.screens.scans.components.AttributeFilterChip
 import ru.packetdima.datascanner.ui.windows.screens.scans.components.ResultTable
+import ru.packetdima.datascanner.ui.windows.screens.scans.components.ScanStat
+import ru.packetdima.datascanner.ui.windows.screens.scans.components.ScanTimeStatItem
 import ru.packetdima.datascanner.ui.windows.screens.scans.components.SortColumn
 import ru.packetdima.datascanner.ui.windows.screens.scans.components.comparator
 import kotlin.time.DurationUnit
@@ -70,7 +72,7 @@ fun ScanResultScreen(
     val taskFilesViewModel = koinInject<TaskFilesViewModel> { parametersOf(task.dbTask) }
     val taskFiles by taskFilesViewModel.taskFiles.collectAsState()
 
-    val scoreSum = taskFiles.sumOf { it.score.toLong() }
+    val scoreSum = taskFiles.sumOf { it.score }
 
     val clipboardManager = LocalClipboardManager.current
 

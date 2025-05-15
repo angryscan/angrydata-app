@@ -65,6 +65,7 @@ compose.desktop {
             vendor = "LLC DETECTICUM"
             packageVersion = version.toString()
             copyright = "© 2024 LLC DETECTICUM"
+            licenseFile.set(rootProject.file("LICENSE.en.txt"))
 
             modules("java.sql", "jdk.charsets", "jdk.unsupported", "java.naming")
 

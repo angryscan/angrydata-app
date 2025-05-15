@@ -1,7 +1,12 @@
 package ru.packetdima.datascanner.ui.windows.screens.about
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.LocalScrollbarStyle
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -16,6 +21,7 @@ import ru.packetdima.datascanner.resources.*
 
 @Composable
 fun AboutScreen() {
+    val scrollState = rememberScrollState()
     Box(
         modifier = Modifier.fillMaxSize()
             .padding(16.dp),
@@ -25,6 +31,9 @@ fun AboutScreen() {
             color = MaterialTheme.colorScheme.surface,
             shape = MaterialTheme.shapes.medium,
             modifier = Modifier
+                .verticalScroll(
+                    scrollState
+                )
         ) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -50,9 +59,31 @@ fun AboutScreen() {
                     text = stringResource(Res.string.AboutScreen_Version, AppVersion),
                     style = MaterialTheme.typography.bodyLarge
                 )
-                Text(text = stringResource(Res.string.AboutScreen_Copyright), style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    text = stringResource(Res.string.license_title),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = stringResource(Res.string.license_copyright),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = stringResource(Res.string.license_text),
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
         }
-
+        VerticalScrollbar(
+            adapter = rememberScrollbarAdapter(scrollState),
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(end = 10.dp)
+                .width(10.dp)
+                .align(Alignment.CenterEnd),
+            style = LocalScrollbarStyle.current.copy(
+                unhoverColor = MaterialTheme.colorScheme.secondary,
+                hoverColor = MaterialTheme.colorScheme.primary
+            )
+        )
     }
 }

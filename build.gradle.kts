@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.compose).apply(false)
     alias(libs.plugins.compose.compiler).apply(false)
     alias(libs.plugins.kover)
+    alias(libs.plugins.conveyor).apply(false)
 }
 
 val dummyAttribute = Attribute.of("ru.packetdima", String::class.java)

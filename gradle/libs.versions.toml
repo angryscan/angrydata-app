@@ -75,3 +75,4 @@ kotlin-jpa = { id = "org.jetbrains.kotlin.plugin.jpa", version.ref = "kotlin" }
 compose = { id = "org.jetbrains.compose", version.ref = "compose" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin"}
 kover = { id = "org.jetbrains.kotlinx.kover", version = "0.9.1" }
+conveyor = { id = "dev.hydraulic.conveyor", version = "1.12" }

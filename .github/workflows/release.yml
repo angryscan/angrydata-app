@@ -1,4 +1,4 @@
-name: release.yml
+name: Release
 on:
   push:
     tags:
@@ -25,13 +25,13 @@ jobs:
       - name: Extract version from tag
         uses: damienaicheh/extract-version-from-tag-action@v1.3.0
 
-      - name: Build with Conveyor
-        run: ./gradlew convey
+      - name: Build and push with conveyor
+        uses: |
+          actions/coactions/setup-xvfb@v1
+          hydraulic-software/conveyor/actions/build@18.0
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.PATCH }}
-
-      - name: Tests with Gradle Wrapper and XVFB
-        uses: coactions/setup-xvfb@v1.0.1
         with:
-          run: ./gradlew allTests --no-daemon
+          run: ./gradlew convey
+

@@ -39,4 +39,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.PATCH }}
+          WINDOWS_SIGNING_KEY: ${{ secrets.WINDOWS_KEY }}
+          WINDOWS_SIGNING_CERT: ${{ secrets.WINDOWS_CRT }}
 

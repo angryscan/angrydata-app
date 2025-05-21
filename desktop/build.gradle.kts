@@ -102,7 +102,7 @@ tasks.register<Exec>("conveyCI") {
     val dir = layout.buildDirectory.dir("packages")
     outputs.dir(dir)
     environment.put("CONVEYOR_AGREE_TO_LICENSE", "1")
-    commandLine("conveyor", "make", "--output-dir", dir.get(), "-f", "ci.conveyor.conf", "copied-site")
+    commandLine("conveyor", "-f", "ci.conveyor.conf", "make", "--output-dir", dir.get(),  "copied-site")
     dependsOn("build", "writeConveyorConfig")
 }
 

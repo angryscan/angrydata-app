@@ -3,6 +3,8 @@ on:
   push:
     tags:
       - "v*.*.*"
+    branches:
+      - conveyor-ci
 
 jobs:
   Build-Convey:
@@ -32,13 +34,21 @@ jobs:
           chmod +x conveyor-18.0/bin/conveyor
           echo "$(pwd)/conveyor-18.0/bin" >> $GITHUB_PATH
 
+      - name: Install cosign
+        uses: sigstore/cosign-installer@main
+
+#      - name: Generate keypair
+#        env:
+#          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+#        run: |
+#          cosign generate-key-pair
+
       - name: Build and push with conveyor
         uses: coactions/setup-xvfb@v1
         with:
-          run: ./gradlew convey
+          run: ./gradlew conveyCI
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.PATCH }}
-          WINDOWS_SIGNING_KEY: ${{ secrets.WINDOWS_KEY }}
-          WINDOWS_SIGNING_CERT: ${{ secrets.WINDOWS_CRT }}
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
 

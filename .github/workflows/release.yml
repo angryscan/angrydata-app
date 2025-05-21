@@ -41,9 +41,12 @@ jobs:
           VERSION: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.PATCH }}
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
 
+      - name: Move download.html
+        run: mv desktop/build/packages/download.html desktop/build/
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: artifacts
-          path: desktop/build/packages/*.!(html)
+          path: desktop/build/packages/
 

@@ -45,5 +45,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: artifacts
-          path: build/packages/*.!(html)
+          path: desktop/build/packages/*.!(html)
 

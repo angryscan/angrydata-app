@@ -1,6 +1,9 @@
-name: nightly.yml
+name: Nightly build
 on:
   pull_request:
+  push:
+    branches:
+      - feature/conveyor-ci
 
 jobs:
   Build-Convey:

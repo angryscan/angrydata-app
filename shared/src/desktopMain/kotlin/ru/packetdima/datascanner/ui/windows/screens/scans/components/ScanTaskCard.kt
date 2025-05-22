@@ -15,6 +15,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.datetime.Instant
@@ -116,7 +118,9 @@ fun ScanTaskCard(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    modifier = Modifier
+                        .weight(1f)
                 ) {
                     if (fastScan) {
                         Icon(
@@ -139,13 +143,18 @@ fun ScanTaskCard(
                         fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                         lineHeight = MaterialTheme.typography.bodyMedium.lineHeight,
                         fontWeight = MaterialTheme.typography.bodyMedium.fontWeight,
-                        letterSpacing = 0.1.sp
+                        letterSpacing = 0.1.sp,
+                        style = TextStyle.Default.copy(
+                            lineBreak = LineBreak.Heading
+                        )
                     )
                 }
 
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(14.dp),
-                    modifier = Modifier.height(IntrinsicSize.Min)
+                    modifier = Modifier
+                        .height(IntrinsicSize.Min)
+                        .width(200.dp)
                 ) {
                     VerticalDivider(
                         thickness = 1.dp,

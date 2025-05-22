@@ -72,6 +72,8 @@
     <string name="MainScreen-SelectPathPlaceholder">Укажите путь для сканирования</string>
     <string name="MainScreen-ScanStartButton">Сканировать</string>
     <string name="MainScreen-ScanCurrentState">Текущие сканирования (%1$d)</string>
+    <string name="MainScreen-SelectTypeFolder">Папка</string>
+    <string name="MainScreen-SelectTypeFile">Файлы</string>
 
     <string name="ScanSettings-FastScan">Быстрое сканирование</string>
     <string name="ScanSettings-FileExtensions">Расширения файлов</string>

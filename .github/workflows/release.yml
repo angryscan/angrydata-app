@@ -25,6 +25,9 @@ jobs:
       - name: Extract version from tag
         uses: damienaicheh/extract-version-from-tag-action@v1.3.0
 
+      - name: Set version
+        run: echo "VERSION=${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.PATCH }}" >> $GITHUB_ENV
+
       - name: Install conveyor
         run: |
           wget https://downloads.hydraulic.dev/conveyor/conveyor-18.0-linux-amd64.tar.gz
@@ -38,15 +41,26 @@ jobs:
           run: ./gradlew conveyCI
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.PATCH }}
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
 
       - name: Move download.html
         run: mv desktop/build/packages/download.html desktop/build/
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      - name: Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: artifacts
-          path: desktop/build/packages/
+          files: |
+            desktop/build/packages/big-data-scanner.appinstaller
+            desktop/build/packages/big-data-scanner.crt
+            desktop/build/packages/big-data-scanner.exe
+            desktop/build/packages/big-data-scanner-${{ env.VERSION }}.windows-amd64.zip
+            desktop/build/packages/big-data-scanner-${{ env.VERSION }}.x64.msix
+            desktop/build/packages/install.ps1
+            desktop/build/packages/big-data-scanner-${{ env.VERSION }}.linux-amd64.tar.gz
+            desktop/build/packages/llc-detecticum-big-data-scanner_${{ env.VERSION }}_amd64.deb
+            LICENSE.txt
+            LICENSE.en.txt
+            
+            
+            
 

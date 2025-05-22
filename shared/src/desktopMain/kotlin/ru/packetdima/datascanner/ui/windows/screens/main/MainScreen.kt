@@ -1,12 +1,15 @@
 package ru.packetdima.datascanner.ui.windows.screens.main
 
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.outlined.ArrowDropDown
+import androidx.compose.material.icons.outlined.FileOpen
+import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,14 +19,17 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.vinceglb.filekit.dialogs.FileKitMode
+import io.github.vinceglb.filekit.dialogs.FileKitType
+import io.github.vinceglb.filekit.dialogs.compose.rememberDirectoryPickerLauncher
+import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
+import io.github.vinceglb.filekit.path
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import ru.packetdima.datascanner.common.ScanSettings
-import ru.packetdima.datascanner.resources.MainScreen_ScanStartButton
-import ru.packetdima.datascanner.resources.MainScreen_SelectPathPlaceholder
-import ru.packetdima.datascanner.resources.Res
+import ru.packetdima.datascanner.resources.*
 import ru.packetdima.datascanner.scan.ScanService
 import ru.packetdima.datascanner.scan.common.ScanPathHelper
 import ru.packetdima.datascanner.scan.common.files.FileType
@@ -33,7 +39,6 @@ import ru.packetdima.datascanner.ui.windows.screens.main.settings.SettingsBox
 import ru.packetdima.datascanner.ui.windows.screens.main.settings.SettingsButton
 import ru.packetdima.datascanner.ui.windows.screens.main.tasks.MainScreenTasks
 import java.io.File
-import javax.swing.JFileChooser
 
 
 @Composable
@@ -59,8 +64,29 @@ fun MainScreen() {
     var selectPathError by remember { mutableStateOf(false) }
     var scanNotCorrectPath by remember { mutableStateOf(false) }
 
+    var selectionTypeChooserExpanded by remember { mutableStateOf(false) }
+
+    var selectionTypeFolder by remember { mutableStateOf(true) }
+
 
     val coroutineScope = rememberCoroutineScope()
+
+    val filePicker = rememberFilePickerLauncher(
+        type = FileKitType.File(),
+        mode = FileKitMode.Multiple(),
+        title = "Select Directory",
+    ) { result ->
+        if (result != null) {
+            path = result.joinToString(";")
+        }
+
+    }
+
+    val folderPicker = rememberDirectoryPickerLauncher { dir ->
+        if (dir != null) {
+            path = dir.path
+        }
+    }
 
     LaunchedEffect(scanNotCorrectPath) {
         if (scanNotCorrectPath) {
@@ -82,7 +108,7 @@ fun MainScreen() {
     LaunchedEffect(helperPath) {
         if (helperPath.isNotEmpty()) {
             path = helperPath
-            if(focusRequested)
+            if (focusRequested)
                 ScanPathHelper.resetFocus()
         }
     }
@@ -138,23 +164,76 @@ fun MainScreen() {
                             Box(
                                 modifier = Modifier
                                     .size(56.dp)
-                                    .clip(MaterialTheme.shapes.large)
+                                    .clip(
+                                        MaterialTheme.shapes.large.copy(
+                                            topEnd = CornerSize(0.dp),
+                                            bottomEnd = CornerSize(0.dp)
+                                        )
+                                    )
                                     .background(MaterialTheme.colorScheme.onBackground)
                                     .pointerHoverIcon(PointerIcon.Hand)
                                     .clickable {
-                                        val f = JFileChooser()
-                                        f.fileSelectionMode = JFileChooser.FILES_AND_DIRECTORIES
-                                        f.isMultiSelectionEnabled = false
-                                        if (f.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                                            path = f.selectedFile.absolutePath
-                                        }
+                                        if (selectionTypeFolder)
+                                            folderPicker.launch()
+                                        else
+                                            filePicker.launch()
                                     },
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    imageVector = Icons.Outlined.Folder,
+                                    imageVector =
+                                        if (selectionTypeFolder)
+                                            Icons.Outlined.Folder
+                                        else
+                                            Icons.Outlined.FileOpen,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.background
+                                )
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .height(56.dp)
+                                    .width(28.dp)
+                                    .clip(
+                                        MaterialTheme.shapes.large.copy(
+                                            topStart = CornerSize(0.dp),
+                                            bottomStart = CornerSize(0.dp)
+                                        )
+                                    )
+                                    .background(MaterialTheme.colorScheme.onBackground)
+                                    .pointerHoverIcon(PointerIcon.Hand)
+                                    .clickable {
+                                        selectionTypeChooserExpanded = true
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.ArrowDropDown,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(32.dp),
+                                    tint = MaterialTheme.colorScheme.background
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = selectionTypeChooserExpanded,
+                                onDismissRequest = {
+                                    selectionTypeChooserExpanded = false
+                                }
+                            ) {
+                                DropdownMenuItem(
+                                    onClick = {
+                                        selectionTypeFolder = true
+                                        selectionTypeChooserExpanded = false
+                                    },
+                                    text = { Text(text = stringResource(Res.string.MainScreen_SelectTypeFolder)) }
+                                )
+                                DropdownMenuItem(
+                                    onClick = {
+                                        selectionTypeFolder = false
+                                        selectionTypeChooserExpanded = false
+                                    },
+                                    text = { Text(text = stringResource(Res.string.MainScreen_SelectTypeFile)) }
                                 )
                             }
                             Spacer(modifier = Modifier.width(16.dp))
@@ -167,19 +246,26 @@ fun MainScreen() {
                     Row {
                         Button(
                             onClick = {
-                                if (File(path).exists()) {
+
+                                if (path
+                                        .split(";").map {
+                                            File(it).exists()
+                                        }
+                                        .all { it }
+                                ) {
                                     coroutineScope.launch {
                                         val extensions = scanSettings.extensions
-                                        if(scanSettings.detectCode.value)
+                                        if (scanSettings.detectCode.value)
                                             extensions.add(FileType.CODE)
-                                        if(scanSettings.detectCert.value)
+                                        if (scanSettings.detectCert.value)
                                             extensions.add(FileType.CERT)
 
-                                        val detectFunctions = (scanSettings.detectFunctions + scanSettings.userSignatures)
-                                            .toMutableList()
-                                        if(scanSettings.detectCert.value)
+                                        val detectFunctions =
+                                            (scanSettings.detectFunctions + scanSettings.userSignatures)
+                                                .toMutableList()
+                                        if (scanSettings.detectCert.value)
                                             detectFunctions.add(CertDetectFun)
-                                        if(scanSettings.detectCode.value)
+                                        if (scanSettings.detectCode.value)
                                             detectFunctions.add(CodeDetectFun)
 
                                         val task = scanService.createTask(

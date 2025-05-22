@@ -349,6 +349,23 @@ fun ScanResultScreen(
                                             .size(32.dp)
                                     )
                                 }
+                                DropdownMenu(
+                                    expanded = reportExtensionChooserExpanded,
+                                    onDismissRequest = {
+                                        reportExtensionChooserExpanded = false
+                                    }
+                                ) {
+                                    ResultWriter.FileExtensions.entries.forEach {
+                                        DropdownMenuItem(
+                                            onClick = {
+                                                reportExtension = it
+                                                reportExtensionChooserExpanded = false
+                                                appSettings.save()
+                                            },
+                                            text = { Text(text = it.name) }
+                                        )
+                                    }
+                                }
                             }
                         }
                         Box(
@@ -368,23 +385,6 @@ fun ScanResultScreen(
                                 imageVector = Icons.Outlined.Delete,
                                 contentDescription = null
                             )
-                            DropdownMenu(
-                                expanded = reportExtensionChooserExpanded,
-                                onDismissRequest = {
-                                    reportExtensionChooserExpanded = false
-                                }
-                            ) {
-                                ResultWriter.FileExtensions.entries.forEach {
-                                    DropdownMenuItem(
-                                        onClick = {
-                                            reportExtension = it
-                                            reportExtensionChooserExpanded = false
-                                            appSettings.save()
-                                        },
-                                        text = { Text(text = it.name) }
-                                    )
-                                }
-                            }
                         }
                     }
                 }

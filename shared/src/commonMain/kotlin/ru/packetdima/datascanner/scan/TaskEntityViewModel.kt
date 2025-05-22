@@ -152,7 +152,7 @@ class TaskEntityViewModel(
         //Check if user signature already added
         if (
             detectFunction !is UserSignature ||
-            _foundAttributes.value.filter { it.name == detectFunction.name }.isEmpty()
+            _foundAttributes.value.none { it.name == detectFunction.name }
         )
             _foundAttributes.value += detectFunction
     }
@@ -351,19 +351,37 @@ class TaskEntityViewModel(
             if (_state.value == TaskState.PENDING || _state.value == TaskState.SEARCHING || rescan) {
                 if (_state.value != TaskState.SEARCHING)
                     setState(TaskState.SEARCHING)
-
-                val directorySize = scanDirectory(File(path), extensions) { item ->
-                    taskScope.launch {
-                        database.transaction {
-                            TaskFile.new {
-                                this.task = dbTask
-                                this.path = item.path
-                                this.state = TaskState.PENDING
-                                this.size = item.length()
+                val filesCounters = path.split(";")
+                    .map { dir ->
+                        scanDirectory(File(dir), extensions) {
+                            taskScope.launch {
+                                database.transaction {
+                                    TaskFile.new {
+                                        this.task = dbTask
+                                        this.path = it.path
+                                        this.state = TaskState.PENDING
+                                        this.size = it.length()
+                                    }
+                                }
                             }
                         }
                     }
+                val directorySize = FilesCounter()
+                filesCounters.forEach {
+                    directorySize.plus(it)
                 }
+//                val directorySize = scanDirectory(File(path), extensions) { item ->
+//                    taskScope.launch {
+//                        database.transaction {
+//                            TaskFile.new {
+//                                this.task = dbTask
+//                                this.path = item.path
+//                                this.state = TaskState.PENDING
+//                                this.size = item.length()
+//                            }
+//                        }
+//                    }
+//                }
 
                 database.transaction {
                     dbTask.size = directorySize.filesSize.toString()

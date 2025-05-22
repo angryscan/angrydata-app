@@ -23,9 +23,6 @@ jobs:
       - name: Validate gradle wrappers
         uses: gradle/actions/wrapper-validation@v4
 
-      - name: Extract version from tag
-        uses: damienaicheh/extract-version-from-tag-action@v1.3.0
-
       - name: Install conveyor
         run: |
           wget https://downloads.hydraulic.dev/conveyor/conveyor-18.0-linux-amd64.tar.gz
@@ -39,7 +36,6 @@ jobs:
           run: ./gradlew conveyCI
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.PATCH }}
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
 
       - name: Upload artifacts

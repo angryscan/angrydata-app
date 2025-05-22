@@ -43,9 +43,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
 
-      - name: Move download.html
-        run: mv desktop/build/packages/download.html desktop/build/
-
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
@@ -53,10 +50,10 @@ jobs:
             desktop/build/packages/big-data-scanner.appinstaller
             desktop/build/packages/big-data-scanner.crt
             desktop/build/packages/big-data-scanner.exe
-            desktop/build/packages/big-data-scanner-${{ env.VERSION }}.windows-amd64.zip
+            desktop/build/packages/big-data-scanner-${{ env.VERSION }}-windows-amd64.zip
             desktop/build/packages/big-data-scanner-${{ env.VERSION }}.x64.msix
             desktop/build/packages/install.ps1
-            desktop/build/packages/big-data-scanner-${{ env.VERSION }}.linux-amd64.tar.gz
+            desktop/build/packages/big-data-scanner-${{ env.VERSION }}-linux-amd64.tar.gz
             desktop/build/packages/llc-detecticum-big-data-scanner_${{ env.VERSION }}_amd64.deb
             LICENSE.txt
             LICENSE.en.txt

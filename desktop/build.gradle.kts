@@ -23,7 +23,9 @@ kotlin {
             }
 
         desktopMain.dependencies {
-            implementation(compose.desktop.currentOs)
+            implementation(compose.desktop.windows_x64)
+            implementation(compose.desktop.linux_x64)
+            implementation(compose.desktop.linux_arm64)
             implementation(libs.ktor.server.netty)
             implementation(libs.ktor.network)
         }

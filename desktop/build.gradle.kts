@@ -11,6 +11,10 @@ plugins {
 
 kotlin {
     jvm("desktop")
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+        vendor.set(JvmVendorSpec.ADOPTIUM)
+    }
     sourceSets {
         val desktopMain by getting
         val desktopTest by getting
@@ -23,9 +27,7 @@ kotlin {
             }
 
         desktopMain.dependencies {
-            implementation(compose.desktop.windows_x64)
-            implementation(compose.desktop.linux_x64)
-            implementation(compose.desktop.linux_arm64)
+            implementation(compose.desktop.currentOs)
             implementation(libs.ktor.server.netty)
             implementation(libs.ktor.network)
         }
@@ -44,6 +46,13 @@ kotlin {
             implementation(compose.uiTest)
         }
     }
+}
+
+dependencies {
+    linuxAmd64(compose.desktop.linux_x64)
+    macAmd64(compose.desktop.macos_x64)
+    macAarch64(compose.desktop.macos_arm64)
+    windowsAmd64(compose.desktop.windows_x64)
 }
 
 compose.desktop {
@@ -125,4 +134,11 @@ tasks.register("getOS") {
             }
         }"
     )
+}
+
+configurations.all {
+    attributes {
+        // https://github.com/JetBrains/compose-jb/issues/1404#issuecomment-1146894731
+        attribute(Attribute.of("ui", String::class.java), "awt")
+    }
 }

@@ -9,7 +9,7 @@ import kotlin.io.path.absolutePathString
 @Suppress("Unused")
 object AppFiles {
     private val WorkDirPath: Path = when (OS.currentOS()) {
-        OS.WINDOWS -> Path(System.getenv("LOCALAPPDATA")).resolve("BigDataScanner")
+        OS.WINDOWS -> Path(System.getenv("APPDATA")).resolve("BigDataScanner")
         else -> Path(System.getProperty("user.home")).resolve(".ads")
     }
 

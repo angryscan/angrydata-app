@@ -3,6 +3,7 @@ rootProject.name = "BigDataScanner"
 pluginManagement {
     repositories {
         gradlePluginPortal()
+        maven("https://maven.hq.hydraulic.software")
     }
 }
 

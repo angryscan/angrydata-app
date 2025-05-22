@@ -32,6 +32,7 @@ import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.resources.*
 import ru.packetdima.datascanner.scan.ScanService
 import ru.packetdima.datascanner.scan.common.ScanPathHelper
+import ru.packetdima.datascanner.scan.common.createDialogSettings
 import ru.packetdima.datascanner.scan.common.files.FileType
 import ru.packetdima.datascanner.scan.functions.CertDetectFun
 import ru.packetdima.datascanner.scan.functions.CodeDetectFun
@@ -42,7 +43,8 @@ import java.io.File
 
 
 @Composable
-fun MainScreen() {
+fun MainScreen(
+) {
 
     val scanService = koinInject<ScanService>()
 
@@ -75,6 +77,7 @@ fun MainScreen() {
         type = FileKitType.File(),
         mode = FileKitMode.Multiple(),
         title = "Select Directory",
+        dialogSettings = createDialogSettings()
     ) { result ->
         if (result != null) {
             path = result.joinToString(";")
@@ -82,7 +85,9 @@ fun MainScreen() {
 
     }
 
-    val folderPicker = rememberDirectoryPickerLauncher { dir ->
+    val folderPicker = rememberDirectoryPickerLauncher(
+        dialogSettings = createDialogSettings()
+    ) { dir ->
         if (dir != null) {
             path = dir.path
         }

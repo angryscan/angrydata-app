@@ -75,6 +75,9 @@ class AppSettings : KoinComponent {
     @Serializable(with = MutableStateSerializer::class)
     var firstMigration = mutableStateOf(true)
 
+    @Serializable(with = MutableStateSerializer::class)
+    var eulaAgreedVersion = mutableStateOf(0)
+
 
     constructor() {
         try {
@@ -96,7 +99,8 @@ class AppSettings : KoinComponent {
             this.reportSaveExtension = prop.reportSaveExtension
             this.debugMode = prop.debugMode
             this.firstMigration = prop.firstMigration
-        } catch (e: Exception) {
+            this.eulaAgreedVersion = prop.eulaAgreedVersion
+        } catch (_: Exception) {
             logger.error {
                 "Failed to load app settings. Loading defaults."
             }

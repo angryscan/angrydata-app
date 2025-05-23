@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPlacement
+import androidx.compose.ui.window.rememberDialogState
 import androidx.compose.ui.window.rememberWindowState
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -30,9 +31,11 @@ import ru.packetdima.datascanner.logging.LogLevel
 import ru.packetdima.datascanner.navigation.AppScreens
 import ru.packetdima.datascanner.resources.Res
 import ru.packetdima.datascanner.resources.appName
+import ru.packetdima.datascanner.resources.eula_version
 import ru.packetdima.datascanner.resources.icon
 import ru.packetdima.datascanner.scan.common.ScanPathHelper
 import ru.packetdima.datascanner.scan.common.mainWindow
+import ru.packetdima.datascanner.ui.dialogs.EulaDialog
 import ru.packetdima.datascanner.ui.theme.AppTheme
 import ru.packetdima.datascanner.ui.windows.components.DesktopWindowShapes
 import ru.packetdima.datascanner.ui.windows.components.MainWindowTitleBar
@@ -97,7 +100,29 @@ fun MainWindow(
     ) {
         mainWindow = this.window
 
+        var eulaAgreedVersion by remember { appSettings.eulaAgreedVersion }
+        val eulaVersion = stringResource(Res.string.eula_version).toInt()
+        var showEulaDialog by remember { mutableStateOf(eulaAgreedVersion < eulaVersion) }
+        val dialogEulaState = rememberDialogState(
+            width = 600.dp,
+            height = 400.dp
+        )
+
         AppTheme {
+            if(showEulaDialog) {
+                EulaDialog(
+                    onAccept = {
+                        eulaAgreedVersion = eulaVersion
+                        appSettings.save()
+                        showEulaDialog = false
+                    },
+                    onDecline = {
+                        showEulaDialog = false
+                        onCloseRequest()
+                    },
+                    dialogState = dialogEulaState
+                )
+            }
             Surface(
                 color = MaterialTheme.colorScheme.background,
                 modifier = Modifier

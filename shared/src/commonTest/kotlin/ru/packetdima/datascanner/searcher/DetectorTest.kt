@@ -54,7 +54,7 @@ internal class DetectorTest {
 омс 7755320882002755"""
         val doc = Document(1, "123")
         DetectFunction.entries.map { f ->
-            f to f.scan(Cleaner.cleanText(sampleText)).takeIf { it > 0 }
+            f to f.scan(Cleaner.cleanText(sampleText)).count().takeIf { it > 0 }
         }.mapNotNull { p ->
             p.second?.let { p.first to it }
         }.toMap().forEach { (t, u) ->

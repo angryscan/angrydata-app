@@ -913,11 +913,25 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
 
     protected fun scan(text: String, detectFunctions: List<IDetectFunction>): Map<IDetectFunction, Int> {
         val cleanText = Cleaner.Companion.cleanText(text)
-        return detectFunctions.map { f ->
-            f to f.scan(cleanText).takeIf { it > 0 }
-        }.mapNotNull { p ->
-            p.second?.let { p.first to it }
+        return detectFunctions.mapNotNull { f ->
+            f.scan(cleanText).count().takeIf { it > 0 }
+                .let {
+                    if(it != null) f to it
+                    else null
+                }
         }.toMap()
+    }
+
+    fun getOccurrences(text: String, detectFunctions: List<IDetectFunction>): Map<IDetectFunction, List<String>> {
+        val cleanText = Cleaner.Companion.cleanText(text)
+        return detectFunctions
+            .mapNotNull { df ->
+                df.scan(cleanText).takeIf { it.count() > 0 }
+                    .let { seq ->
+                        if (seq != null) df to seq.toList()
+                        else null
+                    }
+            }.toMap()
     }
 
     companion object : KoinComponent {

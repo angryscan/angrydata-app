@@ -24,6 +24,7 @@ import ru.packetdima.datascanner.common.LogMarkers
 import ru.packetdima.datascanner.common.OS
 import ru.packetdima.datascanner.di.consoldeDatabaseModule
 import ru.packetdima.datascanner.di.databaseModule
+import ru.packetdima.datascanner.di.s3Module
 import ru.packetdima.datascanner.di.scanModule
 import ru.packetdima.datascanner.di.settingsModule
 import ru.packetdima.datascanner.logging.LogLevel
@@ -96,7 +97,7 @@ suspend fun main(args: Array<String>) {
                 }
             }
         }
-    } catch (e: BindException) {
+    } catch (_: BindException) {
         logger.info { "Application already running!" }
         if (args.isNotEmpty() && args.first().let { it != "-c" && it != "-console" }) {
             runBlocking {
@@ -152,7 +153,8 @@ suspend fun main(args: Array<String>) {
             modules(
                 settingsModule,
                 databaseModule,
-                scanModule
+                scanModule,
+                s3Module
             )
         }
         if (args.isNotEmpty()) {

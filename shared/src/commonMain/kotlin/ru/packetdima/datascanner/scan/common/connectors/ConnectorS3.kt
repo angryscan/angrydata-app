@@ -44,6 +44,64 @@ class ConnectorS3(
         }
     }
 
+    val pathDelimiter = '/'
+
+    suspend fun getFiles(dir: String): List<S3File> =
+        withContext(Dispatchers.Default) {
+            var contToken: String? = null
+            val result = mutableListOf<S3File>()
+
+            do {
+                val request = ListObjectsV2Request {
+                    bucket = bucketStr
+                    prefix = dir
+                    delimiter = pathDelimiter.toString()
+                    maxKeys = 1000
+                    continuationToken = contToken
+                }
+
+                try {
+                    val response = s3Client.listObjectsV2(request)
+
+                    response.commonPrefixes?.map { it.prefix }?.forEach {
+                        if (it != null && it != dir) {
+                            result.add(
+                                S3File(
+                                    name = it.trim(pathDelimiter).substringAfterLast(pathDelimiter),
+                                    path = it,
+                                    isDirectory = true,
+                                    size = 0
+                                )
+                            )
+                        }
+                    }
+
+                    response.contents
+                        ?.forEach { objectInfo ->
+                            val fileSize = objectInfo.size ?: 0
+                            if (fileSize > 0)
+                                objectInfo.key?.let {
+                                    result.add(
+                                        S3File(
+                                            name = it.substringAfterLast(pathDelimiter),
+                                            path = it,
+                                            isDirectory = false,
+                                            size = fileSize
+                                        )
+                                    )
+                                }
+                        }
+
+
+                    contToken = response.nextContinuationToken
+                } catch (_: Exception) {
+
+                }
+            } while (contToken != null)
+
+            return@withContext result
+        }
+
     override suspend fun getFile(filePath: String): File =
         withContext(Dispatchers.Default) {
             val request = GetObjectRequest {
@@ -77,7 +135,7 @@ class ConnectorS3(
                     bucket = bucketStr
                     prefix = dir
                     continuationToken = contToken
-                    delimiter = "/"
+                    delimiter = pathDelimiter.toString()
                     maxKeys = 1000
                 }
 
@@ -86,7 +144,7 @@ class ConnectorS3(
 
                     val folders = response.commonPrefixes?.map { it.prefix }
                     folders?.forEach {
-                        if (it != null && it!= dir) {
+                        if (it != null && it != dir) {
                             filesCounter += scanDirectory(
                                 dir = it,
                                 extensions = extensions,

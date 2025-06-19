@@ -6,7 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,6 +31,7 @@ import ru.packetdima.datascanner.scan.common.connectors.ConnectorS3
 import ru.packetdima.datascanner.scan.common.files.FileType
 import ru.packetdima.datascanner.scan.functions.CertDetectFun
 import ru.packetdima.datascanner.scan.functions.CodeDetectFun
+import ru.packetdima.datascanner.ui.windows.screens.main.components.S3FileChooser
 import ru.packetdima.datascanner.ui.windows.screens.main.settings.SettingsBox
 import ru.packetdima.datascanner.ui.windows.screens.main.settings.SettingsButton
 
@@ -62,20 +63,71 @@ fun S3Screen(
     var selectPathError by remember { mutableStateOf(false) }
 
     var scanNotCorrectPath by remember { mutableStateOf(false) }
+    var incorrectConnection by remember { mutableStateOf(false) }
+    var incorrectPathError by remember { mutableStateOf(false) }
 
-    LaunchedEffect(scanNotCorrectPath) {
-        if (scanNotCorrectPath) {
-            selectPathError = true
+    var endpointError by remember { mutableStateOf(false) }
+    var accessKeyError by remember { mutableStateOf(false) }
+    var secretKeyError by remember { mutableStateOf(false) }
+    var bucketError by remember { mutableStateOf(false) }
+
+    LaunchedEffect(scanNotCorrectPath, incorrectConnection) {
+        if (scanNotCorrectPath || incorrectConnection) {
+            if(incorrectPathError)
+                selectPathError = true
+            if(endpoint.isEmpty())
+                endpointError = true
+            if(accessKey.isEmpty())
+                accessKeyError = true
+            if(secretKey.isEmpty())
+                secretKeyError = true
+            if(bucket.isEmpty())
+                bucketError = true
             delay(200)
+
             selectPathError = false
+            endpointError = false
+            accessKeyError = false
+            secretKeyError = false
+            bucketError = false
             delay(400)
-            selectPathError = true
+
+            if(incorrectPathError)
+                selectPathError = true
+            if(endpoint.isEmpty())
+                endpointError = true
+            if(accessKey.isEmpty())
+                accessKeyError = true
+            if(secretKey.isEmpty())
+                secretKeyError = true
+            if(bucket.isEmpty())
+                bucketError = true
             delay(200)
+
             selectPathError = false
+            endpointError = false
+            accessKeyError = false
+            secretKeyError = false
+            bucketError = false
             delay(400)
-            selectPathError = true
+
+            if(incorrectPathError)
+                selectPathError = true
+            if(endpoint.isEmpty())
+                endpointError = true
+            if(accessKey.isEmpty())
+                accessKeyError = true
+            if(secretKey.isEmpty())
+                secretKeyError = true
+            if(bucket.isEmpty())
+                bucketError = true
             delay(200)
+
             selectPathError = false
+            endpointError = false
+            accessKeyError = false
+            secretKeyError = false
+            bucketError = false
             scanNotCorrectPath = false
         }
     }
@@ -88,6 +140,24 @@ fun S3Screen(
             if (focusRequested)
                 ScanPathHelper.resetFocus()
         }
+    }
+
+    var selectPathDialog by remember { mutableStateOf(false) }
+
+    if (selectPathDialog) {
+        S3FileChooser(
+            onAccept = {
+                path = it.path
+                selectPathDialog = false
+            },
+            onDecline = { selectPathDialog = false },
+            connector = ConnectorS3(
+                endpointStr = endpoint,
+                accessKey = accessKey,
+                secretKey = secretKey,
+                bucketStr = bucket
+            )
+        )
     }
 
     Column(
@@ -105,7 +175,8 @@ fun S3Screen(
                 onValueChange = { endpoint = it },
                 placeholder = { Text(text = "Endpoint") },
                 singleLine = true,
-                shape = MaterialTheme.shapes.medium
+                shape = MaterialTheme.shapes.medium,
+                isError = endpointError
             )
             OutlinedTextField(
                 modifier = Modifier
@@ -115,7 +186,8 @@ fun S3Screen(
                 onValueChange = { bucket = it },
                 placeholder = { Text(text = "Bucket") },
                 singleLine = true,
-                shape = MaterialTheme.shapes.medium
+                shape = MaterialTheme.shapes.medium,
+                isError = bucketError
             )
         }
         Row(
@@ -129,7 +201,8 @@ fun S3Screen(
                 onValueChange = { accessKey = it },
                 placeholder = { Text(text = "Access key") },
                 singleLine = true,
-                shape = MaterialTheme.shapes.medium
+                shape = MaterialTheme.shapes.medium,
+                isError = accessKeyError
             )
             OutlinedTextField(
                 modifier = Modifier
@@ -140,7 +213,8 @@ fun S3Screen(
                 placeholder = { Text(text = "Secret key") },
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
-                shape = MaterialTheme.shapes.medium
+                shape = MaterialTheme.shapes.medium,
+                isError = secretKeyError
             )
         }
         OutlinedTextField(
@@ -164,12 +238,20 @@ fun S3Screen(
                             .background(MaterialTheme.colorScheme.onBackground)
                             .pointerHoverIcon(PointerIcon.Hand)
                             .clickable {
-                                //TODO("Not implemented")
+                                if(endpoint.isNotEmpty() &&
+                                    accessKey.isNotEmpty() &&
+                                    secretKey.isNotEmpty() &&
+                                    bucket.isNotEmpty()) {
+                                    selectPathDialog = true
+                                } else {
+                                    incorrectConnection = true
+                                }
+
                             },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Outlined.Folder,
+                            imageVector = Icons.Outlined.FolderOpen,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.background
                         )
@@ -184,8 +266,11 @@ fun S3Screen(
             Row {
                 Button(
                     onClick = {
-
-                        if (true) {
+                        if (endpoint.isNotEmpty() &&
+                            accessKey.isNotEmpty() &&
+                            secretKey.isNotEmpty() &&
+                            bucket.isNotEmpty()
+                        ) {
                             coroutineScope.launch {
                                 val extensions = scanSettings.extensions
                                 if (scanSettings.detectCode.value)

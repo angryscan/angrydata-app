@@ -12,12 +12,12 @@ interface IFileType {
     ): List<Location>
 
     fun getEntries(text: String, detectFunction: IDetectFunction): List<String> {
-        val cleanText = Cleaner.Companion.cleanText(text)
+        val cleanText = Cleaner.cleanText(text)
         return detectFunction.scan(cleanText).toList()
     }
 
     fun scan(text: String, detectFunctions: List<IDetectFunction>): Map<IDetectFunction, Int> {
-        val cleanText = Cleaner.Companion.cleanText(text)
+        val cleanText = Cleaner.cleanText(text)
         return detectFunctions.mapNotNull { f ->
             f.scan(cleanText).count().takeIf { it > 0 }
                 .let {

@@ -397,6 +397,7 @@ fun ResultTable(
                     ) { file ->
                         val fileType = FileType.getFileType(file.path)
                         val locationSupported = fileType != null && LocationFinder.isSupported(fileType)
+                        val exist = filesExists.contains(file.id)
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -429,7 +430,7 @@ fun ResultTable(
                                     checkedBorderColor = MaterialTheme.colorScheme.primary,
                                     uncheckedBorderColor = MaterialTheme.colorScheme.primary
                                 ),
-                                enabled = filesExists.contains(file.id)
+                                enabled = exist
                             )
                             Text(
                                 text = file.path
@@ -454,7 +455,7 @@ fun ResultTable(
                                     .weight(0.5f)
                             ) {
                                 file.foundAttributes.forEach { attr ->
-                                    if (locationSupported)
+                                    if (locationSupported && exist)
                                         AttributeCard(
                                             attribute = attr,
                                             onClick = {

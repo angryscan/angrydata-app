@@ -1,13 +1,10 @@
 package ru.packetdima.datascanner.ui.windows.screens.scans.components
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.LocalScrollbarStyle
-import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Search
@@ -15,13 +12,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.rememberDialogState
 import info.downdetector.bigdatascanner.common.IDetectFunction
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
+import ru.packetdima.datascanner.resources.Error_FileOpen
+import ru.packetdima.datascanner.resources.LocationWindow_Error
 import ru.packetdima.datascanner.resources.LocationWindow_Title
 import ru.packetdima.datascanner.resources.Res
 import ru.packetdima.datascanner.scan.common.files.Location
@@ -29,6 +30,8 @@ import ru.packetdima.datascanner.scan.common.files.LocationFinder
 import ru.packetdima.datascanner.ui.strings.composableName
 import ru.packetdima.datascanner.ui.windows.components.DesktopWindowShapes
 import ru.packetdima.datascanner.ui.windows.components.TitleBar
+import java.awt.Desktop
+import java.io.File
 
 @Composable
 fun AttributeLocationWindow(
@@ -42,22 +45,30 @@ fun AttributeLocationWindow(
 
     var searching by remember { mutableStateOf(false) }
 
+    var errorSearching by remember { mutableStateOf(false) }
+
     coroutineScope.launch {
         searching = true
-        locations = LocationFinder.findLocations(
-            filePath,
-            attribute
-        )
+        try {
+            locations = LocationFinder.findLocations(
+                filePath,
+                attribute
+            )
+        } catch (_: Exception) {
+            errorSearching = true
+        }
         searching = false
     }
 
 
     val state = rememberDialogState(
-        width = 800.dp,
-        height = 400.dp
+        width = 700.dp,
+        height = 500.dp
     )
 
     val scrollState = rememberLazyListState()
+
+    val snackbarHostState = remember { SnackbarHostState() }
 
     DialogWindow(
         onCloseRequest = onClose,
@@ -116,53 +127,101 @@ fun AttributeLocationWindow(
                         }
                     }
                 }
-                if(searching) {
-                    CircularProgressIndicator()
-                }
-                else {
-                    Box(
+                Row(
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .fillMaxWidth(),
+                ) {
+                    Text(
+                        text = filePath,
+                        style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        LazyColumn(
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier
-                                .padding(start = 8.dp, end = if (scrollState.canScrollBackward || scrollState.canScrollForward) 20.dp else 8.dp),
-                            state = scrollState
-                        ) {
-                            items(locations) { location ->
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                ) {
-                                    Text(
-                                        modifier = Modifier
-                                            .weight(0.8f)
-                                            .fillMaxWidth(),
-                                        text = location.entry
-                                    )
-                                    Text(
-                                        modifier = Modifier
-                                            .weight(0.2f)
-                                            .fillMaxWidth(),
-                                        text = location.location
-                                    )
+                            .clip(shape = MaterialTheme.shapes.small)
+                            .clickable {
+                                try {
+                                    Desktop.getDesktop().open(File(filePath))
+                                } catch (_: Exception) {
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            getString(
+                                                Res.string.Error_FileOpen
+                                            )
+                                        )
+                                    }
                                 }
                             }
-                        }
-
-                        VerticalScrollbar(
-                            adapter = rememberScrollbarAdapter(scrollState),
+                            .padding(4.dp)
+                    )
+                }
+                if (errorSearching) {
+                    Text(
+                        text = stringResource(Res.string.LocationWindow_Error),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                } else {
+                    if (searching) {
+                        CircularProgressIndicator()
+                    } else {
+                        Scaffold(
                             modifier = Modifier
-                                .align(Alignment.CenterEnd)
-                                .padding(end = 6.dp)
-                                .width(10.dp),
-                            style = LocalScrollbarStyle.current.copy(
-                                hoverColor = MaterialTheme.colorScheme.primary,
-                                unhoverColor = MaterialTheme.colorScheme.secondary
-                            )
-                        )
+                                .fillMaxSize(),
+                            snackbarHost = { SnackbarHost(snackbarHostState) }
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(8.dp)
+                                    .background(color = MaterialTheme.colorScheme.surface)
+                                    .padding(vertical = 8.dp)
+                            ) {
+
+                                LazyColumn(
+                                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                                    modifier = Modifier
+                                        .padding(
+                                            start = 8.dp,
+                                            end = if (scrollState.canScrollBackward || scrollState.canScrollForward) 20.dp else 8.dp
+                                        ),
+                                    state = scrollState
+                                ) {
+                                    items(locations) { location ->
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                        ) {
+                                            Text(
+                                                modifier = Modifier
+                                                    .weight(0.8f)
+                                                    .fillMaxWidth(),
+                                                text = location.entry,
+                                                style = MaterialTheme.typography.bodySmall
+                                            )
+                                            Text(
+                                                modifier = Modifier
+                                                    .weight(0.2f)
+                                                    .fillMaxWidth(),
+                                                text = location.location,
+                                                style = MaterialTheme.typography.bodySmall
+                                            )
+                                        }
+                                    }
+                                }
+
+                                VerticalScrollbar(
+                                    adapter = rememberScrollbarAdapter(scrollState),
+                                    modifier = Modifier
+                                        .align(Alignment.CenterEnd)
+                                        .padding(end = 6.dp)
+                                        .width(10.dp),
+                                    style = LocalScrollbarStyle.current.copy(
+                                        hoverColor = MaterialTheme.colorScheme.primary,
+                                        unhoverColor = MaterialTheme.colorScheme.secondary
+                                    )
+                                )
+                            }
+                        }
                     }
                 }
             }

@@ -26,7 +26,6 @@ import org.apache.poi.xwpf.usermodel.XWPFParagraph
 import org.apache.poi.xwpf.usermodel.XWPFTable
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import org.mozilla.universalchardet.UniversalDetector
 import org.odftoolkit.odfdom.doc.OdfSpreadsheetDocument
 import org.odftoolkit.odfdom.doc.OdfTextDocument
 import org.odftoolkit.odfdom.dom.element.table.TableTableCellElement
@@ -36,6 +35,7 @@ import org.odftoolkit.odfdom.incubator.doc.text.OdfTextParagraph
 import org.odftoolkit.simple.PresentationDocument
 import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.scan.common.Document
+import ru.packetdima.datascanner.scan.common.files.types.TextType
 import ru.packetdima.datascanner.scan.common.files.types.XLSXType
 import ru.packetdima.datascanner.scan.functions.CertFileType
 import ru.packetdima.datascanner.scan.functions.CodeFileType
@@ -286,45 +286,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
             context: CoroutineContext,
             detectFunctions: List<IDetectFunction>,
             fastScan: Boolean
-        ): Document {
-            val str = StringBuilder()
-            val res = Document(file.length(), file.absolutePath)
-            val buf = CharArray(1000)
-            var sample = 0
-            try {
-                val encoding = UniversalDetector.detectCharset(file)
-                withContext(Dispatchers.IO) {
-                    FileInputStream(file).use { fileInputStream ->
-                        fileInputStream.bufferedReader(charset = Charset.forName(encoding)).use { reader ->
-                            var actualRead: Int
-                            while (true) {
-                                actualRead = reader.read(buf)
-                                if (actualRead <= 0) {
-                                    break
-                                }
-
-                                str.append(buf)
-
-                                if (str.length >= scanSettings.sampleLength || !isActive) {
-                                    res + withContext(context) { scan(str.toString(), detectFunctions) }
-                                    str.clear()
-                                    sample++
-                                    if (isSampleOverload(sample, fastScan) || !isActive)
-                                        return@withContext
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (_: Exception) {
-                res.skip()
-                return res
-            }
-            if (str.isNotEmpty() && !isSampleOverload(sample, fastScan)) {
-                res + withContext(context) { scan(str.toString(), detectFunctions) }
-            }
-            return res
-        }
+        ): Document = TextType.scanFile(file, context, detectFunctions, fastScan)
     },
     DOC(listOf("doc")) {
         override suspend fun scanFile(
@@ -868,7 +830,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
     ): Document
 
     protected fun scan(text: String, detectFunctions: List<IDetectFunction>): Map<IDetectFunction, Int> {
-        val cleanText = Cleaner.Companion.cleanText(text)
+        val cleanText = Cleaner.cleanText(text)
         return detectFunctions.mapNotNull { f ->
             f.scan(cleanText).count().takeIf { it > 0 }
                 .let {

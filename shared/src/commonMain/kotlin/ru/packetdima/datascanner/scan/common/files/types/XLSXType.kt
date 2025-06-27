@@ -58,8 +58,7 @@ object XLSXType : IFileType {
                     }
                 }
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (_: Exception) {
             res.skip()
             return res
         }
@@ -118,8 +117,7 @@ object XLSXType : IFileType {
                     }
                 }
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (_: Exception) {
             throw ScanException
         }
         return locations

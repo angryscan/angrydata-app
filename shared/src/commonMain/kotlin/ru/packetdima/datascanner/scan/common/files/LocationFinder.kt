@@ -1,12 +1,14 @@
 package ru.packetdima.datascanner.scan.common.files
 
 import info.downdetector.bigdatascanner.common.IDetectFunction
+import ru.packetdima.datascanner.scan.common.files.types.TextType
 import ru.packetdima.datascanner.scan.common.files.types.XLSXType
 import java.io.File
 
 object LocationFinder {
     fun isSupported(type: FileType): Boolean = when (type) {
         FileType.XLSX -> true
+        FileType.Text -> true
         else -> false
     }
 
@@ -18,6 +20,7 @@ object LocationFinder {
 
         return when (type) {
             FileType.XLSX -> XLSXType.findLocation(filePath, detectFunction)
+            FileType.Text -> TextType.findLocation(filePath, detectFunction)
             else -> throw NotSupportedTypeException
         }
     }

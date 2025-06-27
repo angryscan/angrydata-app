@@ -105,5 +105,4 @@ fun DesktopAlertDialog(
 data class DialogWindowSettings(
     val width: Dp = 400.dp,
     val height: Dp = 200.dp,
-
-    )
+)

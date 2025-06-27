@@ -24,7 +24,6 @@ import org.apache.poi.xslf.usermodel.XSLFTextBox
 import org.apache.poi.xwpf.usermodel.XWPFDocument
 import org.apache.poi.xwpf.usermodel.XWPFParagraph
 import org.apache.poi.xwpf.usermodel.XWPFTable
-import org.dhatim.fastexcel.reader.ReadableWorkbook
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.mozilla.universalchardet.UniversalDetector
@@ -37,6 +36,7 @@ import org.odftoolkit.odfdom.incubator.doc.text.OdfTextParagraph
 import org.odftoolkit.simple.PresentationDocument
 import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.scan.common.Document
+import ru.packetdima.datascanner.scan.common.files.types.XLSXType
 import ru.packetdima.datascanner.scan.functions.CertFileType
 import ru.packetdima.datascanner.scan.functions.CodeFileType
 import java.io.BufferedInputStream
@@ -55,51 +55,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
             context: CoroutineContext,
             detectFunctions: List<IDetectFunction>,
             fastScan: Boolean
-        ): Document {
-            val str = StringBuilder()
-            val res = Document(file.length(), file.absolutePath)
-            var sample = 0
-            try {
-                withContext(Dispatchers.IO) {
-                    FileInputStream(file).use { inputStream ->
-                        ReadableWorkbook(inputStream).use { workbook ->
-                            workbook.sheets.use { sheets ->
-                                sheets.forEach sheet@{ sheet ->
-                                    sheet?.openStream().use { rowStream ->
-                                        rowStream?.forEach rowStream@{ row ->
-                                            if (isSampleOverload(sample, fastScan) || !isActive) return@rowStream
-                                            row?.forEach { cell ->
-                                                if (cell != null) {
-                                                    str.append(cell.text).append("\n")
-                                                    if (str.length >= scanSettings.sampleLength || !isActive) {
-                                                        res + scan(str.toString(), detectFunctions)
-                                                        str.clear()
-                                                        sample++
-                                                        if (isSampleOverload(
-                                                                sample,
-                                                                fastScan
-                                                            ) || !isActive
-                                                        ) return@rowStream
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                res.skip()
-                return res
-            }
-            if (str.isNotEmpty()) {
-                res + withContext(context) { scan(str.toString(), detectFunctions) }
-            }
-            return res
-        }
+        ): Document = XLSXType.scanFile(file, context, detectFunctions, fastScan)
     },
     DOCX(listOf("docx")) {
         override suspend fun scanFile(
@@ -922,22 +878,12 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
         }.toMap()
     }
 
-    fun getOccurrences(text: String, detectFunctions: List<IDetectFunction>): Map<IDetectFunction, List<String>> {
-        val cleanText = Cleaner.Companion.cleanText(text)
-        return detectFunctions
-            .mapNotNull { df ->
-                df.scan(cleanText).takeIf { it.count() > 0 }
-                    .let { seq ->
-                        if (seq != null) df to seq.toList()
-                        else null
-                    }
-            }.toMap()
-    }
-
     companion object : KoinComponent {
         fun getFileType(file: File): FileType? {
             return entries.find { fileType -> fileType.extensions.contains(file.extension) }
         }
+        fun getFileType(filePath: String): FileType? =
+            getFileType(File(filePath))
 
         private fun selectedExtension(fileName: String): Boolean =
             entries.filter {
@@ -946,7 +892,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                 it.extensions
             }.any { fileName.endsWith(it) }
 
-        private fun isSampleOverload(sample: Int, fastScan: Boolean): Boolean {
+        fun isSampleOverload(sample: Int, fastScan: Boolean): Boolean {
             return (fastScan && sample >= scanSettings.sampleCount)
         }
 

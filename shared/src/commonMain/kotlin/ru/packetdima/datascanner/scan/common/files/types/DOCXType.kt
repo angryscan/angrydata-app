@@ -141,20 +141,44 @@ object DOCXType : IFileType {
                                     getEntries(text, detectFunction).forEach {
                                         locations.add(Location(it, "Paragraph:$index"))
                                     }
+                                    length += text.length
+                                    if (length >= FileType.Companion.scanSettings.sampleLength || !isActive) {
+                                        length = 0
+                                        sample++
+                                        if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
+                                    }
                                 }
                                 extractor.commentsText.forEachIndexed { index, text ->
                                     getEntries(text, detectFunction).forEach {
                                         locations.add(Location(it, "Comment:$index"))
+                                    }
+                                    length += text.length
+                                    if (length >= FileType.Companion.scanSettings.sampleLength || !isActive) {
+                                        length = 0
+                                        sample++
+                                        if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
                                     }
                                 }
                                 extractor.footnoteText.forEachIndexed { index, text ->
                                     getEntries(text, detectFunction).forEach {
                                         locations.add(Location(it, "Footnote:$index"))
                                     }
+                                    length += text.length
+                                    if (length >= FileType.Companion.scanSettings.sampleLength || !isActive) {
+                                        length = 0
+                                        sample++
+                                        if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
+                                    }
                                 }
                                 extractor.endnoteText.forEachIndexed { index, text ->
                                     getEntries(text, detectFunction).forEach {
                                         locations.add(Location(it, "Endnote:$index"))
+                                    }
+                                    length += text.length
+                                    if (length >= FileType.Companion.scanSettings.sampleLength || !isActive) {
+                                        length = 0
+                                        sample++
+                                        if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
                                     }
                                 }
                             }

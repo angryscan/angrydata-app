@@ -12,6 +12,7 @@ object LocationFinder {
         FileType.XLS -> true
         FileType.Text -> true
         FileType.DOCX -> true
+        FileType.DOC -> true
         else -> false
     }
 
@@ -26,6 +27,7 @@ object LocationFinder {
             FileType.XLS -> XLSXType.findLocation(filePath, detectFunction)
             FileType.Text -> TextType.findLocation(filePath, detectFunction)
             FileType.DOCX -> DOCXType.findLocation(filePath, detectFunction)
+            FileType.DOC -> DOCXType.findLocation(filePath, detectFunction)
             else -> throw NotSupportedTypeException
         }
     }

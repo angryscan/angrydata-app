@@ -65,78 +65,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
             context: CoroutineContext,
             detectFunctions: List<IDetectFunction>,
             fastScan: Boolean
-        ): Document {
-            val str = StringBuilder()
-            val res = Document(file.length(), file.absolutePath)
-            var sample = 0
-            try {
-                withContext(Dispatchers.IO) {
-                    FileInputStream(file).use { fileInputStream ->
-                        HSLFSlideShow(fileInputStream).use { presentation ->
-                            presentation.slides.forEach { slide ->
-                                str.append(slide.slideName).append("\n")
-                                str.append(slide.title).append("\n")
-
-                                slide.shapes.forEach { shape ->
-                                    when (shape) {
-                                        is HSLFTextBox -> {
-                                            str.append(shape.text).append("\n")
-                                            if (str.length >= scanSettings.sampleLength || !isActive) {
-                                                res + withContext(context) { scan(str.toString(), detectFunctions) }
-                                                str.clear()
-                                                sample++
-                                                if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
-                                            }
-                                        }
-
-                                        is HSLFTable -> {
-                                            for (row in 0..shape.numberOfRows - 1) {
-                                                for (col in 0..shape.numberOfColumns - 1) {
-                                                    str.append(shape.getCell(row, col).text).append("\n")
-                                                    if (str.length >= scanSettings.sampleLength || !isActive) {
-                                                        res + withContext(context) {
-                                                            scan(
-                                                                str.toString(),
-                                                                detectFunctions
-                                                            )
-                                                        }
-                                                        str.clear()
-                                                        sample++
-                                                        if (isSampleOverload(
-                                                                sample,
-                                                                fastScan
-                                                            ) || !isActive
-                                                        ) return@withContext
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                }
-                                slide.comments.forEach { comment ->
-                                    str.append(comment.text).append("\n")
-                                    if (str.length >= scanSettings.sampleLength || !isActive) {
-                                        res + withContext(context) { scan(str.toString(), detectFunctions) }
-                                        str.clear()
-                                        sample++
-                                        if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (_: Exception) {
-                res.skip()
-                return res
-            }
-
-            if (str.isNotEmpty() && !isSampleOverload(sample, fastScan)) {
-                res + withContext(context) { scan(str.toString(), detectFunctions) }
-            }
-            return res
-        }
+        ): Document = PPTType.scanFile(file, context, detectFunctions, fastScan)
     },
     Text((1..999).map { it.toString().padStart(3, '0') } + listOf("txt", "csv", "xml", "json", "log")) {
         override suspend fun scanFile(

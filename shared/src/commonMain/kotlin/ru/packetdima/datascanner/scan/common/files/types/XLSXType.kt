@@ -55,7 +55,7 @@ object XLSXType : IFileType {
             res.skip()
             return res
         }
-        if (str.isNotEmpty()) {
+        if (str.isNotEmpty() && !isSampleOverload(sample, fastScan)) {
             res + withContext(context) { scan(str.toString(), detectFunctions) }
         }
         return res

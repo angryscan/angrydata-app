@@ -6,8 +6,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import org.dhatim.fastexcel.reader.ReadableWorkbook
 import ru.packetdima.datascanner.scan.common.Document
-import ru.packetdima.datascanner.scan.common.files.FileType
-import ru.packetdima.datascanner.scan.common.files.FileType.Companion.scanSettings
 import ru.packetdima.datascanner.scan.common.files.Location
 import ru.packetdima.datascanner.scan.common.files.LocationFinder.ScanException
 import java.io.File
@@ -32,19 +30,17 @@ object XLSXType : IFileType {
                             sheets.forEach sheet@{ sheet ->
                                 sheet?.openStream().use { rowStream ->
                                     rowStream?.forEach rowStream@{ row ->
-                                        if (isSampleOverload(sample, fastScan) || !isActive) return@rowStream
+                                        if (isSampleOverload(sample, fastScan, isActive))
+                                            return@rowStream
                                         row?.forEach { cell ->
                                             if (cell != null) {
                                                 str.append(cell.text).append("\n")
-                                                if (str.length >= scanSettings.sampleLength || !isActive) {
+                                                if (isLengthOverload(str.length, isActive)) {
                                                     res + scan(str.toString(), detectFunctions)
                                                     str.clear()
                                                     sample++
-                                                    if (isSampleOverload(
-                                                            sample,
-                                                            fastScan
-                                                        ) || !isActive
-                                                    ) return@rowStream
+                                                    if (isSampleOverload(sample, fastScan, isActive))
+                                                        return@rowStream
                                                 }
                                             }
                                         }
@@ -82,7 +78,7 @@ object XLSXType : IFileType {
                             sheets.forEach sheet@{ sheet ->
                                 sheet?.openStream().use { rowStream ->
                                     rowStream?.forEach rowStream@{ row ->
-                                        if (isSampleOverload(sample, fastScan) || !isActive) return@rowStream
+                                        if (isSampleOverload(sample, fastScan, isActive)) return@rowStream
 
                                         row?.forEach { cell ->
                                             if (cell != null) {
@@ -92,11 +88,11 @@ object XLSXType : IFileType {
                                                     }
 
                                                 length += cell.text.length
-
-                                                if (length >= FileType.Companion.scanSettings.sampleLength || !isActive) {
+                                                if (isLengthOverload(length, isActive)) {
                                                     length = 0
                                                     sample++
-                                                    if (isSampleOverload(sample, fastScan) || !isActive) return@rowStream
+                                                    if (isSampleOverload(sample, fastScan, isActive))
+                                                        return@rowStream
                                                 }
                                             }
                                         }

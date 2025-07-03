@@ -8,14 +8,11 @@ import org.apache.poi.hwpf.HWPFOldDocument
 import org.apache.poi.hwpf.extractor.WordExtractor
 import org.apache.poi.poifs.filesystem.POIFSFileSystem
 import ru.packetdima.datascanner.scan.common.Document
-import ru.packetdima.datascanner.scan.common.files.FileType
-import ru.packetdima.datascanner.scan.common.files.FileType.Companion.scanSettings
 import ru.packetdima.datascanner.scan.common.files.Location
 import ru.packetdima.datascanner.scan.common.files.LocationFinder.ScanException
 import java.io.File
 import java.io.FileInputStream
 import kotlin.coroutines.CoroutineContext
-import kotlin.text.forEach
 
 object DOCType: IFileType {
     override suspend fun scanFile(
@@ -33,11 +30,12 @@ object DOCType: IFileType {
                     WordExtractor(inputStream).use { wordExtractor ->
                         wordExtractor.text.forEach { c ->
                             str.append(c)
-                            if (str.length >= scanSettings.sampleLength || !isActive) {
+                            if (isLengthOverload(str.length, isActive)) {
                                 res + withContext(context) { scan(str.toString(), detectFunctions) }
                                 str.clear()
                                 sample++
-                                if (FileType.Companion.isSampleOverload(sample, fastScan) || !isActive) return@withContext
+                                if (isSampleOverload(sample, fastScan, isActive))
+                                    return@withContext
                             }
                         }
                     }
@@ -50,11 +48,12 @@ object DOCType: IFileType {
                         HWPFOldDocument(inputStream).use { hwpfOldDocument ->
                             hwpfOldDocument.documentText.forEach { c ->
                                 str.append(c)
-                                if (str.length >= scanSettings.sampleLength || !isActive) {
+                                if (isLengthOverload(str.length, isActive)) {
                                     res + withContext(context) { scan(str.toString(), detectFunctions) }
                                     str.clear()
                                     sample++
-                                    if (FileType.Companion.isSampleOverload(sample, fastScan) || !isActive) return@withContext
+                                    if (isSampleOverload(sample, fastScan, isActive))
+                                        return@withContext
                                 }
                             }
                         }
@@ -65,7 +64,7 @@ object DOCType: IFileType {
                 return res
             }
         }
-        if (str.isNotEmpty() && !FileType.Companion.isSampleOverload(sample, fastScan)) {
+        if (str.isNotEmpty() && !isSampleOverload(sample, fastScan)) {
             res + withContext(context) { scan(str.toString(), detectFunctions) }
         }
         return res
@@ -89,10 +88,11 @@ object DOCType: IFileType {
                                 locations.add(Location(it, "Paragraph:$index"))
                             }
                             length += text.length
-                            if (length >= FileType.Companion.scanSettings.sampleLength || !isActive) {
+                            if (isLengthOverload(length, isActive)) {
                                 length = 0
                                 sample++
-                                if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
+                                if (isSampleOverload(sample, fastScan, isActive))
+                                    return@withContext
                             }
                         }
                         extractor.commentsText.forEachIndexed { index, text ->
@@ -100,10 +100,11 @@ object DOCType: IFileType {
                                 locations.add(Location(it, "Comment:$index"))
                             }
                             length += text.length
-                            if (length >= FileType.Companion.scanSettings.sampleLength || !isActive) {
+                            if (isLengthOverload(length, isActive)) {
                                 length = 0
                                 sample++
-                                if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
+                                if (isSampleOverload(sample, fastScan, isActive))
+                                    return@withContext
                             }
                         }
                         extractor.footnoteText.forEachIndexed { index, text ->
@@ -111,10 +112,11 @@ object DOCType: IFileType {
                                 locations.add(Location(it, "Footnote:$index"))
                             }
                             length += text.length
-                            if (length >= FileType.Companion.scanSettings.sampleLength || !isActive) {
+                            if (isLengthOverload(length, isActive)) {
                                 length = 0
                                 sample++
-                                if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
+                                if (isSampleOverload(sample, fastScan, isActive))
+                                    return@withContext
                             }
                         }
                         extractor.endnoteText.forEachIndexed { index, text ->
@@ -122,10 +124,11 @@ object DOCType: IFileType {
                                 locations.add(Location(it, "Endnote:$index"))
                             }
                             length += text.length
-                            if (length >= FileType.Companion.scanSettings.sampleLength || !isActive) {
+                            if (isLengthOverload(length, isActive)) {
                                 length = 0
                                 sample++
-                                if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
+                                if (isSampleOverload(sample, fastScan, isActive))
+                                    return@withContext
                             }
                         }
                     }
@@ -140,13 +143,14 @@ object DOCType: IFileType {
                         HWPFOldDocument(inputStream).use { hwpfOldDocument ->
                             hwpfOldDocument.documentText.forEach { c ->
                                 str.append(c)
-                                if (str.length >= scanSettings.sampleLength || !isActive) {
+                                if (isLengthOverload(str.length, isActive)) {
                                     getEntries(str.toString(), detectFunction).forEach {
                                         locations.add(Location(it, ""))
                                     }
                                     str.clear()
                                     sample++
-                                    if (FileType.Companion.isSampleOverload(sample, fastScan) || !isActive) return@withContext
+                                    if (isSampleOverload(sample, fastScan, isActive))
+                                        return@withContext
                                 }
                             }
                         }

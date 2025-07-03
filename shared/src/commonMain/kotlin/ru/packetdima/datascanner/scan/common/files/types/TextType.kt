@@ -6,8 +6,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import org.mozilla.universalchardet.UniversalDetector
 import ru.packetdima.datascanner.scan.common.Document
-import ru.packetdima.datascanner.scan.common.files.FileType
-import ru.packetdima.datascanner.scan.common.files.FileType.Companion.scanSettings
 import ru.packetdima.datascanner.scan.common.files.Location
 import ru.packetdima.datascanner.scan.common.files.LocationFinder.ScanException
 import java.io.File
@@ -40,11 +38,11 @@ object TextType : IFileType {
 
                             str.append(buf)
 
-                            if (str.length >= scanSettings.sampleLength || !isActive) {
+                            if (isLengthOverload(str.length, isActive)) {
                                 res + withContext(context) { scan(str.toString(), detectFunctions) }
                                 str.clear()
                                 sample++
-                                if (isSampleOverload(sample, fastScan) || !isActive)
+                                if (isSampleOverload(sample, fastScan, isActive))
                                     return@withContext
                             }
                         }
@@ -85,14 +83,11 @@ object TextType : IFileType {
 
                             length += line.length
                             lineNumber++
-                            if (length >= scanSettings.sampleLength || !isActive) {
+                            if (isLengthOverload(length, isActive)) {
                                 length = 0
                                 sample++
-                                if (FileType.Companion.isSampleOverload(
-                                        sample,
-                                        fastScan
-                                    ) || !isActive
-                                ) return@withContext
+                                if (isSampleOverload(sample, fastScan, isActive))
+                                    return@withContext
                             }
                             line = reader.readLine()
                         }

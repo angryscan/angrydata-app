@@ -8,8 +8,6 @@ import org.apache.poi.hwpf.HWPFDocument
 import org.apache.poi.hwpf.extractor.WordExtractor
 import org.apache.poi.xwpf.usermodel.*
 import ru.packetdima.datascanner.scan.common.Document
-import ru.packetdima.datascanner.scan.common.files.FileType
-import ru.packetdima.datascanner.scan.common.files.FileType.Companion.scanSettings
 import ru.packetdima.datascanner.scan.common.files.Location
 import ru.packetdima.datascanner.scan.common.files.LocationFinder.ScanException
 import java.io.File
@@ -40,11 +38,11 @@ object DOCXType : IFileType {
                                 else -> ""
                             }
                             str.append(text).append("\n")
-                            if (str.length >= scanSettings.sampleLength || !isActive) {
+                            if (isLengthOverload(str.length, isActive)) {
                                 res + withContext(context) { scan(str.toString(), detectFunctions) }
                                 str.clear()
                                 sample++
-                                if (FileType.Companion.isSampleOverload(
+                                if (isSampleOverload(
                                         sample,
                                         fastScan
                                     ) || !isActive
@@ -62,11 +60,12 @@ object DOCXType : IFileType {
                             WordExtractor(document).use { extractor ->
                                 extractor.text.forEach { c ->
                                     str.append(c)
-                                    if (str.length >= scanSettings.sampleLength || !isActive) {
+                                    if (isLengthOverload(str.length, isActive)) {
                                         res + withContext(context) { scan(str.toString(), detectFunctions) }
                                         str.clear()
                                         sample++
-                                        if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
+                                        if (isSampleOverload(sample, fastScan, isActive))
+                                            return@withContext
                                     }
                                 }
                             }
@@ -78,7 +77,7 @@ object DOCXType : IFileType {
                 return res
             }
         }
-        if (str.isNotEmpty() && !FileType.Companion.isSampleOverload(sample, fastScan)) {
+        if (str.isNotEmpty() && !isSampleOverload(sample, fastScan)) {
             res + withContext(context) { scan(str.toString(), detectFunctions) }
         }
         return res
@@ -121,10 +120,11 @@ object DOCXType : IFileType {
 
                             elemPosition++
 
-                            if (length >= FileType.Companion.scanSettings.sampleLength || !isActive) {
+                            if (isLengthOverload(length, isActive)) {
                                 length = 0
                                 sample++
-                                if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
+                                if (isSampleOverload(sample, fastScan, isActive)) 
+                                    return@withContext
                             }
                         }
                     }
@@ -142,10 +142,11 @@ object DOCXType : IFileType {
                                         locations.add(Location(it, "Paragraph:$index"))
                                     }
                                     length += text.length
-                                    if (length >= FileType.Companion.scanSettings.sampleLength || !isActive) {
+                                    if (isLengthOverload(length, isActive)) {
                                         length = 0
                                         sample++
-                                        if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
+                                        if (isSampleOverload(sample, fastScan, isActive))
+                                            return@withContext
                                     }
                                 }
                                 extractor.commentsText.forEachIndexed { index, text ->
@@ -153,10 +154,11 @@ object DOCXType : IFileType {
                                         locations.add(Location(it, "Comment:$index"))
                                     }
                                     length += text.length
-                                    if (length >= FileType.Companion.scanSettings.sampleLength || !isActive) {
+                                    if (isLengthOverload(length, isActive)) {
                                         length = 0
                                         sample++
-                                        if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
+                                        if (isSampleOverload(sample, fastScan, isActive))
+                                            return@withContext
                                     }
                                 }
                                 extractor.footnoteText.forEachIndexed { index, text ->
@@ -164,10 +166,11 @@ object DOCXType : IFileType {
                                         locations.add(Location(it, "Footnote:$index"))
                                     }
                                     length += text.length
-                                    if (length >= FileType.Companion.scanSettings.sampleLength || !isActive) {
+                                    if (isLengthOverload(length, isActive)) {
                                         length = 0
                                         sample++
-                                        if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
+                                        if (isSampleOverload(sample, fastScan, isActive))
+                                            return@withContext
                                     }
                                 }
                                 extractor.endnoteText.forEachIndexed { index, text ->
@@ -175,10 +178,11 @@ object DOCXType : IFileType {
                                         locations.add(Location(it, "Endnote:$index"))
                                     }
                                     length += text.length
-                                    if (length >= FileType.Companion.scanSettings.sampleLength || !isActive) {
+                                    if (isLengthOverload(length, isActive)) {
                                         length = 0
                                         sample++
-                                        if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
+                                        if (isSampleOverload(sample, fastScan, isActive))
+                                            return@withContext
                                     }
                                 }
                             }

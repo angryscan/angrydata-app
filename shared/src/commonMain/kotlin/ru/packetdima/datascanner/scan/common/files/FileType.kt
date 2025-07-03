@@ -11,9 +11,6 @@ import org.apache.pdfbox.text.PDFTextStripper
 import org.apache.poi.hslf.usermodel.HSLFSlideShow
 import org.apache.poi.hslf.usermodel.HSLFTable
 import org.apache.poi.hslf.usermodel.HSLFTextBox
-import org.apache.poi.hwpf.HWPFOldDocument
-import org.apache.poi.hwpf.extractor.WordExtractor
-import org.apache.poi.poifs.filesystem.POIFSFileSystem
 import org.apache.poi.xslf.usermodel.XMLSlideShow
 import org.apache.poi.xslf.usermodel.XSLFTable
 import org.apache.poi.xslf.usermodel.XSLFTextBox
@@ -28,10 +25,7 @@ import org.odftoolkit.odfdom.incubator.doc.text.OdfTextParagraph
 import org.odftoolkit.simple.PresentationDocument
 import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.scan.common.Document
-import ru.packetdima.datascanner.scan.common.files.types.DOCXType
-import ru.packetdima.datascanner.scan.common.files.types.TextType
-import ru.packetdima.datascanner.scan.common.files.types.XLSType
-import ru.packetdima.datascanner.scan.common.files.types.XLSXType
+import ru.packetdima.datascanner.scan.common.files.types.*
 import ru.packetdima.datascanner.scan.functions.CertFileType
 import ru.packetdima.datascanner.scan.functions.CodeFileType
 import java.io.BufferedInputStream
@@ -233,53 +227,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
             context: CoroutineContext,
             detectFunctions: List<IDetectFunction>,
             fastScan: Boolean
-        ): Document {
-            val str = StringBuilder()
-            val res = Document(file.length(), file.absolutePath)
-            var sample = 0
-            try {
-                withContext(Dispatchers.IO) {
-                    FileInputStream(file).use { inputStream ->
-                        WordExtractor(inputStream).use { wordExtractor ->
-                            wordExtractor.text.forEach { c ->
-                                str.append(c)
-                                if (str.length >= scanSettings.sampleLength || !isActive) {
-                                    res + withContext(context) { scan(str.toString(), detectFunctions) }
-                                    str.clear()
-                                    sample++
-                                    if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (_: Exception) {
-                try {
-                    withContext(Dispatchers.IO) {
-                        POIFSFileSystem(file).use { inputStream ->
-                            HWPFOldDocument(inputStream).use { hwpfOldDocument ->
-                                hwpfOldDocument.documentText.forEach { c ->
-                                    str.append(c)
-                                    if (str.length >= scanSettings.sampleLength || !isActive) {
-                                        res + withContext(context) { scan(str.toString(), detectFunctions) }
-                                        str.clear()
-                                        sample++
-                                        if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } catch (_: Exception) {
-                    res.skip()
-                    return res
-                }
-            }
-            if (str.isNotEmpty() && !isSampleOverload(sample, fastScan)) {
-                res + withContext(context) { scan(str.toString(), detectFunctions) }
-            }
-            return res
-        }
+        ): Document = DOCType.scanFile(file, context, detectFunctions, fastScan)
     },
     XLS(listOf("xls")) {
         override suspend fun scanFile(

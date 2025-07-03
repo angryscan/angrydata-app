@@ -11,23 +11,8 @@ import org.apache.pdfbox.text.PDFTextStripper
 import org.apache.poi.hslf.usermodel.HSLFSlideShow
 import org.apache.poi.hslf.usermodel.HSLFTable
 import org.apache.poi.hslf.usermodel.HSLFTextBox
-import org.apache.poi.hssf.usermodel.HSSFWorkbook
-import org.apache.poi.hwpf.HWPFDocument
-import org.apache.poi.hwpf.HWPFOldDocument
-import org.apache.poi.hwpf.extractor.WordExtractor
-import org.apache.poi.poifs.filesystem.POIFSFileSystem
-import org.apache.poi.ss.usermodel.CellType
-import org.apache.poi.ss.usermodel.DataFormatter
-import org.apache.poi.xslf.usermodel.XMLSlideShow
-import org.apache.poi.xslf.usermodel.XSLFTable
-import org.apache.poi.xslf.usermodel.XSLFTextBox
-import org.apache.poi.xwpf.usermodel.XWPFDocument
-import org.apache.poi.xwpf.usermodel.XWPFParagraph
-import org.apache.poi.xwpf.usermodel.XWPFTable
-import org.dhatim.fastexcel.reader.ReadableWorkbook
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import org.mozilla.universalchardet.UniversalDetector
 import org.odftoolkit.odfdom.doc.OdfSpreadsheetDocument
 import org.odftoolkit.odfdom.doc.OdfTextDocument
 import org.odftoolkit.odfdom.dom.element.table.TableTableCellElement
@@ -37,6 +22,7 @@ import org.odftoolkit.odfdom.incubator.doc.text.OdfTextParagraph
 import org.odftoolkit.simple.PresentationDocument
 import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.scan.common.Document
+import ru.packetdima.datascanner.scan.common.files.types.*
 import ru.packetdima.datascanner.scan.functions.CertFileType
 import ru.packetdima.datascanner.scan.functions.CodeFileType
 import java.io.BufferedInputStream
@@ -55,51 +41,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
             context: CoroutineContext,
             detectFunctions: List<IDetectFunction>,
             fastScan: Boolean
-        ): Document {
-            val str = StringBuilder()
-            val res = Document(file.length(), file.absolutePath)
-            var sample = 0
-            try {
-                withContext(Dispatchers.IO) {
-                    FileInputStream(file).use { inputStream ->
-                        ReadableWorkbook(inputStream).use { workbook ->
-                            workbook.sheets.use { sheets ->
-                                sheets.forEach sheet@{ sheet ->
-                                    sheet?.openStream().use { rowStream ->
-                                        rowStream?.forEach rowStream@{ row ->
-                                            if (isSampleOverload(sample, fastScan) || !isActive) return@rowStream
-                                            row?.forEach { cell ->
-                                                if (cell != null) {
-                                                    str.append(cell.text).append("\n")
-                                                    if (str.length >= scanSettings.sampleLength || !isActive) {
-                                                        res + scan(str.toString(), detectFunctions)
-                                                        str.clear()
-                                                        sample++
-                                                        if (isSampleOverload(
-                                                                sample,
-                                                                fastScan
-                                                            ) || !isActive
-                                                        ) return@rowStream
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                res.skip()
-                return res
-            }
-            if (str.isNotEmpty()) {
-                res + withContext(context) { scan(str.toString(), detectFunctions) }
-            }
-            return res
-        }
+        ): Document = XLSXType.scanFile(file, context, detectFunctions, fastScan)
     },
     DOCX(listOf("docx")) {
         override suspend fun scanFile(
@@ -107,63 +49,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
             context: CoroutineContext,
             detectFunctions: List<IDetectFunction>,
             fastScan: Boolean
-        ): Document {
-            val str = StringBuilder()
-            val res = Document(file.length(), file.absolutePath)
-            var sample = 0
-            try {
-                withContext(Dispatchers.IO) {
-                    FileInputStream(file).use { fileInputStream ->
-                        XWPFDocument(fileInputStream).use { document ->
-                            document.bodyElements
-                            for (elem in document.bodyElements) {
-                                when (elem) {
-                                    is XWPFParagraph -> elem.text
-                                    is XWPFTable -> elem.text
-                                    else -> ""
-                                }.forEach { c ->
-                                    str.append(c)
-                                    if (str.length >= scanSettings.sampleLength || !isActive) {
-                                        res + withContext(context) { scan(str.toString(), detectFunctions) }
-                                        str.clear()
-                                        sample++
-                                        if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
-                                    }
-                                }
-                                str.append("\n")
-                            }
-                        }
-                    }
-                }
-            } catch (_: Exception) {
-                try {
-                    withContext(Dispatchers.IO) {
-                        FileInputStream(file).use { fileInputStream ->
-                            HWPFDocument(fileInputStream).use { document ->
-                                WordExtractor(document).use { extractor ->
-                                    extractor.text.forEach { c ->
-                                        str.append(c).append("\n")
-                                        if (str.length >= scanSettings.sampleLength || !isActive) {
-                                            res + withContext(context) { scan(str.toString(), detectFunctions) }
-                                            str.clear()
-                                            sample++
-                                            if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } catch (_: Exception) {
-                    res.skip()
-                    return res
-                }
-            }
-            if (str.isNotEmpty() && !isSampleOverload(sample, fastScan)) {
-                res + withContext(context) { scan(str.toString(), detectFunctions) }
-            }
-            return res
-        }
+        ): Document = DOCXType.scanFile(file, context, detectFunctions, fastScan)
     },
     PPTX(listOf("pptx", "potx", "ppsx", "pptm")) {
         override suspend fun scanFile(
@@ -171,79 +57,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
             context: CoroutineContext,
             detectFunctions: List<IDetectFunction>,
             fastScan: Boolean
-        ): Document {
-            val str = StringBuilder()
-            val res = Document(file.length(), file.absolutePath)
-            var sample = 0
-            try {
-                withContext(Dispatchers.IO) {
-                    FileInputStream(file).use { fileInputStream ->
-                        XMLSlideShow(fileInputStream).use stream@{ presentation ->
-                            presentation.slides.forEach { slide ->
-                                str.append(slide.slideName).append("\n")
-                                str.append(slide.title).append("\n")
-
-                                slide.shapes.forEach { shape ->
-                                    when (shape) {
-                                        is XSLFTextBox -> {
-                                            str.append(shape.text).append("\n")
-                                            if (str.length >= scanSettings.sampleLength || !isActive) {
-                                                res + withContext(context) { scan(str.toString(), detectFunctions) }
-                                                str.clear()
-                                                sample++
-                                                if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
-                                            }
-                                        }
-
-                                        is XSLFTable -> {
-                                            shape.rows.forEach { row ->
-                                                row.cells.forEach { cell ->
-                                                    str.append(cell.text).append("\n")
-                                                    if (str.length >= scanSettings.sampleLength || !isActive) {
-                                                        res + withContext(context) {
-                                                            scan(
-                                                                str.toString(),
-                                                                detectFunctions
-                                                            )
-                                                        }
-                                                        str.clear()
-                                                        sample++
-                                                        if (isSampleOverload(
-                                                                sample,
-                                                                fastScan
-                                                            ) || !isActive
-                                                        ) return@withContext
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        else -> {}
-                                    }
-                                }
-                                slide.comments.forEach { comment ->
-                                    str.append(comment.text).append("\n")
-                                    if (str.length >= scanSettings.sampleLength || !isActive) {
-                                        res + withContext(context) { scan(str.toString(), detectFunctions) }
-                                        str.clear()
-                                        sample++
-                                        if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (_: Exception) {
-                res.skip()
-                return res
-            }
-
-            if (str.isNotEmpty() && !isSampleOverload(sample, fastScan)) {
-                res + withContext(context) { scan(str.toString(), detectFunctions) }
-            }
-            return res
-        }
+        ): Document = PPTXType.scanFile(file, context, detectFunctions, fastScan)
     },
     PPT(listOf("ppt", "pps", "pot")) {
         override suspend fun scanFile(
@@ -251,78 +65,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
             context: CoroutineContext,
             detectFunctions: List<IDetectFunction>,
             fastScan: Boolean
-        ): Document {
-            val str = StringBuilder()
-            val res = Document(file.length(), file.absolutePath)
-            var sample = 0
-            try {
-                withContext(Dispatchers.IO) {
-                    FileInputStream(file).use { fileInputStream ->
-                        HSLFSlideShow(fileInputStream).use { presentation ->
-                            presentation.slides.forEach { slide ->
-                                str.append(slide.slideName).append("\n")
-                                str.append(slide.title).append("\n")
-
-                                slide.shapes.forEach { shape ->
-                                    when (shape) {
-                                        is HSLFTextBox -> {
-                                            str.append(shape.text).append("\n")
-                                            if (str.length >= scanSettings.sampleLength || !isActive) {
-                                                res + withContext(context) { scan(str.toString(), detectFunctions) }
-                                                str.clear()
-                                                sample++
-                                                if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
-                                            }
-                                        }
-
-                                        is HSLFTable -> {
-                                            for (row in 0..shape.numberOfRows - 1) {
-                                                for (col in 0..shape.numberOfColumns - 1) {
-                                                    str.append(shape.getCell(row, col).text).append("\n")
-                                                    if (str.length >= scanSettings.sampleLength || !isActive) {
-                                                        res + withContext(context) {
-                                                            scan(
-                                                                str.toString(),
-                                                                detectFunctions
-                                                            )
-                                                        }
-                                                        str.clear()
-                                                        sample++
-                                                        if (isSampleOverload(
-                                                                sample,
-                                                                fastScan
-                                                            ) || !isActive
-                                                        ) return@withContext
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                }
-                                slide.comments.forEach { comment ->
-                                    str.append(comment.text).append("\n")
-                                    if (str.length >= scanSettings.sampleLength || !isActive) {
-                                        res + withContext(context) { scan(str.toString(), detectFunctions) }
-                                        str.clear()
-                                        sample++
-                                        if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (_: Exception) {
-                res.skip()
-                return res
-            }
-
-            if (str.isNotEmpty() && !isSampleOverload(sample, fastScan)) {
-                res + withContext(context) { scan(str.toString(), detectFunctions) }
-            }
-            return res
-        }
+        ): Document = PPTType.scanFile(file, context, detectFunctions, fastScan)
     },
     Text((1..999).map { it.toString().padStart(3, '0') } + listOf("txt", "csv", "xml", "json", "log")) {
         override suspend fun scanFile(
@@ -330,45 +73,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
             context: CoroutineContext,
             detectFunctions: List<IDetectFunction>,
             fastScan: Boolean
-        ): Document {
-            val str = StringBuilder()
-            val res = Document(file.length(), file.absolutePath)
-            val buf = CharArray(1000)
-            var sample = 0
-            try {
-                val encoding = UniversalDetector.detectCharset(file)
-                withContext(Dispatchers.IO) {
-                    FileInputStream(file).use { fileInputStream ->
-                        fileInputStream.bufferedReader(charset = Charset.forName(encoding)).use { reader ->
-                            var actualRead: Int
-                            while (true) {
-                                actualRead = reader.read(buf)
-                                if (actualRead <= 0) {
-                                    break
-                                }
-
-                                str.append(buf)
-
-                                if (str.length >= scanSettings.sampleLength || !isActive) {
-                                    res + withContext(context) { scan(str.toString(), detectFunctions) }
-                                    str.clear()
-                                    sample++
-                                    if (isSampleOverload(sample, fastScan) || !isActive)
-                                        return@withContext
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (_: Exception) {
-                res.skip()
-                return res
-            }
-            if (str.isNotEmpty() && !isSampleOverload(sample, fastScan)) {
-                res + withContext(context) { scan(str.toString(), detectFunctions) }
-            }
-            return res
-        }
+        ): Document = TextType.scanFile(file, context, detectFunctions, fastScan)
     },
     DOC(listOf("doc")) {
         override suspend fun scanFile(
@@ -376,53 +81,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
             context: CoroutineContext,
             detectFunctions: List<IDetectFunction>,
             fastScan: Boolean
-        ): Document {
-            val str = StringBuilder()
-            val res = Document(file.length(), file.absolutePath)
-            var sample = 0
-            try {
-                withContext(Dispatchers.IO) {
-                    FileInputStream(file).use { inputStream ->
-                        WordExtractor(inputStream).use { wordExtractor ->
-                            wordExtractor.text.forEach { c ->
-                                str.append(c)
-                                if (str.length >= scanSettings.sampleLength || !isActive) {
-                                    res + withContext(context) { scan(str.toString(), detectFunctions) }
-                                    str.clear()
-                                    sample++
-                                    if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (_: Exception) {
-                try {
-                    withContext(Dispatchers.IO) {
-                        POIFSFileSystem(file).use { inputStream ->
-                            HWPFOldDocument(inputStream).use { hwpfOldDocument ->
-                                hwpfOldDocument.documentText.forEach { c ->
-                                    str.append(c)
-                                    if (str.length >= scanSettings.sampleLength || !isActive) {
-                                        res + withContext(context) { scan(str.toString(), detectFunctions) }
-                                        str.clear()
-                                        sample++
-                                        if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } catch (_: Exception) {
-                    res.skip()
-                    return res
-                }
-            }
-            if (str.isNotEmpty() && !isSampleOverload(sample, fastScan)) {
-                res + withContext(context) { scan(str.toString(), detectFunctions) }
-            }
-            return res
-        }
+        ): Document = DOCType.scanFile(file, context, detectFunctions, fastScan)
     },
     XLS(listOf("xls")) {
         override suspend fun scanFile(
@@ -430,52 +89,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
             context: CoroutineContext,
             detectFunctions: List<IDetectFunction>,
             fastScan: Boolean
-        ): Document {
-            val str = StringBuilder()
-            val res = Document(file.length(), file.absolutePath)
-            var sample = 0
-            try {
-                //Create Workbook instance holding reference to .xlsx file
-                withContext(Dispatchers.IO) {
-                    FileInputStream(file).use { fileInputStream ->
-                        HSSFWorkbook(fileInputStream).use { workbook ->
-                            val dataFormatter = DataFormatter()
-                            dataFormatter.isEmulateCSV = true
-                            workbook.forEach workbook@{ sheet ->
-                                sheet?.forEach { row ->
-                                    row?.forEach { cell ->
-                                        if (cell != null) {
-                                            when (cell.cellType) {
-                                                CellType.NUMERIC -> str.append(dataFormatter.formatCellValue(cell))
-                                                    .append("\n")
-
-                                                CellType.STRING -> str.append(dataFormatter.formatCellValue(cell))
-                                                    .append("\n")
-
-                                                else -> {}
-                                            }
-                                            if (str.length >= scanSettings.sampleLength || !isActive) {
-                                                res + withContext(context) { scan(str.toString(), detectFunctions) }
-                                                str.clear()
-                                                sample++
-                                                if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (_: Exception) {
-                res.skip()
-                return res
-            }
-            if (str.isNotEmpty() && !isSampleOverload(sample, fastScan)) {
-                res + withContext(context) { scan(str.toString(), detectFunctions) }
-            }
-            return res
-        }
+        ) = XLSType.scanFile(file, context, detectFunctions, fastScan)
     },
     PDF(listOf("pdf")) {
         override suspend fun scanFile(
@@ -912,11 +526,13 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
     ): Document
 
     protected fun scan(text: String, detectFunctions: List<IDetectFunction>): Map<IDetectFunction, Int> {
-        val cleanText = Cleaner.Companion.cleanText(text)
-        return detectFunctions.map { f ->
-            f to f.scan(cleanText).takeIf { it > 0 }
-        }.mapNotNull { p ->
-            p.second?.let { p.first to it }
+        val cleanText = Cleaner.cleanText(text)
+        return detectFunctions.mapNotNull { f ->
+            f.scan(cleanText).count().takeIf { it > 0 }
+                .let {
+                    if(it != null) f to it
+                    else null
+                }
         }.toMap()
     }
 
@@ -924,6 +540,8 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
         fun getFileType(file: File): FileType? {
             return entries.find { fileType -> fileType.extensions.contains(file.extension) }
         }
+        fun getFileType(filePath: String): FileType? =
+            getFileType(File(filePath))
 
         private fun selectedExtension(fileName: String): Boolean =
             entries.filter {
@@ -932,10 +550,10 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                 it.extensions
             }.any { fileName.endsWith(it) }
 
-        private fun isSampleOverload(sample: Int, fastScan: Boolean): Boolean {
+        fun isSampleOverload(sample: Int, fastScan: Boolean): Boolean {
             return (fastScan && sample >= scanSettings.sampleCount)
         }
 
-        val scanSettings: ScanSettings by inject()
+        private val scanSettings: ScanSettings by inject()
     }
 }

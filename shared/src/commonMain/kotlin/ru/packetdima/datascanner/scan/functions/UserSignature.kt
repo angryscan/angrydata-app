@@ -12,8 +12,11 @@ data class UserSignature(
     val searchSignatures: MutableList<String> = mutableStateListOf()
 ) : IDetectFunction {
 
-    override fun scan(text: String): Int {
-        return searchSignatures.sumOf { sig -> Pattern.quote(sig).toRegex(RegexOption.IGNORE_CASE).findAll(text).count() }
+    override fun scan(text: String): Sequence<String> {
+        return searchSignatures
+            .map { sig -> Pattern.quote(sig).toRegex(RegexOption.IGNORE_CASE).findAll(text).map { it.value } }
+            .flatMap { it }
+            .asSequence()
     }
 
     override fun toString(): String {

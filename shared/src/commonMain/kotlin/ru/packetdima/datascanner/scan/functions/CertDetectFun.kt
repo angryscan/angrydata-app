@@ -11,9 +11,9 @@ object CertDetectFun : IDetectFunction {
     private val regex = """(---BEGIN CERTIFICATE)|(---BEGIN PKCS7)|(---BEGIN.*?KEY)"""
         .toRegex(RegexOption.MULTILINE)
 
-    override fun scan(text: String): Int {
+    override fun scan(text: String): Sequence<String> {
         return regex
             .findAll(text)
-            .count()
+            .map { it.value }
     }
 }

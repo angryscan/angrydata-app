@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      actions: read
+      checks: write
 
     steps:
     - uses: actions/checkout@v4
@@ -25,4 +27,12 @@ jobs:
     - name: Tests with Gradle Wrapper and XVFB
       uses: coactions/setup-xvfb@v1
       with:
-        run: ./gradlew allTests --no-daemon
+        run: ./gradlew allTests
+
+    - name: Test Report
+      uses: dorny/test-reporter@v2
+      if: ${{ !cancelled() }}       # run this step even if previous step failed
+      with:
+        name: JEST Tests            # Name of the check run which will be created
+        path: '*/build/test-results/*/TEST-*.xml'    # Path to test results
+        reporter: java-junit        # Format of test results

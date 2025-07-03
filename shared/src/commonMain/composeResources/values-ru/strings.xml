@@ -171,4 +171,13 @@
     <string name="AboutScreen-Version">Версия программы: %1$s</string>
     <string name="AboutScreen-Copyright">Авторские права © ООО "Детектикум", 2024</string>
     <string name="AboutScreen-Description">Big Data Scanner — персональное программное обеспечение для экспресс-проверки наличия в файлах персональных данных и номеров банковских карт. Big Data Scanner работает со следующими форматами файлов: .xlsx, .docx, .txt, .csv, .xml, .json, .log, .doc, .xls, .pdf, .zip.\nBig Data Scanner не вносит никаких изменений в проверяемые файлы, требуется доступ только для чтения файла.\n\nРезультат работы программы носит рекомендательный характер, может требоваться дополнительная верификация со стороны пользователя.</string>
+
+    <string name="MessageBox-Cancel">Отмена</string>
+    <string name="MessageBox-OK">ОК</string>
+
+    <string name="LocationWindow-Title">Местоположение атрибутов: %1$s</string>
+    <string name="LocationWindow-Error">При поиске местоположения атрибутов произошла ошибка.</string>
+    <string name="Location-LongScanTitle">Глубокий поиск местонахождения атрибутов</string>
+    <string name="Location-LongScanText">Поиск местонахождения атрибутов занимает много времени. Вы уверены, что хотите продолжить?</string>
+    <string name="Location-LineNumber">Строка %1$d</string>
 </resources>

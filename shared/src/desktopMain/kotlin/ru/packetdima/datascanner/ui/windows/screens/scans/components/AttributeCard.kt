@@ -1,6 +1,7 @@
 package ru.packetdima.datascanner.ui.windows.screens.scans.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -25,6 +26,31 @@ fun AttributeCard(attribute: IDetectFunction) {
                     MaterialTheme.shapes.small
                 )
                 .background(color = MaterialTheme.colorScheme.secondary)
+                .padding(4.dp)
+        ) {
+            Text(
+                text = attribute.composableName(),
+                fontSize = 14.sp,
+                lineHeight = 14.sp,
+                letterSpacing = 0.1.sp,
+                color = MaterialTheme.colorScheme.onSecondary
+            )
+        }
+    }
+}
+
+@Composable
+fun AttributeCard(attribute: IDetectFunction, onClick: () -> Unit) {
+    DetectFunctionTooltip(
+        detectFunction = attribute
+    ) {
+        Box(
+            modifier = Modifier
+                .clip(
+                    MaterialTheme.shapes.small
+                )
+                .background(color = MaterialTheme.colorScheme.secondary)
+                .clickable(onClick = onClick)
                 .padding(4.dp)
         ) {
             Text(

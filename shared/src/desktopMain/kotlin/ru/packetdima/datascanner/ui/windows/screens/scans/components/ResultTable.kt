@@ -25,6 +25,9 @@ import ru.packetdima.datascanner.resources.*
 import ru.packetdima.datascanner.scan.TaskEntityViewModel
 import ru.packetdima.datascanner.scan.TaskFileResult
 import ru.packetdima.datascanner.scan.TaskFilesViewModel
+import ru.packetdima.datascanner.scan.common.files.FileType
+import ru.packetdima.datascanner.scan.common.files.LocationFinder
+import ru.packetdima.datascanner.ui.windows.components.MessageBox
 import java.awt.Desktop
 import java.io.File
 
@@ -59,6 +62,37 @@ fun ResultTable(
     val scrollState = rememberLazyListState()
 
     val state by task.state.collectAsState()
+
+    var filePathSelected by remember { mutableStateOf("") }
+    var attributeSelected by remember { mutableStateOf<IDetectFunction?>(null) }
+    var locationWindowVisible by remember { mutableStateOf(false) }
+
+    var longScanMessageBoxVisible by remember { mutableStateOf(false) }
+
+    if (longScanMessageBoxVisible) {
+        MessageBox(
+            title = stringResource(Res.string.Location_LongScanTitle),
+            message = stringResource(Res.string.Location_LongScanText),
+            onConfirm = {
+                locationWindowVisible = true
+                longScanMessageBoxVisible = false
+            },
+            onDismiss = { longScanMessageBoxVisible = false }
+        )
+    }
+
+    if (locationWindowVisible && attributeSelected != null) {
+        AttributeLocationWindow(
+            filePathSelected,
+            attribute = attributeSelected!!,
+            onClose = {
+                locationWindowVisible = false
+                attributeSelected = null
+                filePathSelected = ""
+            }
+        )
+    }
+
 
     LaunchedEffect(taskFiles) {
         filesExists.addAll(
@@ -361,6 +395,9 @@ fun ResultTable(
                             f.foundAttributes.any { attr -> attr in selectedAttributes }
                         }
                     ) { file ->
+                        val fileType = FileType.getFileType(file.path)
+                        val locationSupported = fileType != null && LocationFinder.isSupported(fileType)
+                        val exist = filesExists.contains(file.id)
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -372,7 +409,7 @@ fun ResultTable(
                                 ) {
                                     try {
                                         Desktop.getDesktop().open(File(file.path))
-                                    } catch (e: Exception) {
+                                    } catch (_: Exception) {
                                         filesExists.remove(file.id)
                                     }
                                 }
@@ -393,17 +430,15 @@ fun ResultTable(
                                     checkedBorderColor = MaterialTheme.colorScheme.primary,
                                     uncheckedBorderColor = MaterialTheme.colorScheme.primary
                                 ),
-                                enabled = filesExists.contains(file.id)
+                                enabled = exist
                             )
                             Text(
                                 text = file.path
                                     .replace(task.path.value, "")
                                     .removePrefix("/")
                                     .removePrefix("\\")
-                                    .let {
-                                        if (it.isNotEmpty())
-                                            it
-                                        else file.path
+                                    .ifEmpty {
+                                        file.path
                                             .substringAfterLast("/")
                                             .substringAfterLast("\\")
                                     },
@@ -420,7 +455,19 @@ fun ResultTable(
                                     .weight(0.5f)
                             ) {
                                 file.foundAttributes.forEach { attr ->
-                                    AttributeCard(attr)
+                                    if (locationSupported && exist)
+                                        AttributeCard(
+                                            attribute = attr,
+                                            onClick = {
+                                                attributeSelected = attr
+                                                filePathSelected = file.path
+                                                longScanMessageBoxVisible = true
+                                            }
+                                        )
+                                    else
+                                        AttributeCard(
+                                            attribute = attr
+                                        )
                                 }
                             }
                             Text(

@@ -1,17 +1,10 @@
 package ru.packetdima.datascanner.searcher
 
+import IKoinTestRule
 import info.downdetector.bigdatascanner.common.Cleaner
 import info.downdetector.bigdatascanner.common.DetectFunction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import org.junit.Rule
-import org.koin.dsl.module
-import org.koin.test.KoinTestRule
-import ru.packetdima.datascanner.common.AppSettings
-import ru.packetdima.datascanner.common.ScanSettings
-import ru.packetdima.datascanner.common.UserSignatureSettings
-import ru.packetdima.datascanner.db.DatabaseSettings
-import ru.packetdima.datascanner.di.scanModule
 import ru.packetdima.datascanner.scan.common.Document
 import ru.packetdima.datascanner.scan.common.files.FileType
 import java.io.File
@@ -19,34 +12,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-internal class DetectorTest {
-    @get:Rule
-    val koinTestRule = KoinTestRule.create {
-        modules(
-            module {
-                single {
-                    DatabaseSettings(
-                        url = "jdbc:sqlite:build/tmp/test.db",
-                        driver = "org.sqlite.JDBC"
-                    )
-                }
-
-            },
-            module {
-                single { javaClass.getResource("common/UserSignatures.json")
-                    ?.let { it1 -> UserSignatureSettings.SettingsFile(it1.path) } }
-                single { UserSignatureSettings() }
-                single { javaClass.getResource("common/AppSettings.json")
-                    ?.let { it1 -> AppSettings.AppSettingsFile(it1.path) } }
-                single { AppSettings() }
-                single { javaClass.getResource("common/ScanSettings.json")
-                    ?.let { it1 -> ScanSettings.SettingsFile(it1.path) } }
-                single { ScanSettings() }
-            },
-            scanModule
-        )
-    }
-
+internal class DetectorTest: IKoinTestRule {
     @Test
     fun scan() {
         val sampleText = """Sample text, 4279432112344321 199-510-399 13  
@@ -54,7 +20,7 @@ internal class DetectorTest {
 омс 7755320882002755"""
         val doc = Document(1, "123")
         DetectFunction.entries.map { f ->
-            f to f.scan(Cleaner.cleanText(sampleText)).takeIf { it > 0 }
+            f to f.scan(Cleaner.cleanText(sampleText)).count().takeIf { it > 0 }
         }.mapNotNull { p ->
             p.second?.let { p.first to it }
         }.toMap().forEach { (t, u) ->

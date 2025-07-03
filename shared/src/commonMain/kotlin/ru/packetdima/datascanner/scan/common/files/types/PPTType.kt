@@ -4,9 +4,9 @@ import info.downdetector.bigdatascanner.common.IDetectFunction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
-import org.apache.poi.xslf.usermodel.XMLSlideShow
-import org.apache.poi.xslf.usermodel.XSLFTable
-import org.apache.poi.xslf.usermodel.XSLFTextBox
+import org.apache.poi.hslf.usermodel.HSLFSlideShow
+import org.apache.poi.hslf.usermodel.HSLFTable
+import org.apache.poi.hslf.usermodel.HSLFTextBox
 import ru.packetdima.datascanner.scan.common.Document
 import ru.packetdima.datascanner.scan.common.files.Location
 import ru.packetdima.datascanner.scan.common.files.LocationFinder.ScanException
@@ -14,7 +14,7 @@ import java.io.File
 import java.io.FileInputStream
 import kotlin.coroutines.CoroutineContext
 
-object PPTXType : IFileType {
+object PPTType : IFileType {
     override suspend fun scanFile(
         file: File,
         context: CoroutineContext,
@@ -27,14 +27,14 @@ object PPTXType : IFileType {
         try {
             withContext(Dispatchers.IO) {
                 FileInputStream(file).use { fileInputStream ->
-                    XMLSlideShow(fileInputStream).use stream@{ presentation ->
+                    HSLFSlideShow(fileInputStream).use { presentation ->
                         presentation.slides.forEach { slide ->
                             str.append(slide.slideName).append("\n")
                             str.append(slide.title).append("\n")
 
                             slide.shapes.forEach { shape ->
                                 when (shape) {
-                                    is XSLFTextBox -> {
+                                    is HSLFTextBox -> {
                                         str.append(shape.text).append("\n")
                                         if (isLengthOverload(str.length, isActive)) {
                                             res + withContext(context) { scan(str.toString(), detectFunctions) }
@@ -45,10 +45,10 @@ object PPTXType : IFileType {
                                         }
                                     }
 
-                                    is XSLFTable -> {
-                                        shape.rows.forEach { row ->
-                                            row.cells.forEach { cell ->
-                                                str.append(cell.text).append("\n")
+                                    is HSLFTable -> {
+                                        for (row in 0..shape.numberOfRows - 1) {
+                                            for (col in 0..shape.numberOfColumns - 1) {
+                                                str.append(shape.getCell(row, col).text).append("\n")
                                                 if (isLengthOverload(str.length, isActive)) {
                                                     res + withContext(context) {
                                                         scan(
@@ -64,9 +64,8 @@ object PPTXType : IFileType {
                                             }
                                         }
                                     }
-
-                                    else -> {}
                                 }
+
                             }
                             slide.comments.forEach { comment ->
                                 str.append(comment.text).append("\n")
@@ -74,7 +73,8 @@ object PPTXType : IFileType {
                                     res + withContext(context) { scan(str.toString(), detectFunctions) }
                                     str.clear()
                                     sample++
-                                    if (isSampleOverload(sample, fastScan, isActive)) return@withContext
+                                    if (isSampleOverload(sample, fastScan, isActive))
+                                        return@withContext
                                 }
                             }
                         }
@@ -104,8 +104,9 @@ object PPTXType : IFileType {
             withContext(Dispatchers.IO) {
                 val file = File(filePath)
                 FileInputStream(file).use { fileInputStream ->
-                    XMLSlideShow(fileInputStream).use stream@{ presentation ->
+                    HSLFSlideShow(fileInputStream).use { presentation ->
                         presentation.slides.forEachIndexed { slideIndex, slide ->
+
                             if (slide.slideName != null) {
                                 getEntries(slide.slideName, detectFunction)
                                     .forEach {
@@ -132,10 +133,9 @@ object PPTXType : IFileType {
                                 length += slide.title.length
                             }
 
-
                             slide.shapes.forEach { shape ->
                                 when (shape) {
-                                    is XSLFTextBox -> {
+                                    is HSLFTextBox -> {
                                         getEntries(shape.text, detectFunction)
                                             .forEach {
                                                 locations.add(
@@ -154,10 +154,10 @@ object PPTXType : IFileType {
                                         }
                                     }
 
-                                    is XSLFTable -> {
-                                        shape.rows.forEach { row ->
-                                            row.cells.forEach { cell ->
-                                                getEntries(cell.text, detectFunction)
+                                    is HSLFTable -> {
+                                        for (row in 0..shape.numberOfRows - 1) {
+                                            for (col in 0..shape.numberOfColumns - 1) {
+                                                getEntries(shape.getCell(row, col).text, detectFunction)
                                                     .forEach {
                                                         locations.add(
                                                             Location(
@@ -174,9 +174,8 @@ object PPTXType : IFileType {
                                             }
                                         }
                                     }
-
-                                    else -> {}
                                 }
+
                             }
                             slide.comments.forEach { comment ->
                                 getEntries(comment.text, detectFunction)

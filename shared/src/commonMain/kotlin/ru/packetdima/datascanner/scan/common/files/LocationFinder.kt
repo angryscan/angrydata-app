@@ -8,6 +8,7 @@ import java.io.File
 object LocationFinder {
     fun isSupported(type: FileType): Boolean = when (type) {
         FileType.XLSX -> true
+        FileType.XLS -> true
         FileType.Text -> true
         else -> false
     }
@@ -20,6 +21,7 @@ object LocationFinder {
 
         return when (type) {
             FileType.XLSX -> XLSXType.findLocation(filePath, detectFunction)
+            FileType.XLS -> XLSXType.findLocation(filePath, detectFunction)
             FileType.Text -> TextType.findLocation(filePath, detectFunction)
             else -> throw NotSupportedTypeException
         }

@@ -7,18 +7,15 @@ import kotlinx.coroutines.withContext
 import org.dhatim.fastexcel.reader.ReadableWorkbook
 import ru.packetdima.datascanner.scan.common.Document
 import ru.packetdima.datascanner.scan.common.files.FileType
-import ru.packetdima.datascanner.scan.common.files.FileType.Companion.isSampleOverload
 import ru.packetdima.datascanner.scan.common.files.FileType.Companion.scanSettings
 import ru.packetdima.datascanner.scan.common.files.Location
 import ru.packetdima.datascanner.scan.common.files.LocationFinder.ScanException
 import java.io.File
 import java.io.FileInputStream
 import kotlin.coroutines.CoroutineContext
-import kotlin.io.use
-import kotlin.use
 
 object XLSXType : IFileType {
-    suspend fun scanFile(
+    override suspend fun scanFile(
         file: File,
         context: CoroutineContext,
         detectFunctions: List<IDetectFunction>,
@@ -85,11 +82,8 @@ object XLSXType : IFileType {
                             sheets.forEach sheet@{ sheet ->
                                 sheet?.openStream().use { rowStream ->
                                     rowStream?.forEach rowStream@{ row ->
-                                        if (FileType.Companion.isSampleOverload(
-                                                sample,
-                                                fastScan
-                                            ) || !isActive
-                                        ) return@rowStream
+                                        if (isSampleOverload(sample, fastScan) || !isActive) return@rowStream
+
                                         row?.forEach { cell ->
                                             if (cell != null) {
                                                 getEntries(cell.text, detectFunction)
@@ -102,11 +96,7 @@ object XLSXType : IFileType {
                                                 if (length >= FileType.Companion.scanSettings.sampleLength || !isActive) {
                                                     length = 0
                                                     sample++
-                                                    if (FileType.Companion.isSampleOverload(
-                                                            sample,
-                                                            fastScan
-                                                        ) || !isActive
-                                                    ) return@rowStream
+                                                    if (isSampleOverload(sample, fastScan) || !isActive) return@rowStream
                                                 }
                                             }
                                         }

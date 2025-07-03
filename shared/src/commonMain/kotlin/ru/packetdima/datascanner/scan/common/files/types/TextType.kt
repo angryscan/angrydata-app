@@ -7,7 +7,6 @@ import kotlinx.coroutines.withContext
 import org.mozilla.universalchardet.UniversalDetector
 import ru.packetdima.datascanner.scan.common.Document
 import ru.packetdima.datascanner.scan.common.files.FileType
-import ru.packetdima.datascanner.scan.common.files.FileType.Companion.isSampleOverload
 import ru.packetdima.datascanner.scan.common.files.FileType.Companion.scanSettings
 import ru.packetdima.datascanner.scan.common.files.Location
 import ru.packetdima.datascanner.scan.common.files.LocationFinder.ScanException
@@ -17,7 +16,7 @@ import java.nio.charset.Charset
 import kotlin.coroutines.CoroutineContext
 
 object TextType : IFileType {
-    suspend fun scanFile(
+    override suspend fun scanFile(
         file: File,
         context: CoroutineContext,
         detectFunctions: List<IDetectFunction>,

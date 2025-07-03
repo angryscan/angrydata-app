@@ -2,13 +2,16 @@ package ru.packetdima.datascanner.scan.common.files.types
 
 import info.downdetector.bigdatascanner.common.Cleaner
 import info.downdetector.bigdatascanner.common.IDetectFunction
+import kotlinx.coroutines.CoroutineScope
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.scan.common.Document
-import ru.packetdima.datascanner.scan.common.files.FileType.Companion.scanSettings
 import ru.packetdima.datascanner.scan.common.files.Location
 import java.io.File
 import kotlin.coroutines.CoroutineContext
 
-interface IFileType {
+interface IFileType: KoinComponent {
     suspend fun scanFile(
         file: File,
         context: CoroutineContext,
@@ -39,6 +42,22 @@ interface IFileType {
     }
 
     fun isSampleOverload(sample: Int, fastScan: Boolean): Boolean {
+        val scanSettings: ScanSettings by inject()
         return (fastScan && sample >= scanSettings.sampleCount)
+    }
+
+    fun isSampleOverload(sample: Int, fastScan: Boolean, isActive: Boolean): Boolean {
+        if(!isActive) return true
+        return isSampleOverload(sample, fastScan)
+    }
+
+    fun isLengthOverload(length: Int): Boolean {
+        val scanSettings: ScanSettings by inject()
+        return (length >= scanSettings.sampleLength)
+    }
+
+    fun isLengthOverload(length: Int, isActive: Boolean): Boolean {
+        if(!isActive) return true
+        return (isLengthOverload(length))
     }
 }

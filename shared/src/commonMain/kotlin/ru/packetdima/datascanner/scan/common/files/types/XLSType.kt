@@ -8,8 +8,6 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.DataFormatter
 import ru.packetdima.datascanner.scan.common.Document
-import ru.packetdima.datascanner.scan.common.files.FileType
-import ru.packetdima.datascanner.scan.common.files.FileType.Companion.scanSettings
 import ru.packetdima.datascanner.scan.common.files.Location
 import ru.packetdima.datascanner.scan.common.files.LocationFinder.ScanException
 import java.io.File
@@ -46,11 +44,12 @@ object XLSType : IFileType {
 
                                             else -> {}
                                         }
-                                        if (str.length >= scanSettings.sampleLength || !isActive) {
+                                        if (isLengthOverload(str.length, isActive)) {
                                             res + withContext(context) { scan(str.toString(), detectFunctions) }
                                             str.clear()
                                             sample++
-                                            if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
+                                            if (isSampleOverload(sample, fastScan, isActive))
+                                                return@withContext
                                         }
                                     }
                                 }
@@ -101,10 +100,11 @@ object XLSType : IFileType {
                                                 locations.add(Location(it, "${sheet.sheetName}:${cell.address}"))
                                             }
 
-                                        if (length >= FileType.Companion.scanSettings.sampleLength || !isActive) {
+                                        if (isLengthOverload(length, isActive)) {
                                             length = 0
                                             sample++
-                                            if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
+                                            if (isSampleOverload(sample, fastScan, isActive))
+                                                return@withContext
                                         }
                                     }
                                 }

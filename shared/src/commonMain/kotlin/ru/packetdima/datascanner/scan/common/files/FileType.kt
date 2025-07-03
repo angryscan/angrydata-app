@@ -11,16 +11,12 @@ import org.apache.pdfbox.text.PDFTextStripper
 import org.apache.poi.hslf.usermodel.HSLFSlideShow
 import org.apache.poi.hslf.usermodel.HSLFTable
 import org.apache.poi.hslf.usermodel.HSLFTextBox
-import org.apache.poi.hwpf.HWPFDocument
 import org.apache.poi.hwpf.HWPFOldDocument
 import org.apache.poi.hwpf.extractor.WordExtractor
 import org.apache.poi.poifs.filesystem.POIFSFileSystem
 import org.apache.poi.xslf.usermodel.XMLSlideShow
 import org.apache.poi.xslf.usermodel.XSLFTable
 import org.apache.poi.xslf.usermodel.XSLFTextBox
-import org.apache.poi.xwpf.usermodel.XWPFDocument
-import org.apache.poi.xwpf.usermodel.XWPFParagraph
-import org.apache.poi.xwpf.usermodel.XWPFTable
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.odftoolkit.odfdom.doc.OdfSpreadsheetDocument
@@ -32,6 +28,7 @@ import org.odftoolkit.odfdom.incubator.doc.text.OdfTextParagraph
 import org.odftoolkit.simple.PresentationDocument
 import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.scan.common.Document
+import ru.packetdima.datascanner.scan.common.files.types.DOCXType
 import ru.packetdima.datascanner.scan.common.files.types.TextType
 import ru.packetdima.datascanner.scan.common.files.types.XLSType
 import ru.packetdima.datascanner.scan.common.files.types.XLSXType
@@ -61,63 +58,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
             context: CoroutineContext,
             detectFunctions: List<IDetectFunction>,
             fastScan: Boolean
-        ): Document {
-            val str = StringBuilder()
-            val res = Document(file.length(), file.absolutePath)
-            var sample = 0
-            try {
-                withContext(Dispatchers.IO) {
-                    FileInputStream(file).use { fileInputStream ->
-                        XWPFDocument(fileInputStream).use { document ->
-                            document.bodyElements
-                            for (elem in document.bodyElements) {
-                                when (elem) {
-                                    is XWPFParagraph -> elem.text
-                                    is XWPFTable -> elem.text
-                                    else -> ""
-                                }.forEach { c ->
-                                    str.append(c)
-                                    if (str.length >= scanSettings.sampleLength || !isActive) {
-                                        res + withContext(context) { scan(str.toString(), detectFunctions) }
-                                        str.clear()
-                                        sample++
-                                        if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
-                                    }
-                                }
-                                str.append("\n")
-                            }
-                        }
-                    }
-                }
-            } catch (_: Exception) {
-                try {
-                    withContext(Dispatchers.IO) {
-                        FileInputStream(file).use { fileInputStream ->
-                            HWPFDocument(fileInputStream).use { document ->
-                                WordExtractor(document).use { extractor ->
-                                    extractor.text.forEach { c ->
-                                        str.append(c).append("\n")
-                                        if (str.length >= scanSettings.sampleLength || !isActive) {
-                                            res + withContext(context) { scan(str.toString(), detectFunctions) }
-                                            str.clear()
-                                            sample++
-                                            if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } catch (_: Exception) {
-                    res.skip()
-                    return res
-                }
-            }
-            if (str.isNotEmpty() && !isSampleOverload(sample, fastScan)) {
-                res + withContext(context) { scan(str.toString(), detectFunctions) }
-            }
-            return res
-        }
+        ): Document = DOCXType.scanFile(file, context, detectFunctions, fastScan)
     },
     PPTX(listOf("pptx", "potx", "ppsx", "pptm")) {
         override suspend fun scanFile(

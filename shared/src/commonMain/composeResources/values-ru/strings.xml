@@ -139,7 +139,7 @@
     <string name="Task-SelectedFiles">Выбрано файлов</string>
     <string name="Task-FoundFiles">Найдено файлов</string>
     <string name="Task-FolderSize">Размер папки</string>
-    <string name="Task-FoundAttributes">Найденные атрибуты:</string>
+    <string name="Task-FoundAttributes">Что найдено:</string>
     <string name="Task-ScanTime">Время сканирования</string>
 
     <string name="TaskStateChipFilter-Active">Активные</string>
@@ -148,7 +148,7 @@
     <string name="TaskStateChipFilter-Completed">Завершенные</string>
 
     <string name="Result-ColumnFile">Файл</string>
-    <string name="Result-ColumnAttributes">Аттрибуты</string>
+    <string name="Result-ColumnAttributes">Что найдено</string>
     <string name="Result-ColumnCount">Кол-во</string>
     <string name="Result-ColumnSize">Размер</string>
     <string name="Result-ColumnScore">Оценка</string>

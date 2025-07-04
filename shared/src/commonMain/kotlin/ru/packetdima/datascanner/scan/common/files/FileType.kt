@@ -8,9 +8,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.text.PDFTextStripper
-import org.apache.poi.hslf.usermodel.HSLFSlideShow
-import org.apache.poi.hslf.usermodel.HSLFTable
-import org.apache.poi.hslf.usermodel.HSLFTextBox
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.odftoolkit.odfdom.doc.OdfSpreadsheetDocument

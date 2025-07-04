@@ -7,3 +7,4 @@
 /gradle-bin/
 /shared/build/
 /desktop/build/
+/desktop/generated.conveyor.conf

@@ -40,7 +40,7 @@ fun AttributeCard(attribute: IDetectFunction) {
 }
 
 @Composable
-fun AttributeCard(attribute: IDetectFunction, onClick: () -> Unit) {
+fun AttributeCard(attribute: IDetectFunction, onClick: () -> Unit, enabled: Boolean) {
     DetectFunctionTooltip(
         detectFunction = attribute
     ) {
@@ -49,8 +49,16 @@ fun AttributeCard(attribute: IDetectFunction, onClick: () -> Unit) {
                 .clip(
                     MaterialTheme.shapes.small
                 )
-                .background(color = MaterialTheme.colorScheme.secondary)
-                .clickable(onClick = onClick)
+                .background(
+                    color = if (enabled)
+                        MaterialTheme.colorScheme.secondary
+                    else
+                        MaterialTheme.colorScheme.outlineVariant
+                )
+                .clickable(
+                    onClick = onClick,
+                    enabled = enabled
+                )
                 .padding(4.dp)
         ) {
             Text(

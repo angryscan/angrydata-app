@@ -25,6 +25,7 @@ import ru.packetdima.datascanner.resources.*
 import ru.packetdima.datascanner.scan.TaskEntityViewModel
 import ru.packetdima.datascanner.scan.TaskFileResult
 import ru.packetdima.datascanner.scan.TaskFilesViewModel
+import ru.packetdima.datascanner.scan.common.connectors.ConnectorFileShare
 import ru.packetdima.datascanner.scan.common.files.FileType
 import ru.packetdima.datascanner.scan.common.files.LocationFinder
 import ru.packetdima.datascanner.ui.windows.components.MessageBox
@@ -396,7 +397,7 @@ fun ResultTable(
                         }
                     ) { file ->
                         val fileType = FileType.getFileType(file.path)
-                        val locationSupported = fileType != null && LocationFinder.isSupported(fileType)
+                        val locationSupported = fileType != null && LocationFinder.isSupported(fileType) && task.dbTask.connector is ConnectorFileShare
                         val exist = filesExists.contains(file.id)
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -455,19 +456,15 @@ fun ResultTable(
                                     .weight(0.5f)
                             ) {
                                 file.foundAttributes.forEach { attr ->
-                                    if (locationSupported && exist)
-                                        AttributeCard(
-                                            attribute = attr,
-                                            onClick = {
-                                                attributeSelected = attr
-                                                filePathSelected = file.path
-                                                longScanMessageBoxVisible = true
-                                            }
-                                        )
-                                    else
-                                        AttributeCard(
-                                            attribute = attr
-                                        )
+                                    AttributeCard(
+                                        attribute = attr,
+                                        onClick = {
+                                            attributeSelected = attr
+                                            filePathSelected = file.path
+                                            longScanMessageBoxVisible = true
+                                        },
+                                        enabled = locationSupported && exist
+                                    )
                                 }
                             }
                             Text(

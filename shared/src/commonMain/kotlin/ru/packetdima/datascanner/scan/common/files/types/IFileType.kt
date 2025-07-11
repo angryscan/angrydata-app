@@ -2,7 +2,6 @@ package ru.packetdima.datascanner.scan.common.files.types
 
 import info.downdetector.bigdatascanner.common.Cleaner
 import info.downdetector.bigdatascanner.common.IDetectFunction
-import kotlinx.coroutines.CoroutineScope
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import ru.packetdima.datascanner.common.ScanSettings
@@ -22,7 +21,7 @@ interface IFileType: KoinComponent {
     suspend fun findLocation(
         filePath: String,
         detectFunction: IDetectFunction,
-        fastScan: Boolean = true
+        fastScan: Boolean = false
     ): List<Location>
 
     fun getEntries(text: String, detectFunction: IDetectFunction): List<String> {

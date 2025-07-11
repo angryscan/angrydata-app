@@ -177,6 +177,7 @@
 
     <string name="LocationWindow-Title">Местоположение атрибутов: %1$s</string>
     <string name="LocationWindow-Error">При поиске местоположения атрибутов произошла ошибка.</string>
+    <string name="LocationWindow-NotFound">Местоположение не найдено.</string>
     <string name="Location-LongScanTitle">Глубокий поиск местонахождения атрибутов</string>
     <string name="Location-LongScanText">Поиск местонахождения атрибутов занимает много времени. Вы уверены, что хотите продолжить?</string>
     <string name="Location-LineNumber">Строка %1$d</string>

@@ -23,6 +23,7 @@ import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import ru.packetdima.datascanner.resources.Error_FileOpen
 import ru.packetdima.datascanner.resources.LocationWindow_Error
+import ru.packetdima.datascanner.resources.LocationWindow_NotFound
 import ru.packetdima.datascanner.resources.LocationWindow_Title
 import ru.packetdima.datascanner.resources.Res
 import ru.packetdima.datascanner.scan.common.files.Location
@@ -47,6 +48,8 @@ fun AttributeLocationWindow(
 
     var errorSearching by remember { mutableStateOf(false) }
 
+    var failedToFind by remember { mutableStateOf(false) }
+
     coroutineScope.launch {
         searching = true
         try {
@@ -54,6 +57,8 @@ fun AttributeLocationWindow(
                 filePath,
                 attribute
             )
+            if (locations.isEmpty())
+                failedToFind = true
         } catch (_: Exception) {
             errorSearching = true
         }
@@ -163,63 +168,72 @@ fun AttributeLocationWindow(
                     if (searching) {
                         CircularProgressIndicator()
                     } else {
-                        Scaffold(
-                            modifier = Modifier
-                                .fillMaxSize(),
-                            snackbarHost = { SnackbarHost(snackbarHostState) }
-                        ) {
-                            Box(
+                        if (failedToFind) {
+                            Spacer(Modifier.height(20.dp))
+                            Text(
+                                text = stringResource(Res.string.LocationWindow_NotFound),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        } else {
+                            Scaffold(
                                 modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(8.dp)
-                                    .background(color = MaterialTheme.colorScheme.surface)
-                                    .padding(vertical = 8.dp)
+                                    .fillMaxSize(),
+                                snackbarHost = { SnackbarHost(snackbarHostState) }
                             ) {
-
-                                LazyColumn(
-                                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                                Box(
                                     modifier = Modifier
-                                        .padding(
-                                            start = 8.dp,
-                                            end = if (scrollState.canScrollBackward || scrollState.canScrollForward) 20.dp else 8.dp
-                                        ),
-                                    state = scrollState
+                                        .fillMaxSize()
+                                        .padding(8.dp)
+                                        .background(color = MaterialTheme.colorScheme.surface)
+                                        .padding(vertical = 8.dp)
                                 ) {
-                                    items(locations) { location ->
-                                        Row(
-                                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                        ) {
-                                            Text(
+
+                                    LazyColumn(
+                                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                                        modifier = Modifier
+                                            .padding(
+                                                start = 8.dp,
+                                                end = if (scrollState.canScrollBackward || scrollState.canScrollForward) 20.dp else 8.dp
+                                            ),
+                                        state = scrollState
+                                    ) {
+                                        items(locations) { location ->
+                                            Row(
+                                                horizontalArrangement = Arrangement.spacedBy(12.dp),
                                                 modifier = Modifier
-                                                    .weight(0.8f)
-                                                    .fillMaxWidth(),
-                                                text = location.entry,
-                                                style = MaterialTheme.typography.bodySmall
-                                            )
-                                            Text(
-                                                modifier = Modifier
-                                                    .weight(0.2f)
-                                                    .fillMaxWidth(),
-                                                text = location.location,
-                                                style = MaterialTheme.typography.bodySmall
-                                            )
+                                                    .fillMaxWidth()
+                                            ) {
+                                                Text(
+                                                    modifier = Modifier
+                                                        .weight(0.8f)
+                                                        .fillMaxWidth(),
+                                                    text = location.entry,
+                                                    style = MaterialTheme.typography.bodySmall
+                                                )
+                                                Text(
+                                                    modifier = Modifier
+                                                        .weight(0.2f)
+                                                        .fillMaxWidth(),
+                                                    text = location.location,
+                                                    style = MaterialTheme.typography.bodySmall
+                                                )
+                                            }
                                         }
                                     }
-                                }
 
-                                VerticalScrollbar(
-                                    adapter = rememberScrollbarAdapter(scrollState),
-                                    modifier = Modifier
-                                        .align(Alignment.CenterEnd)
-                                        .padding(end = 6.dp)
-                                        .width(10.dp),
-                                    style = LocalScrollbarStyle.current.copy(
-                                        hoverColor = MaterialTheme.colorScheme.primary,
-                                        unhoverColor = MaterialTheme.colorScheme.secondary
+                                    VerticalScrollbar(
+                                        adapter = rememberScrollbarAdapter(scrollState),
+                                        modifier = Modifier
+                                            .align(Alignment.CenterEnd)
+                                            .padding(end = 6.dp)
+                                            .width(10.dp),
+                                        style = LocalScrollbarStyle.current.copy(
+                                            hoverColor = MaterialTheme.colorScheme.primary,
+                                            unhoverColor = MaterialTheme.colorScheme.secondary
+                                        )
                                     )
-                                )
+                                }
                             }
                         }
                     }

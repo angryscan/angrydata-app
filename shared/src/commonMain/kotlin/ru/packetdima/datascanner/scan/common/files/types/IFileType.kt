@@ -21,7 +21,7 @@ interface IFileType: KoinComponent {
     suspend fun findLocation(
         filePath: String,
         detectFunction: IDetectFunction,
-        fastScan: Boolean = true
+        fastScan: Boolean = false
     ): List<Location>
 
     fun getEntries(text: String, detectFunction: IDetectFunction): List<String> {

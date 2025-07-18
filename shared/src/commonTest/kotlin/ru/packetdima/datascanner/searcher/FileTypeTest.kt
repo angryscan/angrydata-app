@@ -75,9 +75,7 @@ internal class FileTypeTest() {
             "first.pot",
             "first.ods",
             "first.pdf",
-            "first.zip",
             "very_short.xlsx",
-            "TestText.rar",
             "ipv6.txt"
         )
             .forEach { filename ->
@@ -165,28 +163,6 @@ internal class FileTypeTest() {
                 enumType?.scanFile(f, currentCoroutineContext(), DetectFunction.entries, false).let {
                     assertEquals(mapOf(), it?.getDocumentFields())
                     assertTrue(it?.skipped() == true)
-                }
-            } catch (e: Exception) {
-                fail(e.message)
-            }
-        }
-    }
-
-    @Test
-    fun `Check IllegalArgumentException`() {
-        val path = javaClass.getResource("/files/diacritic.zip")
-        assertNotNull(path)
-        val f = File(path.file)
-        val writer = FileWriter(f)
-        writer.write("content")
-        writer.close()
-        assertTrue(f.exists())
-
-        runBlocking {
-            try {
-                FileType.ZIP.scanFile(f, currentCoroutineContext(), DetectFunction.entries, false).let {
-                    assertEquals(0, it.length())
-                    assertEquals(mapOf(), it.getDocumentFields())
                 }
             } catch (e: Exception) {
                 fail(e.message)

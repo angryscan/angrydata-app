@@ -7,6 +7,7 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 import ru.packetdima.datascanner.scan.common.connectors.ConnectorFileShare
+import ru.packetdima.datascanner.scan.common.connectors.ConnectorHTTP
 import ru.packetdima.datascanner.scan.common.connectors.ConnectorS3
 import ru.packetdima.datascanner.scan.common.connectors.IConnector
 import ru.packetdima.datascanner.scan.functions.CertDetectFun
@@ -23,6 +24,7 @@ val PolymorphicSerializationModule = SerializersModule {
     polymorphic(IConnector::class) {
         subclass(ConnectorS3::class)
         subclass(ConnectorFileShare::class)
+        subclass(ConnectorHTTP::class)
     }
 }
 

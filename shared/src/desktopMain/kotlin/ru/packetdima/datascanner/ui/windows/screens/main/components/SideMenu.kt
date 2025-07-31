@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.Http
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -59,7 +60,13 @@ fun SideMenu(
                 text = "AWS S3",
                 onClick = { navController.navigate(MainScreens.S3.name) }
             )
-
+            SideMenuItem(
+                isSelected = currentScreen == MainScreens.HTTP,
+                expanded = false,
+                icon = rememberVectorPainter(Icons.Outlined.Http),
+                text = "HTTP",
+                onClick = { navController.navigate(MainScreens.HTTP.name) }
+            )
         }
     }
 }

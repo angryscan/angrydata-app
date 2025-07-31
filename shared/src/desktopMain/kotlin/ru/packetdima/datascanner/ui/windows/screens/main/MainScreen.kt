@@ -11,6 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import ru.packetdima.datascanner.ui.windows.screens.main.components.MainScreens
 import ru.packetdima.datascanner.ui.windows.screens.main.components.SideMenu
 import ru.packetdima.datascanner.ui.windows.screens.main.subscreens.FileShareScreen
+import ru.packetdima.datascanner.ui.windows.screens.main.subscreens.HTTPScreen
 import ru.packetdima.datascanner.ui.windows.screens.main.subscreens.S3Screen
 import ru.packetdima.datascanner.ui.windows.screens.main.tasks.MainScreenTasks
 
@@ -63,6 +64,25 @@ fun MainScreen(
                     }
                     composable(route = MainScreens.S3.name) {
                         S3Screen(
+                            settingsExpanded = settingsExpanded,
+                            expandSettings = {
+                                if(scanStateExpanded)
+                                    scanStateExpanded = false
+                                settingsExpanded = true
+                            },
+                            hideSettings = {
+                                settingsExpanded = false
+                            },
+                            expandScanState = {
+                                if (!scanStateExpanded) {
+                                    settingsExpanded = false
+                                    scanStateExpanded = true
+                                }
+                            }
+                        )
+                    }
+                    composable(route = MainScreens.HTTP.name) {
+                        HTTPScreen(
                             settingsExpanded = settingsExpanded,
                             expandSettings = {
                                 if(scanStateExpanded)

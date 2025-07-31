@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
 import ru.packetdima.datascanner.scan.common.FilesCounter
 import java.io.File
 
-val logger = KotlinLogging.logger {}
+private val logger = KotlinLogging.logger {}
 
 @Serializable
 class ConnectorS3(
@@ -29,6 +29,7 @@ class ConnectorS3(
     @Serializable
     val regionStr: String? = null,
 ) : IConnector, AutoCloseable {
+
     private val s3Client by lazy {
         runBlocking {
             val client = S3Client.fromEnvironment {

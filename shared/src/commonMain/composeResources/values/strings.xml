@@ -71,7 +71,7 @@
     <string name="SideMenu-SettingsPage">Settings</string>
     <string name="SideMenu-AboutPage">About</string>
 
-    <string name="MainScreen-SelectPathPlaceholder">Choose folder to scanFile</string>
+    <string name="MainScreen-SelectPathPlaceholder">Choose paths to scan separated by semicolon (;)</string>
     <string name="MainScreen-ScanStartButton">Scan</string>
     <string name="MainScreen-ScanCurrentState">Current scans (%1$d)</string>
     <string name="MainScreen-SelectTypeFolder">Folder</string>

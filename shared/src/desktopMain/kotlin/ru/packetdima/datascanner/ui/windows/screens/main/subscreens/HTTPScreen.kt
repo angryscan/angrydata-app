@@ -78,7 +78,12 @@ fun HTTPScreen(
                 .height(80.dp)
                 .width(700.dp),
             value = path,
-            onValueChange = { path = it },
+            onValueChange = {
+                path = it
+                    .split("\\s".toRegex())
+                    .filter { url -> url.trim().isNotEmpty() }
+                    .joinToString(";")
+            },
             placeholder = { Text(text = stringResource(Res.string.MainScreen_SelectPathPlaceholder)) },
             singleLine = true,
             shape = MaterialTheme.shapes.medium,
@@ -112,7 +117,7 @@ fun HTTPScreen(
                         if (
                             path.split(";").all {
                                 it.startsWith("http://") ||
-                                it.startsWith("https://")
+                                        it.startsWith("https://")
                             }
                         ) {
                             coroutineScope.launch {

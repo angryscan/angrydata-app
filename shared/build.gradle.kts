@@ -64,6 +64,9 @@ kotlin {
                 implementation("org.bouncycastle:bcprov-jdk15on:1.70")
                 implementation("org.bouncycastle:bcpkix-jdk15on:1.70")
                 implementation(libs.aws.s3)
+
+                implementation(libs.ktor.client.core)
+                implementation(libs.ktor.client.cio)
             }
         }
         commonTest {

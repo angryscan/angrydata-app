@@ -361,35 +361,29 @@ class TaskEntityViewModel(
                     setState(TaskState.SEARCHING)
                 val filesCounters = path.split(";")
                     .map { dir ->
-                        scanDirectory(dir, extensions) {
-                            taskScope.launch {
-                                database.transaction {
-                                    TaskFile.new {
-                                        this.task = dbTask
-                                        this.path = it.path
-                                        this.state = TaskState.PENDING
-                                        this.size = it.size
+                        try {
+                            scanDirectory(dir, extensions) {
+                                taskScope.launch {
+                                    database.transaction {
+                                        TaskFile.new {
+                                            this.task = dbTask
+                                            this.path = it.path
+                                            this.state = TaskState.PENDING
+                                            this.size = it.size
+                                        }
                                     }
                                 }
                             }
+                        } catch (e: Exception) {
+                            logger.error { "Failed to scan directory: $dir. ${e.message}"}
+                            setState(TaskState.FAILED)
+                            return@launch
                         }
                     }
                 val directorySize = FilesCounter()
                 filesCounters.forEach {
                     directorySize.plus(it)
                 }
-//                val directorySize = scanDirectory(File(path), extensions) { item ->
-//                    taskScope.launch {
-//                        database.transaction {
-//                            TaskFile.new {
-//                                this.task = dbTask
-//                                this.path = item.path
-//                                this.state = TaskState.PENDING
-//                                this.size = item.length()
-//                            }
-//                        }
-//                    }
-//                }
 
                 database.transaction {
                     dbTask.size = directorySize.filesSize.toString()
@@ -408,9 +402,16 @@ class TaskEntityViewModel(
         dir: String,
         extensions: List<String>,
         fileSelected: (file: FoundedFile) -> Unit
-    ): FilesCounter = dbTask.connector.scanDirectory(
-        dir = dir,
-        extensions = extensions,
-        fileSelected = fileSelected
-    )
+    ): FilesCounter {
+        try {
+            val res = dbTask.connector.scanDirectory(
+                dir = dir,
+                extensions = extensions,
+                fileSelected = fileSelected
+            )
+            return  res
+        } catch (e: Exception) {
+            throw e
+        }
+    }
 }

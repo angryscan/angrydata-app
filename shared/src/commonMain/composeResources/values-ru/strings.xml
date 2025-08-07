@@ -69,7 +69,7 @@
     <string name="SideMenu-SettingsPage">Параметры</string>
     <string name="SideMenu-AboutPage">О программе</string>
 
-    <string name="MainScreen-SelectPathPlaceholder">Укажите путь для сканирования</string>
+    <string name="MainScreen-SelectPathPlaceholder">Укажите пути для сканирования через точку с запятой (;)</string>
     <string name="MainScreen-ScanStartButton">Сканировать</string>
     <string name="MainScreen-ScanCurrentState">Текущие сканирования (%1$d)</string>
     <string name="MainScreen-SelectTypeFolder">Папка</string>

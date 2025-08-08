@@ -45,8 +45,9 @@ class DomainRepository {
     }
 
     fun checkDomain(domain: String): Boolean {
+        val d = domain.replace("^www.".toRegex(), "")
         blockedDomains.forEach { bd ->
-            if(bd.endsWith(domain))
+            if(bd.endsWith(d))
                 return true
         }
         return false

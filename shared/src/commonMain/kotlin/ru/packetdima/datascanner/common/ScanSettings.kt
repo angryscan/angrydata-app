@@ -36,6 +36,8 @@ class ScanSettings : KoinComponent {
     var detectCode: MutableState<Boolean>
     @Serializable(with = MutableStateSerializer::class)
     var detectCert: MutableState<Boolean>
+    @Serializable(with = MutableStateSerializer::class)
+    var detectBlockedDomains: MutableState<Boolean>
 
     @Serializable(with = MutableStateSerializer::class)
     var detectFunctionsExpanded: MutableState<Boolean>
@@ -68,6 +70,7 @@ class ScanSettings : KoinComponent {
             this.userSignatureExpanded = prop.userSignatureExpanded
             this.detectCert = prop.detectCert
             this.detectCode = prop.detectCode
+            this.detectBlockedDomains = prop.detectBlockedDomains
         } catch (_: Exception) {
             logger.error {
                 "Failed to load ScanSettings. Loading default."
@@ -87,6 +90,7 @@ class ScanSettings : KoinComponent {
             this.userSignatureExpanded = mutableStateOf(false)
             this.detectCert = mutableStateOf(false)
             this.detectCode = mutableStateOf(false)
+            this.detectBlockedDomains = mutableStateOf(true)
         }
     }
 

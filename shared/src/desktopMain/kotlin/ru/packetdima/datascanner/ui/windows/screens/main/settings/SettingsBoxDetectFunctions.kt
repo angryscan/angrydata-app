@@ -21,25 +21,22 @@ import androidx.compose.ui.unit.sp
 import info.downdetector.bigdatascanner.common.DetectFunction
 import org.jetbrains.compose.resources.stringResource
 import ru.packetdima.datascanner.common.ScanSettings
-import ru.packetdima.datascanner.resources.DetectFunction_Cert
-import ru.packetdima.datascanner.resources.DetectFunction_Code
-import ru.packetdima.datascanner.resources.DetectFunction_Description_Cert
-import ru.packetdima.datascanner.resources.DetectFunction_Description_Code
-import ru.packetdima.datascanner.resources.Res
-import ru.packetdima.datascanner.resources.ScanSettings_DetectFunctions
-import ru.packetdima.datascanner.resources.ScanSettings_SelectAll
+import ru.packetdima.datascanner.resources.*
 import ru.packetdima.datascanner.ui.strings.composableName
 import ru.packetdima.datascanner.ui.windows.components.DetectFunctionTooltip
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsBoxDetectFunctions(scanSettings: ScanSettings) {
+fun SettingsBoxDetectFunctions(
+    scanSettings: ScanSettings
+) {
     val detectFunctions = remember { scanSettings.detectFunctions }
     var expanded by remember { scanSettings.detectFunctionsExpanded }
     var detectCode by remember { scanSettings.detectCode }
     var detectCert by remember { scanSettings.detectCert }
+    var detectDomains by remember { scanSettings.detectBlockedDomains }
 
-    LaunchedEffect(detectFunctions, expanded, detectCert, detectCode) {
+    LaunchedEffect(detectFunctions, expanded, detectCert, detectCode, detectDomains) {
         scanSettings.save()
     }
 
@@ -71,8 +68,7 @@ fun SettingsBoxDetectFunctions(scanSettings: ScanSettings) {
                     Checkbox(
                         checked = scanSettings.detectFunctions.containsAll(DetectFunction.entries)
                                 && scanSettings.detectCert.value
-                                && scanSettings.detectCode.value
-                        ,
+                                && scanSettings.detectCode.value,
                         onCheckedChange = { checked ->
                             if (checked) {
                                 scanSettings.detectFunctions.addAll(DetectFunction.entries.filter {
@@ -103,8 +99,7 @@ fun SettingsBoxDetectFunctions(scanSettings: ScanSettings) {
                                     })
                                     scanSettings.detectCert.value = true
                                     scanSettings.detectCode.value = true
-                                }
-                                else {
+                                } else {
                                     scanSettings.detectFunctions.clear()
                                     scanSettings.detectCert.value = false
                                     scanSettings.detectCode.value = false
@@ -201,6 +196,35 @@ fun SettingsBoxDetectFunctions(scanSettings: ScanSettings) {
                                 fontSize = 14.sp,
                                 modifier = Modifier.clickable {
                                     scanSettings.detectCert.value = !scanSettings.detectCert.value
+                                    scanSettings.save()
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(1f)
+                        .height(24.dp)
+                ) {
+                    Checkbox(
+                        checked = scanSettings.detectBlockedDomains.value,
+                        onCheckedChange = { checked ->
+                            scanSettings.detectBlockedDomains.value = checked
+                            scanSettings.save()
+                        }
+                    )
+                    CompositionLocalProvider(LocalRippleConfiguration provides null) {
+                        DetectFunctionTooltip(
+                            description = stringResource(Res.string.DetectFunction_Description_DetectBlockedDomains)
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.DetectFunction_DetectBlockedDomains),
+                                fontSize = 14.sp,
+                                modifier = Modifier.clickable {
+                                    scanSettings.detectBlockedDomains.value = !scanSettings.detectBlockedDomains.value
                                     scanSettings.save()
                                 }
                             )

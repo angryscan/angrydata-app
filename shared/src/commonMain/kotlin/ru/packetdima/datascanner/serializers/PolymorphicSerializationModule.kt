@@ -12,6 +12,7 @@ import ru.packetdima.datascanner.scan.common.connectors.ConnectorS3
 import ru.packetdima.datascanner.scan.common.connectors.IConnector
 import ru.packetdima.datascanner.scan.functions.CertDetectFun
 import ru.packetdima.datascanner.scan.functions.CodeDetectFun
+import ru.packetdima.datascanner.scan.functions.RKNDomainDetectFun
 import ru.packetdima.datascanner.scan.functions.UserSignature
 
 val PolymorphicSerializationModule = SerializersModule {
@@ -20,6 +21,7 @@ val PolymorphicSerializationModule = SerializersModule {
         subclass(UserSignature::class)
         subclass(CertDetectFun::class)
         subclass(CodeDetectFun::class)
+        subclass(RKNDomainDetectFun::class)
     }
     polymorphic(IConnector::class) {
         subclass(ConnectorS3::class)

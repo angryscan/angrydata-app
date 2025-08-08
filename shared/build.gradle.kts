@@ -67,6 +67,8 @@ kotlin {
 
                 implementation(libs.ktor.client.core)
                 implementation(libs.ktor.client.cio)
+                implementation(libs.ktor.client.contentnegotation)
+                implementation(libs.ktor.serializtion.kotlinx.json)
             }
         }
         commonTest {

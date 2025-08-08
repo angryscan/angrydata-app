@@ -7,10 +7,12 @@ import ru.packetdima.datascanner.db.DatabaseConnector
 import ru.packetdima.datascanner.scan.ScanService
 import ru.packetdima.datascanner.scan.TaskFilesViewModel
 import ru.packetdima.datascanner.scan.TasksViewModel
+import ru.packetdima.datascanner.scan.functions.rkn.DomainRepository
 
 val scanModule = module {
     singleOf(::DatabaseConnector)
     singleOf(::TasksViewModel)
     singleOf(::ScanService)
+    singleOf(::DomainRepository)
     factoryOf(::TaskFilesViewModel)
 }

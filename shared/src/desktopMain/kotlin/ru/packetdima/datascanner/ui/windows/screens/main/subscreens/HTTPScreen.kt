@@ -25,6 +25,7 @@ import ru.packetdima.datascanner.scan.common.connectors.ConnectorHTTP
 import ru.packetdima.datascanner.scan.common.files.FileType
 import ru.packetdima.datascanner.scan.functions.CertDetectFun
 import ru.packetdima.datascanner.scan.functions.CodeDetectFun
+import ru.packetdima.datascanner.scan.functions.RKNDomainDetectFun
 import ru.packetdima.datascanner.ui.windows.screens.main.settings.SettingsBox
 import ru.packetdima.datascanner.ui.windows.screens.main.settings.SettingsButton
 
@@ -134,6 +135,8 @@ fun HTTPScreen(
                                     detectFunctions.add(CertDetectFun)
                                 if (scanSettings.detectCode.value)
                                     detectFunctions.add(CodeDetectFun)
+                                if(scanSettings.detectBlockedDomains.value)
+                                    detectFunctions.add(RKNDomainDetectFun)
 
                                 val task = scanService.createTask(
                                     path = path,

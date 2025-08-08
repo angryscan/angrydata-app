@@ -103,6 +103,7 @@
     <string name="DetectFunction-IPv6">IPv6</string>
     <string name="DetectFunction-Code">Program code</string>
     <string name="DetectFunction-Cert">Certificate</string>
+    <string name="DetectFunction-DetectBlockedDomains">Domain</string>
     <string name="DetectFunction-Description-Emails">Email</string>
     <string name="DetectFunction-Description-Phones">Phone (+7)</string>
     <string name="DetectFunction-Description-CardNumbers">Card number with BINs of russian banks</string>
@@ -122,6 +123,7 @@
     <string name="DetectFunction-Description-IPv6">IP address v6</string>
     <string name="DetectFunction-Description-Code">Program code</string>
     <string name="DetectFunction-Description-Cert">Certificate</string>
+    <string name="DetectFunction-Description-DetectBlockedDomains">Domain from registry blocked by RKN</string>
 
     <string name="SettingsScreen-ThreadsCount">Threads count</string>
     <string name="SettingsScreen-ContextMenu">Context menu</string>

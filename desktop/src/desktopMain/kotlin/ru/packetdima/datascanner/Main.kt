@@ -22,11 +22,7 @@ import ru.packetdima.datascanner.common.AppFiles
 import ru.packetdima.datascanner.common.AppVersion
 import ru.packetdima.datascanner.common.LogMarkers
 import ru.packetdima.datascanner.common.OS
-import ru.packetdima.datascanner.di.consoldeDatabaseModule
-import ru.packetdima.datascanner.di.databaseModule
-import ru.packetdima.datascanner.di.s3Module
-import ru.packetdima.datascanner.di.scanModule
-import ru.packetdima.datascanner.di.settingsModule
+import ru.packetdima.datascanner.di.*
 import ru.packetdima.datascanner.logging.LogLevel
 import ru.packetdima.datascanner.scan.common.ScanPathHelper
 import ru.packetdima.datascanner.ui.MainWindow

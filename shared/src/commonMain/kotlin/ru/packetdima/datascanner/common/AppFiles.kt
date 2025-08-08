@@ -41,4 +41,5 @@ object AppFiles {
         )
         .toFile()
     val MigrationsDirectory: Path = WorkDirPath.resolve("migrations")
+    val BlockedDomainsCache: File = WorkDirPath.resolve("rkn.json").toFile()
 }

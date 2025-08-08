@@ -64,6 +64,8 @@
     <string name="add">Add</string>
     <string name="name">Name</string>
 
+    <string name="DropDown-OpenInExplorer">Open in Explorer</string>
+
     <string name="SelectAll">Select all (%1$d)</string>
 
     <string name="SideMenu-MainPage">Main</string>

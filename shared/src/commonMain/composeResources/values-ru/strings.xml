@@ -62,6 +62,8 @@
     <string name="add">Добавить</string>
     <string name="name">Наименование</string>
 
+    <string name="DropDown-OpenInExplorer">Показать в проводнике</string>
+
     <string name="SelectAll">Выбрать все (%1$d)</string>
 
     <string name="SideMenu-MainPage">Главная</string>

@@ -10,17 +10,23 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowDownward
 import androidx.compose.material.icons.outlined.ArrowUpward
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.isSecondaryPressed
+import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import info.downdetector.bigdatascanner.common.IDetectFunction
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
+import ru.packetdima.datascanner.common.OS
 import ru.packetdima.datascanner.resources.*
 import ru.packetdima.datascanner.scan.TaskEntityViewModel
 import ru.packetdima.datascanner.scan.TaskFileResult
@@ -32,7 +38,7 @@ import ru.packetdima.datascanner.ui.windows.components.MessageBox
 import java.awt.Desktop
 import java.io.File
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun ResultTable(
     taskFilesViewModel: TaskFilesViewModel,
@@ -399,6 +405,7 @@ fun ResultTable(
                         val fileType = FileType.getFileType(file.path)
                         val locationSupported = fileType != null && LocationFinder.isSupported(fileType) && task.dbTask.connector is ConnectorFileShare
                         val exist = filesExists.contains(file.id)
+                        var menuExpanded by remember { mutableStateOf(false) }
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -406,7 +413,7 @@ fun ResultTable(
                                 .clip(MaterialTheme.shapes.medium)
                                 .background(MaterialTheme.colorScheme.surfaceVariant)
                                 .clickable(
-                                    enabled = filesExists.contains(file.id)
+                                    enabled = exist
                                 ) {
                                     try {
                                         Desktop.getDesktop().open(File(file.path))
@@ -414,9 +421,61 @@ fun ResultTable(
                                         filesExists.remove(file.id)
                                     }
                                 }
+                                .onPointerEvent(PointerEventType.Press) { event ->
+                                    if(event.buttons.isSecondaryPressed && exist){
+                                        menuExpanded = true
+                                    }
+                                }
                                 .padding(4.dp)
                         ) {
+                            DropdownMenu(
+                                expanded = menuExpanded,
+                                onDismissRequest = {
+                                    menuExpanded = false
+                                },
+                            ){
+                                DropdownMenuItem(
+                                    leadingIcon = {
+                                        Icon(
+                                            Icons.Outlined.Delete,
+                                            contentDescription = null
+                                        )
+                                    },
+                                    text = {
+                                        Text(stringResource(Res.string.deleteFile))
+                                    },
+                                    onClick = {
+                                        if(File(file.path).delete()) {
+                                            filesExists.remove(file.id)
+                                            filesDeleted.add(file.id)
+                                        }
 
+                                    }
+                                )
+                                if(OS.currentOS() == OS.WINDOWS) {
+                                    DropdownMenuItem(
+                                        leadingIcon = {
+                                            Icon(
+                                                Icons.Outlined.FolderOpen,
+                                                contentDescription = null
+                                            )
+                                        },
+                                        text = {
+                                            Text(stringResource(Res.string.DropDown_OpenInExplorer))
+                                        },
+                                        onClick = {
+                                            val f = File(file.path)
+                                            if(f.exists()) {
+                                                Runtime.getRuntime().exec("explorer /select,\"${file.path}\"")
+                                            } else {
+                                                filesExists.remove(file.id)
+                                                filesDeleted.add(file.id)
+                                            }
+
+                                        }
+                                    )
+                                }
+                            }
                             Checkbox(
                                 checked = selectedFiles.contains(file.id),
                                 onCheckedChange = { checkState ->

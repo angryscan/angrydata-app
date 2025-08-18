@@ -1,6 +1,6 @@
 <resources>
     <string name="license-title">License</string>
-    <string name="license-copyright">Copyright © 2024 LLC DETECTICUM</string>
+    <string name="license-copyright">Open Source Software</string>
     <string name="license-text">This license allows any person who has received this software (or a copy thereof):
 1. Use the software for personal (official) purposes.
 2. Make changes to the software in full or change any part of it. Files modified by the Licensee must contain information about the changes and the date of the changes.

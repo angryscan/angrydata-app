@@ -73,9 +73,8 @@ compose.desktop {
 
         nativeDistributions {
             packageName = "Big Data Scanner"
-            vendor = "LLC DETECTICUM"
             packageVersion = version.toString()
-            copyright = "© 2024 LLC DETECTICUM"
+            copyright = "Open Source Software, 2025"
             licenseFile.set(rootProject.file("LICENSE.en.txt"))
 
             modules("java.sql", "jdk.charsets", "jdk.unsupported", "java.naming")
@@ -117,7 +116,7 @@ tasks.register<Exec>("conveyCI") {
     dependsOn("build", "writeConveyorConfig")
 }
 
-tasks.create("printVersion") {
+tasks.register("printVersion") {
     doLast {
         print(version)
     }

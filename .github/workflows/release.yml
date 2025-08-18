@@ -54,7 +54,7 @@ jobs:
             desktop/build/packages/big-data-scanner-${{ env.VERSION }}.x64.msix
             desktop/build/packages/install.ps1
             desktop/build/packages/big-data-scanner-${{ env.VERSION }}-linux-amd64.tar.gz
-            desktop/build/packages/llc-detecticum-big-data-scanner_${{ env.VERSION }}_amd64.deb
+            desktop/build/packages/big-data-scanner_${{ env.VERSION }}_amd64.deb
             LICENSE.txt
             LICENSE.en.txt
             

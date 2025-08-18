@@ -1,5 +1,4 @@
 License
-Copyright © 2024 LLC DETECTICUM
 
 This license allows any person who has received this software (or a copy thereof):
 

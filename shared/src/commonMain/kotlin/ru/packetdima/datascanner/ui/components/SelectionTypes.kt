@@ -1,4 +1,4 @@
-package ru.packetdima.datascanner.ui.windows.screens.main.components
+package ru.packetdima.datascanner.ui.components
 
 enum class SelectionTypes {
     Folder,

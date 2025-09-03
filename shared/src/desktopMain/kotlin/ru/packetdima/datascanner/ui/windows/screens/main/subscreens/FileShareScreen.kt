@@ -39,7 +39,7 @@ import ru.packetdima.datascanner.scan.common.files.FileType
 import ru.packetdima.datascanner.scan.functions.CertDetectFun
 import ru.packetdima.datascanner.scan.functions.CodeDetectFun
 import ru.packetdima.datascanner.scan.functions.RKNDomainDetectFun
-import ru.packetdima.datascanner.ui.windows.screens.main.components.SelectionTypes
+import ru.packetdima.datascanner.ui.components.SelectionTypes
 import ru.packetdima.datascanner.ui.windows.screens.main.settings.SettingsBox
 import ru.packetdima.datascanner.ui.windows.screens.main.settings.SettingsButton
 import java.io.File
@@ -63,7 +63,7 @@ fun FileShareScreen(
 
     val settingsBoxTransition = updateTransition(settingsExpanded)
 
-    var selectionType by remember { mutableStateOf(SelectionTypes.Folder) }
+    var selectionType by remember { scanSettings.selectionType }
     var selectionTypeChooserExpanded by remember { mutableStateOf(false) }
 
 
@@ -240,6 +240,7 @@ fun FileShareScreen(
                                     path = ""
                                 selectionType = SelectionTypes.Folder
                                 selectionTypeChooserExpanded = false
+                                scanSettings.save()
                             },
                             text = { Text(text = stringResource(Res.string.MainScreen_SelectTypeFolder)) }
                         )
@@ -249,6 +250,7 @@ fun FileShareScreen(
                                     path = ""
                                 selectionType = SelectionTypes.File
                                 selectionTypeChooserExpanded = false
+                                scanSettings.save()
                             },
                             text = { Text(text = stringResource(Res.string.MainScreen_SelectTypeFile)) }
                         )
@@ -258,6 +260,7 @@ fun FileShareScreen(
                                     path = ""
                                 selectionType = SelectionTypes.FileWithPaths
                                 selectionTypeChooserExpanded = false
+                                scanSettings.save()
                             },
                             text = { Text(text = stringResource(Res.string.MainScreen_SelectTypeFileWithPaths)) }
                         )

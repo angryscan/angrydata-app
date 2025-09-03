@@ -72,10 +72,15 @@
     <string name="SideMenu-AboutPage">О программе</string>
 
     <string name="MainScreen-SelectPathPlaceholder">Укажите пути для сканирования через точку с запятой (;)</string>
+    <string name="MainScreen-SelectFileWithPathsPlaceholder">Укажите файл с путями</string>
     <string name="MainScreen-ScanStartButton">Сканировать</string>
     <string name="MainScreen-ScanCurrentState">Текущие сканирования (%1$d)</string>
     <string name="MainScreen-SelectTypeFolder">Папка</string>
     <string name="MainScreen-SelectTypeFile">Файлы</string>
+    <string name="MainScreen-SelectTypeFileWithPaths">Файл с путями</string>
+    <string name="MainScreen-FilePickerTitle">Выберите файл(ы)</string>
+    <string name="MainScreen-FolderPickerTitle">Выберите папку</string>
+    <string name="MainScreen-FileWithPathsPickerTitle">Выберите файл с путями</string>
 
     <string name="ScanSettings-FastScan">Быстрое сканирование</string>
     <string name="ScanSettings-FileExtensions">Расширения файлов</string>

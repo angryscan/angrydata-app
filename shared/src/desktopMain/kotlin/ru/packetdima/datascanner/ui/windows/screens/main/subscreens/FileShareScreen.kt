@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowDropDown
+import androidx.compose.material.icons.outlined.DocumentScanner
 import androidx.compose.material.icons.outlined.FileOpen
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Search
@@ -38,6 +39,7 @@ import ru.packetdima.datascanner.scan.common.files.FileType
 import ru.packetdima.datascanner.scan.functions.CertDetectFun
 import ru.packetdima.datascanner.scan.functions.CodeDetectFun
 import ru.packetdima.datascanner.scan.functions.RKNDomainDetectFun
+import ru.packetdima.datascanner.ui.components.SelectionTypes
 import ru.packetdima.datascanner.ui.windows.screens.main.settings.SettingsBox
 import ru.packetdima.datascanner.ui.windows.screens.main.settings.SettingsButton
 import java.io.File
@@ -57,14 +59,12 @@ fun FileShareScreen(
     var path by remember { mutableStateOf(helperPath) }
 
 
-
     val settingsButtonTransition = updateTransition(settingsExpanded)
 
     val settingsBoxTransition = updateTransition(settingsExpanded)
 
+    var selectionType by remember { scanSettings.selectionType }
     var selectionTypeChooserExpanded by remember { mutableStateOf(false) }
-
-    var selectionTypeFolder by remember { mutableStateOf(true) }
 
 
     val coroutineScope = rememberCoroutineScope()
@@ -72,7 +72,7 @@ fun FileShareScreen(
     val filePicker = rememberFilePickerLauncher(
         type = FileKitType.File(),
         mode = FileKitMode.Multiple(),
-        title = "Select Directory",
+        title = stringResource(Res.string.MainScreen_FilePickerTitle),
         dialogSettings = createDialogSettings()
     ) { result ->
         if (result != null) {
@@ -81,8 +81,21 @@ fun FileShareScreen(
 
     }
 
-    val folderPicker = rememberDirectoryPickerLauncher(
+    val pathFilePicker = rememberFilePickerLauncher(
+        type = FileKitType.File(extensions = listOf("txt", "csv")),
+        mode = FileKitMode.Single,
+        title = stringResource(Res.string.MainScreen_FileWithPathsPickerTitle),
         dialogSettings = createDialogSettings()
+    ) { result ->
+        if (result != null) {
+            path = result.path
+        }
+
+    }
+
+    val folderPicker = rememberDirectoryPickerLauncher(
+        dialogSettings = createDialogSettings(),
+        title = stringResource(Res.string.MainScreen_FolderPickerTitle)
     ) { dir ->
         if (dir != null) {
             path = dir.path
@@ -130,7 +143,14 @@ fun FileShareScreen(
                 .width(700.dp),
             value = path,
             onValueChange = { path = it },
-            placeholder = { Text(text = stringResource(Res.string.MainScreen_SelectPathPlaceholder)) },
+            placeholder = {
+                Text(
+                    text = when(selectionType) {
+                        SelectionTypes.FileWithPaths -> stringResource(Res.string.MainScreen_SelectFileWithPathsPlaceholder)
+                        else ->stringResource(Res.string.MainScreen_SelectPathPlaceholder)
+                    }
+                )
+            },
             singleLine = true,
             shape = MaterialTheme.shapes.medium,
             isError = selectPathError,
@@ -165,19 +185,20 @@ fun FileShareScreen(
                             .background(MaterialTheme.colorScheme.onBackground)
                             .pointerHoverIcon(PointerIcon.Hand)
                             .clickable {
-                                if (selectionTypeFolder)
-                                    folderPicker.launch()
-                                else
-                                    filePicker.launch()
+                                when (selectionType) {
+                                    SelectionTypes.Folder -> folderPicker.launch()
+                                    SelectionTypes.File -> filePicker.launch()
+                                    SelectionTypes.FileWithPaths -> pathFilePicker.launch()
+                                }
                             },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector =
-                                if (selectionTypeFolder)
-                                    Icons.Outlined.FolderOpen
-                                else
-                                    Icons.Outlined.FileOpen,
+                            imageVector = when (selectionType) {
+                                SelectionTypes.Folder -> Icons.Outlined.FolderOpen
+                                SelectionTypes.File -> Icons.Outlined.FileOpen
+                                SelectionTypes.FileWithPaths -> Icons.Outlined.DocumentScanner
+                            },
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.background
                         )
@@ -215,18 +236,35 @@ fun FileShareScreen(
                     ) {
                         DropdownMenuItem(
                             onClick = {
-                                selectionTypeFolder = true
+                                if (selectionType != SelectionTypes.Folder)
+                                    path = ""
+                                selectionType = SelectionTypes.Folder
                                 selectionTypeChooserExpanded = false
+                                scanSettings.save()
                             },
                             text = { Text(text = stringResource(Res.string.MainScreen_SelectTypeFolder)) }
                         )
                         DropdownMenuItem(
                             onClick = {
-                                selectionTypeFolder = false
+                                if (selectionType != SelectionTypes.File)
+                                    path = ""
+                                selectionType = SelectionTypes.File
                                 selectionTypeChooserExpanded = false
+                                scanSettings.save()
                             },
                             text = { Text(text = stringResource(Res.string.MainScreen_SelectTypeFile)) }
                         )
+                        DropdownMenuItem(
+                            onClick = {
+                                if (selectionType != SelectionTypes.FileWithPaths)
+                                    path = ""
+                                selectionType = SelectionTypes.FileWithPaths
+                                selectionTypeChooserExpanded = false
+                                scanSettings.save()
+                            },
+                            text = { Text(text = stringResource(Res.string.MainScreen_SelectTypeFileWithPaths)) }
+                        )
+
                     }
                     Spacer(modifier = Modifier.width(16.dp))
                 }
@@ -238,13 +276,18 @@ fun FileShareScreen(
             Row {
                 Button(
                     onClick = {
-
                         if (path
                                 .split(";").map {
                                     File(it).exists()
                                 }
                                 .all { it }
                         ) {
+                            val scanPath = if(selectionType == SelectionTypes.FileWithPaths) {
+                                val file = File(path)
+                                file.readLines().joinToString(separator = ";")
+                            } else {
+                                path
+                            }
                             coroutineScope.launch {
                                 val extensions = scanSettings.extensions
                                 if (scanSettings.detectCode.value)
@@ -259,11 +302,12 @@ fun FileShareScreen(
                                     detectFunctions.add(CertDetectFun)
                                 if (scanSettings.detectCode.value)
                                     detectFunctions.add(CodeDetectFun)
-                                if(scanSettings.detectBlockedDomains.value)
+                                if (scanSettings.detectBlockedDomains.value)
                                     detectFunctions.add(RKNDomainDetectFun)
 
                                 val task = scanService.createTask(
-                                    path = path,
+                                    name = if(selectionType == SelectionTypes.FileWithPaths) path else null,
+                                    path = scanPath,
                                     extensions = scanSettings.extensions,
                                     detectFunctions = detectFunctions,
                                     fastScan = scanSettings.fastScan.value,

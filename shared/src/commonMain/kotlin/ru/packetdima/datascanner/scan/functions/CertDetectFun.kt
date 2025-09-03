@@ -1,6 +1,7 @@
 package ru.packetdima.datascanner.scan.functions
 
 import info.downdetector.bigdatascanner.common.IDetectFunction
+import info.downdetector.bigdatascanner.common.extensions.MatchWithContext
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -11,9 +12,9 @@ object CertDetectFun : IDetectFunction {
     private val regex = """(---BEGIN CERTIFICATE)|(---BEGIN PKCS7)|(---BEGIN.*?KEY)"""
         .toRegex(RegexOption.MULTILINE)
 
-    override fun scan(text: String): Sequence<String> {
+    override fun scan(text: String, withContext: Boolean): Sequence<MatchWithContext> {
         return regex
             .findAll(text)
-            .map { it.value }
+            .map { MatchWithContext(it.value) }
     }
 }

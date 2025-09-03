@@ -2,6 +2,7 @@ package ru.packetdima.datascanner.scan.common.files.types
 
 import info.downdetector.bigdatascanner.common.Cleaner
 import info.downdetector.bigdatascanner.common.IDetectFunction
+import info.downdetector.bigdatascanner.common.extensions.MatchWithContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import ru.packetdima.datascanner.common.ScanSettings
@@ -24,9 +25,9 @@ interface IFileType: KoinComponent {
         fastScan: Boolean = false
     ): List<Location>
 
-    fun getEntries(text: String, detectFunction: IDetectFunction): List<String> {
+    fun getEntries(text: String, detectFunction: IDetectFunction): List<MatchWithContext> {
         val cleanText = Cleaner.cleanText(text)
-        return detectFunction.scan(cleanText).toList()
+        return detectFunction.scan(text = cleanText, withContext = true).toList()
     }
 
     fun scan(text: String, detectFunctions: List<IDetectFunction>): Map<IDetectFunction, Int> {

@@ -2,6 +2,8 @@ package ru.packetdima.datascanner.ui
 
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Column
@@ -166,29 +168,33 @@ fun MainWindow(
                                 slideInVertically(
                                     initialOffsetY = { it },
                                     animationSpec = tween(durationMillis = 700, easing = LinearOutSlowInEasing)
-                                )
+                                ) + fadeIn(tween(700))
                             },
                             exitTransition = {
                                 slideOutVertically(
                                     targetOffsetY = { -it * 3 / 2 },
                                     animationSpec = tween(durationMillis = 700, easing = LinearOutSlowInEasing)
-                                )
+                                ) + fadeOut(tween(700))
                             },
                             popEnterTransition = {
                                 slideInVertically(
                                     initialOffsetY = { -it * 3 / 2 },
                                     animationSpec = tween(durationMillis = 700, easing = LinearOutSlowInEasing)
-                                )
+                                ) + fadeIn(tween(700))
                             },
                             popExitTransition = {
                                 slideOutVertically(
                                     targetOffsetY = { it },
                                     animationSpec = tween(durationMillis = 700, easing = LinearOutSlowInEasing)
-                                )
+                                ) + fadeOut(tween(700))
                             }
                         ) {
                             composable(route = AppScreens.Main.name) {
-                                MainScreen()
+                                MainScreen(
+                                    showScan = {
+                                        navController.navigate(AppScreens.Scans.name)
+                                    }
+                                )
                             }
                             composable(route = AppScreens.Scans.name) {
                                 ScansScreen(

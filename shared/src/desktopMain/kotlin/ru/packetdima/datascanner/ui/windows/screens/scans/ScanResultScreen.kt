@@ -82,6 +82,7 @@ fun ScanResultScreen(
 
     val state by task.state.collectAsState()
     val path by task.path.collectAsState()
+    val name by task.name.collectAsState()
     val fastScan by task.fastScan.collectAsState()
     val startedAt by task.startedAt.collectAsState()
     val finishedAt by task.finishedAt.collectAsState()
@@ -231,7 +232,6 @@ fun ScanResultScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Column {
-
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
@@ -240,7 +240,8 @@ fun ScanResultScreen(
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(14.dp)
+                        horizontalArrangement = Arrangement.spacedBy(14.dp),
+                        modifier = Modifier.weight(0.8f)
                     ) {
                         IconButton(
                             onClick = onCloseClick
@@ -263,24 +264,26 @@ fun ScanResultScreen(
                         }
 
                         Text(
-                            text = path,
+                            text = name ?:path,
                             fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                             lineHeight = MaterialTheme.typography.bodyMedium.lineHeight,
                             fontWeight = MaterialTheme.typography.bodyMedium.fontWeight,
                             letterSpacing = 0.1.sp
                         )
 
-                        Icon(
-                            imageVector = Icons.Outlined.CopyAll,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .clip(MaterialTheme.shapes.extraSmall)
-                                .clickable {
-                                    clipboardManager.setText(
-                                        annotatedString = AnnotatedString(path)
-                                    )
-                                }
-                        )
+                        if(name == null) {
+                            Icon(
+                                imageVector = Icons.Outlined.CopyAll,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .clip(MaterialTheme.shapes.extraSmall)
+                                    .clickable {
+                                        clipboardManager.setText(
+                                            annotatedString = AnnotatedString(path)
+                                        )
+                                    }
+                            )
+                        }
 
                         if (fastScan) {
                             Icon(

@@ -11,6 +11,7 @@ import ru.packetdima.datascanner.scan.common.connectors.IConnector
 import ru.packetdima.datascanner.serializers.PolymorphicFormatter
 
 object Tasks : IntIdTable() {
+    val name = text("name").nullable()
     val path = text("path")
     val taskState = enumeration("task_state", TaskState::class)
     val startedAt = datetime("started_at").nullable()
@@ -28,6 +29,7 @@ object Tasks : IntIdTable() {
 class Task(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<Task>(Tasks)
 
+    var name by Tasks.name
     var path by Tasks.path
     var taskState by Tasks.taskState
     var startedAt by Tasks.startedAt

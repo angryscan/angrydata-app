@@ -39,6 +39,10 @@ class TaskEntityViewModel(
 
     private val taskScope: CoroutineScope = CoroutineScope(Dispatchers.Default)
 
+    private var _name = MutableStateFlow<String?>(null)
+    val name
+        get() = _name.asStateFlow()
+
     private var _state = MutableStateFlow(state)
     val state
         get() = _state.asStateFlow()
@@ -129,6 +133,7 @@ class TaskEntityViewModel(
             database.transaction {
                 _fastScan.value = dbTask.fastScan
                 _path.value = dbTask.path
+                _name.value = dbTask.name
                 _startedAt.value = dbTask.startedAt
                 _pausedAt.value = dbTask.pauseDate
                 _deltaSeconds.value = dbTask.delta

@@ -77,11 +77,26 @@ class ScanService : KoinComponent {
                         scriptName = "V2__AddMissingColumns",
                     )
                 } else {
-                    MigrationUtils.generateMigrationScript(
-                        Tasks,
-                        scriptDirectory = AppFiles.MigrationsDirectory.absolutePathString(),
-                        scriptName = "V3__AddConnectors",
-                    )
+                    if (!File(
+                            AppFiles
+                                .MigrationsDirectory
+                                .resolve("V3__AddConnectors.sql")
+                                .absolutePathString()
+                        )
+                            .exists()
+                    ) {
+                        MigrationUtils.generateMigrationScript(
+                            Tasks,
+                            scriptDirectory = AppFiles.MigrationsDirectory.absolutePathString(),
+                            scriptName = "V3__AddConnectors",
+                        )
+                    } else {
+                        MigrationUtils.generateMigrationScript(
+                            Tasks,
+                            scriptDirectory = AppFiles.MigrationsDirectory.absolutePathString(),
+                            scriptName = "V4__AddScanName",
+                        )
+                    }
                 }
 
             }
@@ -160,7 +175,7 @@ class ScanService : KoinComponent {
                         }
                     }
 
-                    if(task.taskState == TaskState.SEARCHING) {
+                    if (task.taskState == TaskState.SEARCHING) {
                         task.pauseDate = task.startedAt
 
                         taskEntity.setState(TaskState.PENDING)
@@ -227,6 +242,7 @@ class ScanService : KoinComponent {
     }
 
     suspend fun createTask(
+        name: String? = null,
         path: String,
         extensions: List<FileType>? = null,
         detectFunctions: List<IDetectFunction>? = null,
@@ -235,6 +251,7 @@ class ScanService : KoinComponent {
     ): TaskEntityViewModel {
         return database.transaction {
             val task = Task.new {
+                this.name = name
                 this.path = path
                 this.taskState = TaskState.PENDING
                 this.fastScan = fastScan ?: scanSettings.fastScan.value

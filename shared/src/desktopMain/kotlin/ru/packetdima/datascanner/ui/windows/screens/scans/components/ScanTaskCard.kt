@@ -4,6 +4,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.FolderOpen
+import androidx.compose.material.icons.outlined.Http
 import androidx.compose.material.icons.outlined.RocketLaunch
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +34,8 @@ import ru.packetdima.datascanner.resources.Task_FoundAttributes
 import ru.packetdima.datascanner.resources.aws_s3
 import ru.packetdima.datascanner.scan.TaskEntityViewModel
 import ru.packetdima.datascanner.scan.TaskFilesViewModel
+import ru.packetdima.datascanner.scan.common.connectors.ConnectorFileShare
+import ru.packetdima.datascanner.scan.common.connectors.ConnectorHTTP
 import ru.packetdima.datascanner.scan.common.connectors.ConnectorS3
 import ru.packetdima.datascanner.ui.extensions.color
 import ru.packetdima.datascanner.ui.extensions.icon
@@ -48,6 +52,7 @@ fun ScanTaskCard(
     val state by taskEntity.state.collectAsState()
     val fastScan by taskEntity.fastScan.collectAsState()
     val path by taskEntity.path.collectAsState()
+    val name by taskEntity.name.collectAsState()
     val startedAt by taskEntity.startedAt.collectAsState()
     val finishedAt by taskEntity.finishedAt.collectAsState()
     val pausedAt by taskEntity.pausedAt.collectAsState()
@@ -150,10 +155,26 @@ fun ScanTaskCard(
                                     .size(32.dp)
                             )
                         }
+                        is ConnectorHTTP -> {
+                            Icon(
+                                imageVector = Icons.Outlined.Http,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(32.dp)
+                            )
+                        }
+                        is ConnectorFileShare -> {
+                            Icon(
+                                imageVector = Icons.Outlined.FolderOpen,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(32.dp)
+                            )
+                        }
                     }
 
                     Text(
-                        text = path,
+                        text = name ?: path,
                         fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                         lineHeight = MaterialTheme.typography.bodyMedium.lineHeight,
                         fontWeight = MaterialTheme.typography.bodyMedium.fontWeight,

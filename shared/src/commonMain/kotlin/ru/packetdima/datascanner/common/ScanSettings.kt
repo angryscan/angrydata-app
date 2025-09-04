@@ -13,6 +13,7 @@ import org.koin.core.component.inject
 import ru.packetdima.datascanner.scan.common.files.FileType
 import ru.packetdima.datascanner.scan.functions.UserSignature
 import ru.packetdima.datascanner.serializers.MutableStateSerializer
+import ru.packetdima.datascanner.ui.components.SelectionTypes
 import java.io.File
 
 @Serializable
@@ -49,6 +50,9 @@ class ScanSettings : KoinComponent {
     var userSignatureExpanded: MutableState<Boolean>
 
     @Serializable(with = MutableStateSerializer::class)
+    var selectionType: MutableState<SelectionTypes>
+
+    @Serializable(with = MutableStateSerializer::class)
     var fastScan: MutableState<Boolean>
     val sampleLength = 10_000
     val sampleCount = 100
@@ -71,6 +75,7 @@ class ScanSettings : KoinComponent {
             this.detectCert = prop.detectCert
             this.detectCode = prop.detectCode
             this.detectBlockedDomains = prop.detectBlockedDomains
+            this.selectionType = prop.selectionType
         } catch (_: Exception) {
             logger.error {
                 "Failed to load ScanSettings. Loading default."
@@ -91,6 +96,7 @@ class ScanSettings : KoinComponent {
             this.detectCert = mutableStateOf(false)
             this.detectCode = mutableStateOf(false)
             this.detectBlockedDomains = mutableStateOf(true)
+            this.selectionType = mutableStateOf(SelectionTypes.Folder)
         }
     }
 

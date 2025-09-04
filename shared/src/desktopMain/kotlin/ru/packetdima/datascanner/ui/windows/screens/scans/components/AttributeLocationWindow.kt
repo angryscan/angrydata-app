@@ -204,13 +204,26 @@ fun AttributeLocationWindow(
                                                 modifier = Modifier
                                                     .fillMaxWidth()
                                             ) {
-                                                Text(
+                                                Row(
                                                     modifier = Modifier
                                                         .weight(0.8f)
                                                         .fillMaxWidth(),
-                                                    text = location.entry,
-                                                    style = MaterialTheme.typography.bodySmall
-                                                )
+                                                ) {
+                                                    Text(
+                                                        text = location.entry.before,
+                                                        style = MaterialTheme.typography.bodySmall
+                                                    )
+                                                    Text(
+                                                        text = location.entry.value,
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.primary
+                                                    )
+                                                    Text(
+                                                        text = location.entry.after,
+                                                        style = MaterialTheme.typography.bodySmall
+                                                    )
+                                                }
+
                                                 Text(
                                                     modifier = Modifier
                                                         .weight(0.2f)

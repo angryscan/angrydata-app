@@ -45,6 +45,8 @@ fun MainScreenTaskCard(taskEntity: TaskEntityViewModel, currentTime: Instant) {
     val startedAtInstant = startedAt?.toInstant(TimeZone.currentSystemDefault())
     val deltaSeconds by taskEntity.deltaSeconds.collectAsState()
     val busy by taskEntity.busy.collectAsState()
+    val name by taskEntity.name.collectAsState()
+    val path by taskEntity.path.collectAsState()
 
     val deltaDuration = (deltaSeconds?: 0L).toDuration(DurationUnit.SECONDS)
 
@@ -110,7 +112,7 @@ fun MainScreenTaskCard(taskEntity: TaskEntityViewModel, currentTime: Instant) {
             Text(
                 modifier = Modifier
                     .weight(0.5f),
-                text = taskEntity.dbTask.path,
+                text = name ?: path,
             )
             Text(text = scanTime)
             Row(

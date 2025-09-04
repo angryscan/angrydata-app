@@ -54,8 +54,10 @@ kotlin {
                 api(libs.koin.core)
                 api(libs.koin.compose)
                 api(libs.koin.compose.viewmodel)
-                api(libs.koin.compose.viewmodel.navigation)
+                //api(libs.koin.compose.viewmodel.navigation)
                 implementation(libs.lifecycle.viewmodel)
+
+                api(libs.navigation.compose)
 
                 api(libs.filekit.dialogs.compose)
 

@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import ru.packetdima.datascanner.ui.windows.screens.main.components.MainScreens
+import ru.packetdima.datascanner.ui.windows.screens.main.components.MainScreenConnector
 import ru.packetdima.datascanner.ui.windows.screens.main.components.UpperMenu
 import ru.packetdima.datascanner.ui.windows.screens.main.subscreens.FileShareScreen
 import ru.packetdima.datascanner.ui.windows.screens.main.subscreens.HTTPScreen
@@ -53,7 +53,7 @@ fun MainScreen(
 
             NavHost(
                 navController = navController,
-                startDestination = MainScreens.FileShare.name,
+                startDestination = MainScreenConnector.FileShare,
                 enterTransition = {
                     slideIntoContainer(
                         AnimatedContentTransitionScope.SlideDirection.Start, tween(700)
@@ -65,7 +65,7 @@ fun MainScreen(
                     ) + fadeOut(tween(700))
                 }
             ) {
-                composable(route = MainScreens.FileShare.name) {
+                composable<MainScreenConnector.FileShare> {
                     FileShareScreen(
                         settingsExpanded = settingsExpanded,
                         expandSettings = {
@@ -79,7 +79,7 @@ fun MainScreen(
                         expandScanState = showScan
                     )
                 }
-                composable(route = MainScreens.S3.name) {
+                composable<MainScreenConnector.S3> {
                     S3Screen(
                         settingsExpanded = settingsExpanded,
                         expandSettings = {
@@ -93,7 +93,7 @@ fun MainScreen(
                         expandScanState = showScan
                     )
                 }
-                composable(route = MainScreens.HTTP.name) {
+                composable<MainScreenConnector.HTTP> {
                     HTTPScreen(
                         settingsExpanded = settingsExpanded,
                         expandSettings = {

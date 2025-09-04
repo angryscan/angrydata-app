@@ -22,10 +22,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.currentBackStackEntryAsState
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import ru.packetdima.datascanner.navigation.AppScreens
+import ru.packetdima.datascanner.navigation.AppScreen
 import ru.packetdima.datascanner.resources.*
 
 @Composable
@@ -33,9 +34,7 @@ fun SideMenu(navController: NavController) {
     var expanded by remember { mutableStateOf(false) }
 
     val backStackEntry by navController.currentBackStackEntryAsState()
-    val currentScreen = AppScreens.valueOf(
-        backStackEntry?.destination?.route?.substringBefore("/") ?: AppScreens.Main.name
-    )
+    val destination = backStackEntry?.destination
 
     Surface(
         modifier = Modifier
@@ -102,33 +101,34 @@ fun SideMenu(navController: NavController) {
             }
             Spacer(modifier = Modifier.height(18.dp))
             SideMenuItem(
-                isSelected = currentScreen == AppScreens.Main,
+                isSelected = destination?.hasRoute(AppScreen.Main::class) ?: false,
                 expanded = expanded,
                 icon = painterResource(Res.drawable.SideMenu_IconMainPage),
                 text = stringResource(Res.string.SideMenu_MainPage),
-                onClick = { navController.navigate(AppScreens.Main.name) },
+                onClick = { navController.navigate(AppScreen.Main) },
             )
             SideMenuItem(
-                isSelected = currentScreen == AppScreens.Scans,
+                isSelected = destination?.hasRoute(AppScreen.Scans::class) ?: false ||
+                        destination?.hasRoute(AppScreen.ScanResult::class) ?: false,
                 expanded = expanded,
                 icon = painterResource(Res.drawable.SideMenu_IconScans),
                 text = stringResource(Res.string.SideMenu_ScanListPage),
-                onClick = { navController.navigate(AppScreens.Scans.name) },
+                onClick = { navController.navigate(AppScreen.Scans) },
             )
             Spacer(modifier = Modifier.weight(1f))
             SideMenuItem(
-                isSelected = currentScreen == AppScreens.Settings,
+                isSelected = destination?.hasRoute(AppScreen.Settings::class) ?: false,
                 expanded = expanded,
                 icon = painterResource(Res.drawable.SideMenu_IconSettings),
                 text = stringResource(Res.string.SideMenu_SettingsPage),
-                onClick = { navController.navigate(AppScreens.Settings.name) },
+                onClick = { navController.navigate(AppScreen.Settings) },
             )
             SideMenuItem(
-                isSelected = currentScreen == AppScreens.About,
+                isSelected = destination?.hasRoute(AppScreen.About::class) ?: false,
                 expanded = expanded,
                 icon = painterResource(Res.drawable.SideMenu_IconAbout),
                 text = stringResource(Res.string.SideMenu_AboutPage),
-                onClick = { navController.navigate(AppScreens.About.name) },
+                onClick = { navController.navigate(AppScreen.About) },
             )
         }
     }

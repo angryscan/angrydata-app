@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.currentBackStackEntryAsState
 import org.jetbrains.compose.resources.painterResource
 import ru.packetdima.datascanner.resources.Res
@@ -36,9 +37,7 @@ fun UpperMenu(
     modifier: Modifier = Modifier
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
-    val currentScreen = MainScreens.valueOf(
-        backStackEntry?.destination?.route?.substringBefore("/") ?: MainScreens.FileShare.name
-    )
+    val destination = backStackEntry?.destination
 
     Surface(
         shape = MaterialTheme.shapes.medium
@@ -56,25 +55,25 @@ fun UpperMenu(
             horizontalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             UpperMenuItem(
-                isSelected = currentScreen == MainScreens.FileShare,
+                isSelected = destination?.hasRoute(MainScreenConnector.FileShare::class) ?: false,
                 expanded = false,
                 icon = rememberVectorPainter(Icons.Outlined.Folder),
                 text = "File share",
-                onClick = { navController.navigate(MainScreens.FileShare.name) }
+                onClick = { navController.navigate(MainScreenConnector.FileShare) }
             )
             UpperMenuItem(
-                isSelected = currentScreen == MainScreens.S3,
+                isSelected = destination?.hasRoute(MainScreenConnector.S3::class) ?: false,
                 expanded = false,
                 icon = painterResource(Res.drawable.aws_s3),
                 text = "AWS S3",
-                onClick = { navController.navigate(MainScreens.S3.name) }
+                onClick = { navController.navigate(MainScreenConnector.S3) }
             )
             UpperMenuItem(
-                isSelected = currentScreen == MainScreens.HTTP,
+                isSelected = destination?.hasRoute(MainScreenConnector.HTTP::class) ?: false,
                 expanded = false,
                 icon = rememberVectorPainter(Icons.Outlined.Http),
                 text = "HTTP",
-                onClick = { navController.navigate(MainScreens.HTTP.name) }
+                onClick = { navController.navigate(MainScreenConnector.HTTP) }
             )
         }
     }

@@ -155,6 +155,8 @@
     <string name="TaskStateChipFilter-Error">Error</string>
     <string name="TaskStateChipFilter-Completed">Completed</string>
 
+    <string name="ScanResultScreen-ClipboardCopiedMessage">Copied to clipboard</string>
+
     <string name="Result-ColumnFile">File</string>
     <string name="Result-ColumnAttributes">Attributes</string>
     <string name="Result-ColumnCount">Count</string>

@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.painterResource
@@ -22,7 +23,10 @@ import ru.packetdima.datascanner.resources.ScanSettings_FastScan
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsBox(transition: Transition<Boolean>) {
+fun SettingsBox(
+    transition: Transition<Boolean>,
+    height: Dp
+) {
     val scanSettings = koinInject<ScanSettings>()
 
     var fastScan by remember { scanSettings.fastScan }
@@ -42,7 +46,7 @@ fun SettingsBox(transition: Transition<Boolean>) {
             modifier = Modifier
                 .clip(MaterialTheme.shapes.medium)
                 .background(MaterialTheme.colorScheme.surface)
-                .height(400.dp)
+                .height(height)
                 .padding(6.dp)
                 .fillMaxWidth()
         ) {

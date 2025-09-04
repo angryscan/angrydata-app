@@ -302,7 +302,8 @@ fun FileShareScreen(
                 )
             }
             SettingsBox(
-                transition = settingsBoxTransition
+                transition = settingsBoxTransition,
+                height = 384.dp
             )
         }
 

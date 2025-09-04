@@ -1,7 +1,6 @@
 package ru.packetdima.datascanner.ui.windows.screens.main
 
 import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -37,7 +36,7 @@ fun MainScreen(
         UpperMenu(
             navController,
             modifier = Modifier
-                .align(Alignment.TopCenter)
+                .align(Alignment.BottomCenter)
         )
         Column(
             modifier = Modifier
@@ -49,10 +48,7 @@ fun MainScreen(
         ) {
 
             Spacer(
-                modifier = Modifier.height(
-                    if(settingsExpanded ) 78.dp else 12.dp
-                )
-                    .animateContentSize()
+                modifier = Modifier.height(8.dp)
             )
 
             NavHost(
@@ -113,7 +109,7 @@ fun MainScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(76.dp))
         }
 
 

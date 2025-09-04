@@ -42,7 +42,7 @@ fun UpperMenu(
 
     Surface(
         shape = MaterialTheme.shapes.medium
-            .copy(topEnd = CornerSize(0.dp), topStart = CornerSize(0.dp)),
+            .copy(bottomEnd = CornerSize(0.dp), bottomStart = CornerSize(0.dp)),
         color = MaterialTheme.colorScheme.surface,
         modifier = modifier
             .height(70.dp)

@@ -178,7 +178,8 @@ fun HTTPScreen(
                 )
             }
             SettingsBox(
-                transition = settingsBoxTransition
+                transition = settingsBoxTransition,
+                height = 384.dp
             )
 
         }

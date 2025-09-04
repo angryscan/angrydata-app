@@ -335,7 +335,8 @@ fun S3Screen(
                 )
             }
             SettingsBox(
-                transition = settingsBoxTransition
+                transition = settingsBoxTransition,
+                height = 280.dp
             )
         }
 

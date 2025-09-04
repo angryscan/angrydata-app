@@ -100,36 +100,61 @@ fun SideMenu(navController: NavController) {
 
             }
             Spacer(modifier = Modifier.height(18.dp))
-            SideMenuItem(
-                isSelected = destination?.hasRoute(AppScreen.Main::class) ?: false,
-                expanded = expanded,
-                icon = painterResource(Res.drawable.SideMenu_IconMainPage),
-                text = stringResource(Res.string.SideMenu_MainPage),
-                onClick = { navController.navigate(AppScreen.Main) },
-            )
-            SideMenuItem(
-                isSelected = destination?.hasRoute(AppScreen.Scans::class) ?: false ||
-                        destination?.hasRoute(AppScreen.ScanResult::class) ?: false,
-                expanded = expanded,
-                icon = painterResource(Res.drawable.SideMenu_IconScans),
-                text = stringResource(Res.string.SideMenu_ScanListPage),
-                onClick = { navController.navigate(AppScreen.Scans) },
-            )
+
+            DescriptionTooltip(
+                description = stringResource(Res.string.SideMenu_MainPage),
+                delay = 1000
+            ){
+                SideMenuItem(
+                    isSelected = destination?.hasRoute(AppScreen.Main::class) ?: false,
+                    expanded = expanded,
+                    icon = painterResource(Res.drawable.SideMenu_IconMainPage),
+                    text = stringResource(Res.string.SideMenu_MainPage),
+                    onClick = { navController.navigate(AppScreen.Main) },
+                )
+            }
+
+            DescriptionTooltip(
+                description = stringResource(Res.string.SideMenu_ScanListPage),
+                delay = 1000
+            ) {
+                SideMenuItem(
+                    isSelected = destination?.hasRoute(AppScreen.Scans::class) ?: false ||
+                            destination?.hasRoute(AppScreen.ScanResult::class) ?: false,
+                    expanded = expanded,
+                    icon = painterResource(Res.drawable.SideMenu_IconScans),
+                    text = stringResource(Res.string.SideMenu_ScanListPage),
+                    onClick = { navController.navigate(AppScreen.Scans) },
+                )
+            }
+
             Spacer(modifier = Modifier.weight(1f))
-            SideMenuItem(
-                isSelected = destination?.hasRoute(AppScreen.Settings::class) ?: false,
-                expanded = expanded,
-                icon = painterResource(Res.drawable.SideMenu_IconSettings),
-                text = stringResource(Res.string.SideMenu_SettingsPage),
-                onClick = { navController.navigate(AppScreen.Settings) },
-            )
-            SideMenuItem(
-                isSelected = destination?.hasRoute(AppScreen.About::class) ?: false,
-                expanded = expanded,
-                icon = painterResource(Res.drawable.SideMenu_IconAbout),
-                text = stringResource(Res.string.SideMenu_AboutPage),
-                onClick = { navController.navigate(AppScreen.About) },
-            )
+
+            DescriptionTooltip(
+                description = stringResource(Res.string.SideMenu_SettingsPage),
+                delay = 1000
+            ) {
+                SideMenuItem(
+                    isSelected = destination?.hasRoute(AppScreen.Settings::class) ?: false,
+                    expanded = expanded,
+                    icon = painterResource(Res.drawable.SideMenu_IconSettings),
+                    text = stringResource(Res.string.SideMenu_SettingsPage),
+                    onClick = { navController.navigate(AppScreen.Settings) },
+                )
+            }
+
+            DescriptionTooltip(
+                description = stringResource(Res.string.SideMenu_AboutPage),
+                delay = 1000
+            ) {
+                SideMenuItem(
+                    isSelected = destination?.hasRoute(AppScreen.About::class) ?: false,
+                    expanded = expanded,
+                    icon = painterResource(Res.drawable.SideMenu_IconAbout),
+                    text = stringResource(Res.string.SideMenu_AboutPage),
+                    onClick = { navController.navigate(AppScreen.About) },
+                )
+            }
         }
     }
 }

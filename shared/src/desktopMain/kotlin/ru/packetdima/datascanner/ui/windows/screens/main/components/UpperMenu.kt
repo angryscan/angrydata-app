@@ -28,8 +28,13 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.currentBackStackEntryAsState
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import ru.packetdima.datascanner.resources.Res
+import ru.packetdima.datascanner.resources.UpperMenu_Tooltip_FileShare
+import ru.packetdima.datascanner.resources.UpperMenu_Tooltip_HTTP
+import ru.packetdima.datascanner.resources.UpperMenu_Tooltip_S3
 import ru.packetdima.datascanner.resources.aws_s3
+import ru.packetdima.datascanner.ui.windows.components.DescriptionTooltip
 
 @Composable
 fun UpperMenu(
@@ -54,27 +59,42 @@ fun UpperMenu(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            UpperMenuItem(
-                isSelected = destination?.hasRoute(MainScreenConnector.FileShare::class) ?: false,
-                expanded = false,
-                icon = rememberVectorPainter(Icons.Outlined.Folder),
-                text = "File share",
-                onClick = { navController.navigate(MainScreenConnector.FileShare) }
-            )
-            UpperMenuItem(
-                isSelected = destination?.hasRoute(MainScreenConnector.S3::class) ?: false,
-                expanded = false,
-                icon = painterResource(Res.drawable.aws_s3),
-                text = "AWS S3",
-                onClick = { navController.navigate(MainScreenConnector.S3) }
-            )
-            UpperMenuItem(
-                isSelected = destination?.hasRoute(MainScreenConnector.HTTP::class) ?: false,
-                expanded = false,
-                icon = rememberVectorPainter(Icons.Outlined.Http),
-                text = "HTTP",
-                onClick = { navController.navigate(MainScreenConnector.HTTP) }
-            )
+            DescriptionTooltip(
+                description = stringResource(Res.string.UpperMenu_Tooltip_FileShare),
+                delay = 1000
+            ) {
+                UpperMenuItem(
+                    isSelected = destination?.hasRoute(MainScreenConnector.FileShare::class) ?: false,
+                    expanded = false,
+                    icon = rememberVectorPainter(Icons.Outlined.Folder),
+                    text = "File share",
+                    onClick = { navController.navigate(MainScreenConnector.FileShare) }
+                )
+            }
+            DescriptionTooltip(
+                description = stringResource(Res.string.UpperMenu_Tooltip_S3),
+                delay = 1000
+            ) {
+                UpperMenuItem(
+                    isSelected = destination?.hasRoute(MainScreenConnector.S3::class) ?: false,
+                    expanded = false,
+                    icon = painterResource(Res.drawable.aws_s3),
+                    text = "AWS S3",
+                    onClick = { navController.navigate(MainScreenConnector.S3) }
+                )
+            }
+            DescriptionTooltip(
+                description = stringResource(Res.string.UpperMenu_Tooltip_HTTP),
+                delay = 1000
+            ) {
+                UpperMenuItem(
+                    isSelected = destination?.hasRoute(MainScreenConnector.HTTP::class) ?: false,
+                    expanded = false,
+                    icon = rememberVectorPainter(Icons.Outlined.Http),
+                    text = "HTTP",
+                    onClick = { navController.navigate(MainScreenConnector.HTTP) }
+                )
+            }
         }
     }
 }

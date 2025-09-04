@@ -23,7 +23,7 @@ fun DetectFunctionTooltip(detectFunction: IDetectFunction, block: @Composable ()
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun DescriptionTooltip(description: String, block: @Composable () -> Unit) {
+fun DescriptionTooltip(description: String, delay: Int = 500, block: @Composable () -> Unit) {
     TooltipArea(
         tooltip = {
             Surface(
@@ -40,7 +40,8 @@ fun DescriptionTooltip(description: String, block: @Composable () -> Unit) {
                     lineHeight = MaterialTheme.typography.bodyMedium.lineHeight
                 )
             }
-        }
+        },
+        delayMillis = delay
     ) {
         block()
     }

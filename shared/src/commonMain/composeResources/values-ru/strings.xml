@@ -71,6 +71,10 @@
     <string name="SideMenu-SettingsPage">Параметры</string>
     <string name="SideMenu-AboutPage">О программе</string>
 
+    <string name="UpperMenu-Tooltip-FileShare">Сканирование файловых систем</string>
+    <string name="UpperMenu-Tooltip-S3">Сканирование хранилища S3</string>
+    <string name="UpperMenu-Tooltip-HTTP">Сканирование веб-сайтов</string>
+
     <string name="MainScreen-SelectPathPlaceholder">Укажите пути для сканирования через точку с запятой (;)</string>
     <string name="MainScreen-ScanStartButton">Сканировать</string>
     <string name="MainScreen-ScanCurrentState">Текущие сканирования (%1$d)</string>
@@ -85,6 +89,8 @@
     <string name="SettingsScreen-Logging">Журналирование</string>
     <string name="SettingsScreen-OpenFolder">Открыть папку</string>
     <string name="ScanSettings-DebugMode">Собирать отладочную информацию</string>
+
+    <string name="ScanSettings-Tooltip-FastScan">Частично сканировать файлы, чтобы ускорить сканирование</string>
 
     <string name="DetectFunction-Emails">Эл. адрес</string>
     <string name="DetectFunction-Phones">Телефон</string>
@@ -121,9 +127,9 @@
     <string name="DetectFunction-Description-Name">Фамилия, имя и отчество</string>
     <string name="DetectFunction-Description-IP">IP адрес</string>
     <string name="DetectFunction-Description-IPv6">IP адрес v6</string>
-    <string name="DetectFunction-Description-Code">Программный код</string>
-    <string name="DetectFunction-Description-Cert">Сертификат</string>
-    <string name="DetectFunction-Description-DetectBlockedDomains">Домен из реестра заблокированных РосКомНадзором</string>
+    <string name="DetectFunction-Description-Code">Поиск программный кода</string>
+    <string name="DetectFunction-Description-Cert">Поиск сертификатов</string>
+    <string name="DetectFunction-Description-DetectBlockedDomains">Поиск доменлв из реестра заблокированных РосКомНадзором</string>
 
     <string name="SettingsScreen-ThreadsCount">Количество потоков</string>
     <string name="SettingsScreen-ContextMenu">Контекстное меню</string>

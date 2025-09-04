@@ -20,6 +20,8 @@ import org.koin.compose.koinInject
 import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.resources.Res
 import ru.packetdima.datascanner.resources.ScanSettings_FastScan
+import ru.packetdima.datascanner.resources.ScanSettings_Tooltip_FastScan
+import ru.packetdima.datascanner.ui.windows.components.DescriptionTooltip
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,32 +64,36 @@ fun SettingsBox(
                     .verticalScroll(scrollState)
             ) {
                 // Fast scan checkbox
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                DescriptionTooltip(
+                    description = stringResource(Res.string.ScanSettings_Tooltip_FastScan),
                 ) {
-                    Checkbox(
-                        checked = fastScan,
-                        onCheckedChange = { fastScan = it }
-                    )
-                    CompositionLocalProvider(LocalRippleConfiguration provides null) {
-                        Text(
-                            text = stringResource(Res.string.ScanSettings_FastScan),
-                            fontSize = 14.sp,
-                            modifier = Modifier.clickable {
-                                fastScan = !fastScan
-                            }
-                        )
-                    }
-                    Box(
-                        modifier = Modifier
-                            .size(24.dp),
-                        contentAlignment = Alignment.Center
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            painter = painterResource(Res.drawable.ScanSettings_FastScan),
-                            contentDescription = null
+                        Checkbox(
+                            checked = fastScan,
+                            onCheckedChange = { fastScan = it }
                         )
+                        CompositionLocalProvider(LocalRippleConfiguration provides null) {
+                            Text(
+                                text = stringResource(Res.string.ScanSettings_FastScan),
+                                fontSize = 14.sp,
+                                modifier = Modifier.clickable {
+                                    fastScan = !fastScan
+                                }
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ScanSettings_FastScan),
+                                contentDescription = null
+                            )
+                        }
                     }
                 }
 

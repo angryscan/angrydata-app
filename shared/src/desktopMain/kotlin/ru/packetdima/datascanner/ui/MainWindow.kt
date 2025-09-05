@@ -2,6 +2,8 @@ package ru.packetdima.datascanner.ui
 
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Column
@@ -18,17 +20,19 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.rememberDialogState
 import androidx.compose.ui.window.rememberWindowState
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import ch.qos.logback.classic.Level
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import ru.packetdima.datascanner.common.AppSettings
 import ru.packetdima.datascanner.logging.LogLevel
-import ru.packetdima.datascanner.navigation.AppScreens
+import ru.packetdima.datascanner.navigation.AppScreen
 import ru.packetdima.datascanner.resources.Res
 import ru.packetdima.datascanner.resources.appName
 import ru.packetdima.datascanner.resources.eula_version
@@ -65,9 +69,6 @@ fun MainWindow(
     val debugMode by remember { appSettings.debugMode }
 
     val backStackEntry by navController.currentBackStackEntryAsState()
-    val currentScreen = AppScreens.valueOf(
-        backStackEntry?.destination?.route?.substringBefore("/") ?: AppScreens.Main.name
-    )
 
     val appLocale by remember { appSettings.language }
     LaunchedEffect(appLocale) {
@@ -76,8 +77,8 @@ fun MainWindow(
 
     LaunchedEffect(focusRemember) {
         if (focusRemember) {
-            if (currentScreen != AppScreens.Main)
-                navController.navigate(AppScreens.Main.name)
+            if (backStackEntry?.destination?.hasRoute(AppScreen.Main::class) ?: false)
+                navController.navigate(AppScreen.Main)
         }
     }
 
@@ -161,53 +162,57 @@ fun MainWindow(
                         )
                         NavHost(
                             navController = navController,
-                            startDestination = AppScreens.Main.name,
+                            startDestination = AppScreen.Main,
                             enterTransition = {
                                 slideInVertically(
                                     initialOffsetY = { it },
                                     animationSpec = tween(durationMillis = 700, easing = LinearOutSlowInEasing)
-                                )
+                                ) + fadeIn(tween(700))
                             },
                             exitTransition = {
                                 slideOutVertically(
                                     targetOffsetY = { -it * 3 / 2 },
                                     animationSpec = tween(durationMillis = 700, easing = LinearOutSlowInEasing)
-                                )
+                                ) + fadeOut(tween(700))
                             },
                             popEnterTransition = {
                                 slideInVertically(
                                     initialOffsetY = { -it * 3 / 2 },
                                     animationSpec = tween(durationMillis = 700, easing = LinearOutSlowInEasing)
-                                )
+                                ) + fadeIn(tween(700))
                             },
                             popExitTransition = {
                                 slideOutVertically(
                                     targetOffsetY = { it },
                                     animationSpec = tween(durationMillis = 700, easing = LinearOutSlowInEasing)
-                                )
+                                ) + fadeOut(tween(700))
                             }
                         ) {
-                            composable(route = AppScreens.Main.name) {
-                                MainScreen()
-                            }
-                            composable(route = AppScreens.Scans.name) {
-                                ScansScreen(
-                                    onTaskClick = { taskId ->
-                                        navController.navigate(AppScreens.Scans.name + "/$taskId")
+                            composable<AppScreen.Main> {
+                                MainScreen(
+                                    showScan = {
+                                        navController.navigate(AppScreen.Scans)
                                     }
                                 )
                             }
-                            composable(route = AppScreens.Scans.name + "/{taskId}") { backStackEntry ->
-                                val taskId = backStackEntry.arguments?.getString("taskId")?.toInt()
-                                ScanResultScreen(
-                                    taskId!!,
-                                    onCloseClick = { navController.navigate(AppScreens.Scans.name) }
+                            composable<AppScreen.Scans> {
+                                ScansScreen(
+                                    onTaskClick = { taskId ->
+                                        navController.navigate(AppScreen.ScanResult(taskId))
+                                    }
                                 )
                             }
-                            composable(route = AppScreens.Settings.name) {
+                            composable<AppScreen.ScanResult> { backStackEntry ->
+                                val scanResult: AppScreen.ScanResult = backStackEntry.toRoute()
+                                ScanResultScreen(
+                                    scanResult.scanId,
+                                    onCloseClick = { navController.navigate(AppScreen.Scans) }
+                                )
+                            }
+                            composable<AppScreen.Settings> {
                                 SettingsScreen()
                             }
-                            composable(route = AppScreens.About.name) {
+                            composable<AppScreen.About> {
                                 AboutScreen()
                             }
                         }

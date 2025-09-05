@@ -22,6 +22,9 @@ import info.downdetector.bigdatascanner.common.DetectFunction
 import org.jetbrains.compose.resources.stringResource
 import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.resources.*
+import ru.packetdima.datascanner.scan.functions.CertDetectFun
+import ru.packetdima.datascanner.scan.functions.CodeDetectFun
+import ru.packetdima.datascanner.scan.functions.RKNDomainDetectFun
 import ru.packetdima.datascanner.ui.strings.composableName
 import ru.packetdima.datascanner.ui.windows.components.DetectFunctionTooltip
 
@@ -68,9 +71,10 @@ fun SettingsBoxDetectFunctions(
                     Checkbox(
                         checked = scanSettings.detectFunctions.containsAll(DetectFunction.entries)
                                 && scanSettings.detectCert.value
-                                && scanSettings.detectCode.value,
+                                && scanSettings.detectCode.value
+                                && scanSettings.detectBlockedDomains.value,
                         onCheckedChange = { checked ->
-                            if (checked) {
+                            if (checked) { // Select all detect functions
                                 scanSettings.detectFunctions.addAll(DetectFunction.entries.filter {
                                     !scanSettings.detectFunctions.contains(
                                         it
@@ -78,10 +82,12 @@ fun SettingsBoxDetectFunctions(
                                 })
                                 scanSettings.detectCert.value = true
                                 scanSettings.detectCode.value = true
-                            } else {
+                                scanSettings.detectBlockedDomains.value = true
+                            } else { // Deselect all detect functions
                                 scanSettings.detectFunctions.clear()
                                 scanSettings.detectCert.value = false
                                 scanSettings.detectCode.value = false
+                                scanSettings.detectBlockedDomains.value = false
                             }
                             scanSettings.save()
                         }
@@ -160,7 +166,7 @@ fun SettingsBoxDetectFunctions(
                     )
                     CompositionLocalProvider(LocalRippleConfiguration provides null) {
                         DetectFunctionTooltip(
-                            description = stringResource(Res.string.DetectFunction_Description_Code)
+                            detectFunction = CodeDetectFun
                         ) {
                             Text(
                                 text = stringResource(Res.string.DetectFunction_Code),
@@ -189,7 +195,7 @@ fun SettingsBoxDetectFunctions(
                     )
                     CompositionLocalProvider(LocalRippleConfiguration provides null) {
                         DetectFunctionTooltip(
-                            description = stringResource(Res.string.DetectFunction_Description_Cert)
+                            detectFunction = CertDetectFun
                         ) {
                             Text(
                                 text = stringResource(Res.string.DetectFunction_Cert),
@@ -218,7 +224,7 @@ fun SettingsBoxDetectFunctions(
                     )
                     CompositionLocalProvider(LocalRippleConfiguration provides null) {
                         DetectFunctionTooltip(
-                            description = stringResource(Res.string.DetectFunction_Description_DetectBlockedDomains)
+                            detectFunction = RKNDomainDetectFun
                         ) {
                             Text(
                                 text = stringResource(Res.string.DetectFunction_DetectBlockedDomains),

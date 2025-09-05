@@ -14,8 +14,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import info.downdetector.bigdatascanner.common.IDetectFunction
@@ -29,6 +29,7 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toInstant
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -53,6 +54,7 @@ import ru.packetdima.datascanner.ui.windows.screens.scans.components.ScanStat
 import ru.packetdima.datascanner.ui.windows.screens.scans.components.ScanTimeStatItem
 import ru.packetdima.datascanner.ui.windows.screens.scans.components.SortColumn
 import ru.packetdima.datascanner.ui.windows.screens.scans.components.comparator
+import java.awt.datatransfer.StringSelection
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
@@ -66,7 +68,7 @@ fun ScanResultScreen(
     val appSettings = koinInject<AppSettings>()
     val task = scanService.tasks.tasks.value.firstOrNull { it.id.value == taskId }
 
-    if(task == null) {
+    if (task == null) {
         onCloseClick()
         return
     }
@@ -76,7 +78,7 @@ fun ScanResultScreen(
 
     val scoreSum = taskFiles.sumOf { it.score }
 
-    val clipboardManager = LocalClipboardManager.current
+    val clipboard = LocalClipboard.current
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -108,7 +110,7 @@ fun ScanResultScreen(
     val pausedAtInstant = pausedAt?.toInstant(TimeZone.currentSystemDefault())
     val startedAtInstant = startedAt?.toInstant(TimeZone.currentSystemDefault())
     val deltaSeconds by task.deltaSeconds.collectAsState()
-    val deltaDuration = (deltaSeconds?: 0L).toDuration(DurationUnit.SECONDS)
+    val deltaDuration = (deltaSeconds ?: 0L).toDuration(DurationUnit.SECONDS)
 
     var currentTime by remember { mutableStateOf(Clock.System.now()) }
 
@@ -122,7 +124,9 @@ fun ScanResultScreen(
     val scanTime = if (startedAt != null) {
         when (state) {
             TaskState.COMPLETED -> finishedAt!!.toInstant(TimeZone.currentSystemDefault()) - startedAtInstant!! - deltaDuration
-            TaskState.STOPPED, TaskState.PENDING -> (pausedAtInstant ?: startedAtInstant!!) - startedAtInstant!! - deltaDuration
+            TaskState.STOPPED, TaskState.PENDING -> (pausedAtInstant
+                ?: startedAtInstant!!) - startedAtInstant!! - deltaDuration
+
             else -> currentTime - startedAtInstant!! - deltaDuration
         }
             .toComponents { days, hours, minutes, seconds, _ ->
@@ -156,8 +160,7 @@ fun ScanResultScreen(
         taskFilesViewModel.update()
     }
 
-    val animatedProgress by
-    animateFloatAsState(
+    val animatedProgress by animateFloatAsState(
         targetValue = if (selectedFiles > 0) (scanned + skipped).toFloat() / selectedFiles else 0f,
         animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec
     )
@@ -212,7 +215,10 @@ fun ScanResultScreen(
     }
 
     val shapes = MaterialTheme.shapes.medium.copy(bottomEnd = CornerSize(0.dp), bottomStart = CornerSize(0.dp))
-    Box(
+
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    Scaffold(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 12.dp)
@@ -226,7 +232,10 @@ fun ScanResultScreen(
                 start = 15.dp,
                 top = 15.dp,
                 end = 15.dp
-            )
+            ),
+        snackbarHost = {
+            SnackbarHost(snackbarHostState)
+        }
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -252,7 +261,7 @@ fun ScanResultScreen(
                             )
                         }
 
-                        when(task.dbTask.connector) {
+                        when (task.dbTask.connector) {
                             is ConnectorS3 -> {
                                 Icon(
                                     painter = painterResource(Res.drawable.aws_s3),
@@ -264,23 +273,24 @@ fun ScanResultScreen(
                         }
 
                         Text(
-                            text = name ?:path,
+                            text = name ?: path,
                             fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                             lineHeight = MaterialTheme.typography.bodyMedium.lineHeight,
                             fontWeight = MaterialTheme.typography.bodyMedium.fontWeight,
                             letterSpacing = 0.1.sp
                         )
 
-                        if(name == null) {
+                        if (name == null) {
                             Icon(
                                 imageVector = Icons.Outlined.CopyAll,
                                 contentDescription = null,
                                 modifier = Modifier
                                     .clip(MaterialTheme.shapes.extraSmall)
                                     .clickable {
-                                        clipboardManager.setText(
-                                            annotatedString = AnnotatedString(path)
-                                        )
+                                        coroutineScope.launch {
+                                            clipboard.setClipEntry(clipEntry = ClipEntry(StringSelection(path)))
+                                            snackbarHostState.showSnackbar(getString(Res.string.ScanResultScreen_ClipboardCopiedMessage))
+                                        }
                                     }
                             )
                         }
@@ -411,7 +421,7 @@ fun ScanResultScreen(
                     horizontalArrangement = Arrangement.spacedBy(14.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if(busy || state in listOf(TaskState.LOADING, TaskState.SEARCHING)) {
+                    if (busy || state in listOf(TaskState.LOADING, TaskState.SEARCHING)) {
                         CircularProgressIndicator(
                             modifier = Modifier
                                 .size(40.dp)

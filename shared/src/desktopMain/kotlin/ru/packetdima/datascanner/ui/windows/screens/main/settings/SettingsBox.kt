@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.painterResource
@@ -19,10 +20,15 @@ import org.koin.compose.koinInject
 import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.resources.Res
 import ru.packetdima.datascanner.resources.ScanSettings_FastScan
+import ru.packetdima.datascanner.resources.ScanSettings_Tooltip_FastScan
+import ru.packetdima.datascanner.ui.windows.components.DescriptionTooltip
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsBox(transition: Transition<Boolean>) {
+fun SettingsBox(
+    transition: Transition<Boolean>,
+    height: Dp
+) {
     val scanSettings = koinInject<ScanSettings>()
 
     var fastScan by remember { scanSettings.fastScan }
@@ -42,7 +48,7 @@ fun SettingsBox(transition: Transition<Boolean>) {
             modifier = Modifier
                 .clip(MaterialTheme.shapes.medium)
                 .background(MaterialTheme.colorScheme.surface)
-                .height(400.dp)
+                .height(height)
                 .padding(6.dp)
                 .fillMaxWidth()
         ) {
@@ -58,32 +64,36 @@ fun SettingsBox(transition: Transition<Boolean>) {
                     .verticalScroll(scrollState)
             ) {
                 // Fast scan checkbox
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                DescriptionTooltip(
+                    description = stringResource(Res.string.ScanSettings_Tooltip_FastScan),
                 ) {
-                    Checkbox(
-                        checked = fastScan,
-                        onCheckedChange = { fastScan = it }
-                    )
-                    CompositionLocalProvider(LocalRippleConfiguration provides null) {
-                        Text(
-                            text = stringResource(Res.string.ScanSettings_FastScan),
-                            fontSize = 14.sp,
-                            modifier = Modifier.clickable {
-                                fastScan = !fastScan
-                            }
-                        )
-                    }
-                    Box(
-                        modifier = Modifier
-                            .size(24.dp),
-                        contentAlignment = Alignment.Center
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            painter = painterResource(Res.drawable.ScanSettings_FastScan),
-                            contentDescription = null
+                        Checkbox(
+                            checked = fastScan,
+                            onCheckedChange = { fastScan = it }
                         )
+                        CompositionLocalProvider(LocalRippleConfiguration provides null) {
+                            Text(
+                                text = stringResource(Res.string.ScanSettings_FastScan),
+                                fontSize = 14.sp,
+                                modifier = Modifier.clickable {
+                                    fastScan = !fastScan
+                                }
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ScanSettings_FastScan),
+                                contentDescription = null
+                            )
+                        }
                     }
                 }
 

@@ -73,6 +73,10 @@
     <string name="SideMenu-SettingsPage">Settings</string>
     <string name="SideMenu-AboutPage">About</string>
 
+    <string name="UpperMenu-Tooltip-FileShare">File share scanning</string>
+    <string name="UpperMenu-Tooltip-S3">S3 storage scanning</string>
+    <string name="UpperMenu-Tooltip-HTTP">Web scanning</string>
+
     <string name="MainScreen-SelectPathPlaceholder">Choose paths to scan separated by semicolon (;)</string>
     <string name="MainScreen-SelectFileWithPathsPlaceholder">Choose file with paths</string>
     <string name="MainScreen-ScanStartButton">Scan</string>
@@ -90,6 +94,8 @@
     <string name="ScanSettings-UserSignatures">User signatures</string>
     <string name="ScanSettings-SelectAll">Select all</string>
     <string name="ScanSettings-DebugMode">Collect debug info</string>
+
+    <string name="ScanSettings-Tooltip-FastScan">Partially scan files to speed up the scan</string>
 
     <string name="DetectFunction-Emails">Email</string>
     <string name="DetectFunction-Phones">Phone</string>
@@ -159,6 +165,8 @@
     <string name="TaskStateChipFilter-Paused">Paused</string>
     <string name="TaskStateChipFilter-Error">Error</string>
     <string name="TaskStateChipFilter-Completed">Completed</string>
+
+    <string name="ScanResultScreen-ClipboardCopiedMessage">Copied to clipboard</string>
 
     <string name="Result-ColumnFile">File</string>
     <string name="Result-ColumnAttributes">Attributes</string>

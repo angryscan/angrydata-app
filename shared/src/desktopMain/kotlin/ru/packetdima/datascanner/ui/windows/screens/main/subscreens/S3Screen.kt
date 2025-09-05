@@ -165,6 +165,49 @@ fun S3Screen(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        OutlinedTextField(
+            modifier = Modifier
+                .height(60.dp)
+                .width(700.dp),
+            value = path,
+            onValueChange = { path = it },
+            placeholder = { Text(text = stringResource(Res.string.MainScreen_SelectPathPlaceholder)) },
+            singleLine = true,
+            shape = MaterialTheme.shapes.medium,
+            isError = selectPathError,
+            trailingIcon = {
+                Row {
+                    Box(
+                        modifier = Modifier
+                            .size(42.dp)
+                            .clip(
+                                MaterialTheme.shapes.large
+                            )
+                            .background(MaterialTheme.colorScheme.onBackground)
+                            .pointerHoverIcon(PointerIcon.Hand)
+                            .clickable {
+                                if(endpoint.isNotEmpty() &&
+                                    accessKey.isNotEmpty() &&
+                                    secretKey.isNotEmpty() &&
+                                    bucket.isNotEmpty()) {
+                                    selectPathDialog = true
+                                } else {
+                                    incorrectConnection = true
+                                }
+
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.FolderOpen,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.background
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                }
+            }
+        )
         Row(
             horizontalArrangement = Arrangement.spacedBy(20.dp)
         ) {
@@ -218,49 +261,7 @@ fun S3Screen(
                 isError = secretKeyError
             )
         }
-        OutlinedTextField(
-            modifier = Modifier
-                .height(60.dp)
-                .width(700.dp),
-            value = path,
-            onValueChange = { path = it },
-            placeholder = { Text(text = stringResource(Res.string.MainScreen_SelectPathPlaceholder)) },
-            singleLine = true,
-            shape = MaterialTheme.shapes.medium,
-            isError = selectPathError,
-            trailingIcon = {
-                Row {
-                    Box(
-                        modifier = Modifier
-                            .size(42.dp)
-                            .clip(
-                                MaterialTheme.shapes.large
-                            )
-                            .background(MaterialTheme.colorScheme.onBackground)
-                            .pointerHoverIcon(PointerIcon.Hand)
-                            .clickable {
-                                if(endpoint.isNotEmpty() &&
-                                    accessKey.isNotEmpty() &&
-                                    secretKey.isNotEmpty() &&
-                                    bucket.isNotEmpty()) {
-                                    selectPathDialog = true
-                                } else {
-                                    incorrectConnection = true
-                                }
 
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.FolderOpen,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.background
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(16.dp))
-                }
-            }
-        )
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -334,7 +335,8 @@ fun S3Screen(
                 )
             }
             SettingsBox(
-                transition = settingsBoxTransition
+                transition = settingsBoxTransition,
+                height = 280.dp
             )
         }
 

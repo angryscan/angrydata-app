@@ -1,18 +1,19 @@
 [versions]
-kotlin = "2.1.10"
-exposed = "0.60.0"
+kotlin = "2.2.10"
+exposed = "0.61.0"
 poi = "5.4.0"
-compose = "1.7.3"
+compose = "1.8.2"
 ktor = "3.2.3"
 datascanner = "1.2.2"
 progressbar = "0.10.1"
 log4j = "2.24.3"
 koin = "4.0.2"
-viewmodel = "2.8.4"
-filekit = "0.10.0-beta03"
-fastexcel = "0.18.4"
+viewmodel = "2.9.3"
+filekit = "0.10.0"
+fastexcel = "0.19.0"
 flyway = "11.4.1"
 aws = "1.4.92"
+navigation = "2.9.0-rc01"
 
 [libraries]
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
@@ -63,11 +64,11 @@ filekit-dialogs-compose = { module = "io.github.vinceglb:filekit-dialogs-compose
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
 koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin" }
-koin-compose-viewmodel-navigation = { module = "io.insert-koin:koin-compose-viewmodel-navigation", version.ref = "koin" }
 koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin" }
 koin-test-junit4 = { module = "io.insert-koin:koin-test-junit4", version.ref = "koin" }
 
 lifecycle-viewmodel = { module ="org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "viewmodel" }
+navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigation" }
 
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 

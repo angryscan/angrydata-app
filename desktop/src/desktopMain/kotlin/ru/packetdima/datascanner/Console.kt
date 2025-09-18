@@ -346,9 +346,10 @@ Allowed parameters:
 
 Allowed extensions: 
         ${
-                FileType.entries.joinToString("\n        ") {
+                FileType.entries.filter { ft -> ft != FileType.CERT && ft != FileType.CODE }.joinToString("\n        ") {
                     "${it.name} (${
-                        it.extensions.filter { ext -> ext.toIntOrNull() == null }.joinToString(",")
+                        it.extensions.filter { ext -> 
+                            ext.toIntOrNull() == null }.joinToString(",")
                     })"
                 }
             }

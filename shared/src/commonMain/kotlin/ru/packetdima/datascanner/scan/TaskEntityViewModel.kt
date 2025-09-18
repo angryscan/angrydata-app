@@ -150,7 +150,9 @@ class TaskEntityViewModel(
             }
         }
         _id.value = dbTask.id.value
-        checkProgress()
+        taskScope.launch {
+            checkProgress()
+        }
     }
 
     fun addFoundAttribute(detectFunction: IDetectFunction) {
@@ -166,50 +168,48 @@ class TaskEntityViewModel(
         _foundFiles.value++
     }
 
-    fun checkProgress() {
-        taskScope.launch {
-            while (_state.value == TaskState.LOADING) {
-                delay(500)
-            }
-            if (_state.value != TaskState.PENDING && _state.value != TaskState.SEARCHING) {
-                database.transaction {
-                    if (_selectedFiles.value == 0L) {
-                        _selectedFiles.value = TaskFiles
-                            .selectAll()
-                            .where {
-                                TaskFiles.task.eq(dbTask.id)
-                            }
-                            .count()
-                    }
-
-
-                    _skippedFiles.value = TaskFiles
+    suspend fun checkProgress() {
+        while (_state.value == TaskState.LOADING) {
+            delay(500)
+        }
+        if (_state.value != TaskState.PENDING && _state.value != TaskState.SEARCHING) {
+            database.transaction {
+                if (_selectedFiles.value == 0L) {
+                    _selectedFiles.value = TaskFiles
                         .selectAll()
                         .where {
-                            TaskFiles.task.eq(dbTask.id) and TaskFiles.state.eq(TaskState.FAILED)
+                            TaskFiles.task.eq(dbTask.id)
                         }
                         .count()
-
-                    _scannedFiles.value = TaskFiles
-                        .selectAll()
-                        .where {
-                            TaskFiles.task.eq(dbTask.id) and TaskFiles.state.eq(TaskState.COMPLETED)
-                        }
-                        .count()
-
-                    if (_selectedFiles.value == _scannedFiles.value + _skippedFiles.value) {
-                        if (_state.value != TaskState.COMPLETED) {
-                            setState(TaskState.COMPLETED)
-                            logger.info(
-                                throwable = null,
-                                LogMarkers.UserAction
-                            ) { "Scanning task completed. ID: ${_id.value}. Path: \"${_path.value}\"" }
-                        }
-                    }
                 }
 
-                _busy.value = false
+
+                _skippedFiles.value = TaskFiles
+                    .selectAll()
+                    .where {
+                        TaskFiles.task.eq(dbTask.id) and TaskFiles.state.eq(TaskState.FAILED)
+                    }
+                    .count()
+
+                _scannedFiles.value = TaskFiles
+                    .selectAll()
+                    .where {
+                        TaskFiles.task.eq(dbTask.id) and TaskFiles.state.eq(TaskState.COMPLETED)
+                    }
+                    .count()
+
+                if (_selectedFiles.value == _scannedFiles.value + _skippedFiles.value) {
+                    if (_state.value != TaskState.COMPLETED) {
+                        setState(TaskState.COMPLETED)
+                        logger.info(
+                            throwable = null,
+                            LogMarkers.UserAction
+                        ) { "Scanning task completed. ID: ${_id.value}. Path: \"${_path.value}\"" }
+                    }
+                }
             }
+
+            _busy.value = false
         }
     }
 
@@ -263,7 +263,7 @@ class TaskEntityViewModel(
                     }
 
                     TaskState.PENDING -> {
-                        if(dbTask.taskState > TaskState.PENDING) {
+                        if (dbTask.taskState > TaskState.PENDING) {
                             if (dbTask.pauseDate == null)
                                 dbTask.pauseDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
                             _pausedAt.value = dbTask.pauseDate
@@ -380,7 +380,7 @@ class TaskEntityViewModel(
                                 }
                             }
                         } catch (e: Exception) {
-                            logger.error { "Failed to scan directory: $dir. ${e.message}"}
+                            logger.error { "Failed to scan directory: $dir. ${e.message}" }
                             setState(TaskState.FAILED)
                             return@launch
                         }
@@ -414,7 +414,7 @@ class TaskEntityViewModel(
                 extensions = extensions,
                 fileSelected = fileSelected
             )
-            return  res
+            return res
         } catch (e: Exception) {
             throw e
         }

@@ -47,8 +47,6 @@ class ConnectorHTTP: IConnector, AutoCloseable {
             logger.error { "Error downloading page" }
             throw FailedToLoadHTTP()
         }
-
-        return outputFile
     }
 
     override suspend fun scanDirectory(
@@ -74,5 +72,9 @@ class ConnectorHTTP: IConnector, AutoCloseable {
 
     override fun close() {
         client.close()
+    }
+
+    override fun toString(): String {
+        return "ConnectorHTTP"
     }
 }

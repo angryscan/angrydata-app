@@ -403,7 +403,9 @@ fun ResultTable(
                         }
                     ) { file ->
                         val fileType = FileType.getFileType(file.path)
-                        val locationSupported = fileType != null && LocationFinder.isSupported(fileType) && task.dbTask.connector is ConnectorFileShare
+                        val locationSupported = fileType != null &&
+                                LocationFinder.isSupported(fileType) &&
+                                task.dbTask.connector is ConnectorFileShare
                         val exist = filesExists.contains(file.id)
                         var menuExpanded by remember { mutableStateOf(false) }
                         Row(
@@ -422,7 +424,7 @@ fun ResultTable(
                                     }
                                 }
                                 .onPointerEvent(PointerEventType.Press) { event ->
-                                    if(event.buttons.isSecondaryPressed && exist){
+                                    if (event.buttons.isSecondaryPressed && exist) {
                                         menuExpanded = true
                                     }
                                 }
@@ -433,7 +435,7 @@ fun ResultTable(
                                 onDismissRequest = {
                                     menuExpanded = false
                                 },
-                            ){
+                            ) {
                                 DropdownMenuItem(
                                     leadingIcon = {
                                         Icon(
@@ -445,14 +447,14 @@ fun ResultTable(
                                         Text(stringResource(Res.string.deleteFile))
                                     },
                                     onClick = {
-                                        if(File(file.path).delete()) {
+                                        if (File(file.path).delete()) {
                                             filesExists.remove(file.id)
                                             filesDeleted.add(file.id)
                                         }
 
                                     }
                                 )
-                                if(OS.currentOS() == OS.WINDOWS) {
+                                if (OS.currentOS() == OS.WINDOWS) {
                                     DropdownMenuItem(
                                         leadingIcon = {
                                             Icon(
@@ -465,8 +467,8 @@ fun ResultTable(
                                         },
                                         onClick = {
                                             val f = File(file.path)
-                                            if(f.exists()) {
-                                                Runtime.getRuntime().exec("explorer /select,\"${file.path}\"")
+                                            if (f.exists()) {
+                                                ProcessBuilder("explorer", "/select,", file.path).start()
                                             } else {
                                                 filesExists.remove(file.id)
                                                 filesDeleted.add(file.id)

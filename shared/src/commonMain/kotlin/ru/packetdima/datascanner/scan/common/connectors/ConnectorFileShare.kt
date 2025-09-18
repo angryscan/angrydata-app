@@ -50,4 +50,8 @@ class ConnectorFileShare: IConnector {
             }
             return@withContext filesCounter
         }
+
+    override fun toString(): String {
+        return "ConnectorFileShare"
+    }
 }

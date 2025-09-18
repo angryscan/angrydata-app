@@ -1,6 +1,6 @@
 <resources>
     <string name="locale">Русский</string>
-    <string name="plannerWindowTitle">ADS Планировщик</string>
+    <string name="plannerWindowTitle">BDS Планировщик</string>
     <string name="uiLanguage">Язык</string>
     <string name="uiTheme">Тема</string>
     <string name="uiThreadCount">Количество потоков</string>
@@ -57,7 +57,7 @@
     <string name="settingsChangedText">Некоторые параметры будут применены при следующем запуске</string>
     <string name="settingsContextMenuTitle">Контекстное меню</string>
     <string name="settingsContextMenuText">Файловый проводник</string>
-    <string name="contextScanWith">Сканировать при помощи ADS</string>
+    <string name="contextScanWith">Сканировать при помощи BDS</string>
     <string name="uiUserSignature">Пользовательские сигнатуры</string>
     <string name="add">Добавить</string>
     <string name="name">Наименование</string>

@@ -2,42 +2,53 @@ package ru.packetdima.datascanner
 
 import info.downdetector.bigdatascanner.common.DetectFunction
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import me.tongfei.progressbar.ProgressBar
+import me.tongfei.progressbar.ProgressBarBuilder
+import me.tongfei.progressbar.ProgressBarStyle
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import org.koin.core.parameter.parametersOf
 import ru.packetdima.datascanner.common.*
+import ru.packetdima.datascanner.db.models.TaskState
+import ru.packetdima.datascanner.scan.ScanService
+import ru.packetdima.datascanner.scan.TaskFileResult
+import ru.packetdima.datascanner.scan.TaskFilesViewModel
+import ru.packetdima.datascanner.scan.common.connectors.ConnectorFileShare
 import ru.packetdima.datascanner.scan.common.files.FileType
-import ru.packetdima.datascanner.searcher.ConsoleFilesCounter
-import ru.packetdima.datascanner.searcher.SensitiveSearcher
-import ru.packetdima.datascanner.searcher.Writer
+import ru.packetdima.datascanner.scan.functions.CertDetectFun
+import ru.packetdima.datascanner.scan.functions.CodeDetectFun
+import ru.packetdima.datascanner.scan.functions.RKNDomainDetectFun
+import ru.packetdima.datascanner.ui.windows.screens.scans.components.SortColumn
+import ru.packetdima.datascanner.ui.windows.screens.scans.components.comparator
 import java.io.File
+import java.io.FileOutputStream
+import java.nio.charset.Charset
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.system.exitProcess
 
 private val logger = KotlinLogging.logger {}
 
-object Console: KoinComponent {
+object Console : KoinComponent {
     lateinit var progressBar: ProgressBar
 
     private var path: String? = null
     private var reportDir: File = AppFiles.UserDirPath
-    private var reportEncoding = "UTF-8"
+    private var reportEncoding =
+        if (OS.currentOS() == OS.WINDOWS)
+            "windows-1251"
+        else
+            "UTF-8"
+    private var fileWithPaths: Boolean = false
 
     suspend fun consoleRun(args: Array<String>) {
-
-        val searcher = SensitiveSearcher()
-
-        var scanStarted = false
-        val filesCounter = ConsoleFilesCounter()
 
         parseArgs(args)
 
         val scanSettings by inject<ScanSettings>()
+
+        val scanService by inject<ScanService>()
 
         if (path != null) {
             logger.info(throwable = null, LogMarkers.UserAction) {
@@ -48,79 +59,145 @@ object Console: KoinComponent {
                         "fast scan: ${scanSettings.fastScan} "
             }
             println("Selecting files...")
-            Writer.initDB()
-            val job = CoroutineScope(Dispatchers.Default).launch {
-                searcher.inspectDirectory(
-                    File(path!!.trim('"')),
-                    onProgressChange = {
-                        if (it.first >= 0) {
-                            if (!scanStarted) {
-                                progressBar = ProgressBar("Scanning", filesCounter.selectedFilesCount)
-                                scanStarted = true
-                            }
-                            filesCounter.scannedFilesCount = it.first
-                            filesCounter.scannedFilesSize = it.second
 
-                            progressBar.stepTo(filesCounter.scannedFilesCount + filesCounter.skippedScanFilesCount)
-                        } else {
-                            scanStarted = false
-                        }
-                    },
-                    onFileFound = {
-                        filesCounter.selectedFilesCount++
-                        filesCounter.selectedFilesSize += it
-
-                        filesCounter.totalFilesCount++
-                        filesCounter.totalFilesSize += it
-                    },
-                    onSkipSelectFile = {
-                        filesCounter.totalFilesSize += it
-                        filesCounter.totalFilesCount++
-                    },
-                    onSkipScanFile = {
-                        filesCounter.skippedScanFilesCount++
-                        filesCounter.skippedScanFilesSize += it
-                        progressBar.stepTo(filesCounter.scannedFilesCount + filesCounter.skippedScanFilesCount)
-                    },
-                    onReportCreated = {
-                        filesCounter.valuebleFilesCount = it.first
-                        filesCounter.valuebleFilesSize = it.second
-                    }
-                )
+            val scanPath = if (fileWithPaths) {
+                val file = File(path!!)
+                file.readLines().joinToString(separator = ";")
+            } else {
+                path
             }
-            job.join()
+            val detectFunctions =
+                (scanSettings.detectFunctions + scanSettings.userSignatures)
+                    .toMutableList()
+            if (scanSettings.detectCert.value)
+                detectFunctions.add(CertDetectFun)
+            if (scanSettings.detectCode.value)
+                detectFunctions.add(CodeDetectFun)
+            if (scanSettings.detectBlockedDomains.value)
+                detectFunctions.add(RKNDomainDetectFun)
 
-            delay(1000)
-            println("\nReport created")
-            println("Valuable file found: ${filesCounter.valuebleFilesCount} with size ${filesCounter.valuebleFilesSize}")
-            saveReport()
+            val task = scanService.createTask(
+                name = if (fileWithPaths) path else null,
+                path = scanPath!!,
+                extensions = scanSettings.extensions,
+                detectFunctions = detectFunctions,
+                fastScan = scanSettings.fastScan.value,
+                connector = ConnectorFileShare()
+            )
+
+            scanService.startTask(task)
+
+            println("Searching files for scan")
+            var scanStarted = false
+
+            CoroutineScope(Dispatchers.Default).launch {
+                while (true) {
+                    if (task.state.value == TaskState.SCANNING) {
+                        task.checkProgress()
+                        if (!scanStarted) {
+
+                            progressBar = ProgressBarBuilder()
+                                .setStyle(ProgressBarStyle.ASCII)
+                                .setTaskName("Scanning")
+                                .setInitialMax(task.selectedFiles.value)
+                                .build()
+                            scanStarted = true
+                        }
+                        progressBar.stepTo(task.scannedFiles.value + task.skippedFiles.value)
+                    }
+
+                    if (task.state.value == TaskState.COMPLETED ||
+                        task.state.value == TaskState.FAILED
+                    ) {
+                        break
+                    }
+                    delay(500)
+                }
+            }.join()
+            val taskFiles by inject<TaskFilesViewModel> { parametersOf(task.dbTask) }
+            println("Generating report...")
+            while (!taskFiles.updated.value) {
+                delay(500)
+            }
+            val saveReportPath = saveReport(taskFiles)
+            if (saveReportPath != null) {
+                logger.info(
+                    throwable = null,
+                    LogMarkers.UserAction
+                ) { "Scanning completed. Report saved to $saveReportPath" }
+            } else {
+                logger.error(throwable = null) { "Error when saving report" }
+            }
+
 
             println("Program completed")
             exitProcess(0)
         } else
-            println("Chose path to scan with -path parameter")
+            println("Chose path to scan with -path parameter or file with paths with -file parameter")
     }
 
-    private fun saveReport() {
+    private fun saveReport(taskFiles: TaskFilesViewModel): String? {
         println("Saving report...")
         val time = Calendar.getInstance().time
         val formatter = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss")
         val currentTime = formatter.format(time)
-        val reportFile = reportDir.resolve("ADS_$currentTime.csv")
-        Writer.writeReport(reportFile, reportEncoding)
+        val reportFile = reportDir.resolve("BDS_$currentTime.csv")
 
-        logger.info(throwable = null, LogMarkers.UserAction) { "Scanning completed. Report saved to $reportDir" }
+        return runBlocking {
+            try {
+                writeCSV(
+                    reportFile = reportFile,
+                    reportEncoding = reportEncoding,
+                    result = taskFiles.taskFiles.value.sortedWith(
+                        SortColumn.Score.comparator()
+                    )
+                )
+                reportFile.absolutePath
+            } catch (_: Exception) {
+                null
+            }
+        }
+    }
+
+    private suspend fun writeCSV(reportFile: File, reportEncoding: String = "UTF-8", result: List<TaskFileResult>) {
+        withContext(Dispatchers.IO) {
+            FileOutputStream(reportFile, true).bufferedWriter(charset = Charset.forName(reportEncoding))
+        }.use { writer ->
+            val columns = listOf(
+                "File",
+                "Attributes",
+                "Score",
+                "Count",
+                "Size"
+            )
+            writer.append(
+                columns.joinToString(";") + "\r\n"
+            )
+
+            result.forEach { fileRow ->
+                writer.append(
+                    listOf(
+                        fileRow.path,
+                        fileRow.foundAttributes.joinToString(", ") { attr -> attr.writeName },
+                        fileRow.score.toString(),
+                        fileRow.count.toString(),
+                        fileRow.size.toString()
+                    ).joinToString(";") + "\r\n"
+                )
+            }
+        }
     }
 
     private fun parseArgs(args: Array<String>) {
-        fun getArg(map: Map<String, List<String>>, tag: String, default: String?): String? =
-            map[tag]?.first() ?: default
 
         fun getArg(map: Map<String, List<String>>, tag: String, default: Boolean): Boolean =
             if (map.containsKey(tag)) !default else default
 
-        fun getArg(map: Map<String, List<String>>, tag: String, default: Int): Int =
-            map[tag]?.first()?.toIntOrNull() ?: default
+        fun getArg(map: Map<String, List<String>>, tag: String, shortTag: String, default: String?): String? =
+            map[tag]?.first() ?: map[shortTag]?.first() ?: default
+
+        fun getArg(map: Map<String, List<String>>, tag: String, shortTag: String, default: Int): Int =
+            map[tag]?.first()?.toIntOrNull() ?: map[shortTag]?.first()?.toIntOrNull() ?: default
 
         val map = args.fold(Pair(emptyMap<String, List<String>>(), "")) { (map, lastKey), elem ->
             if (elem.startsWith("-")) Pair(map + (elem to emptyList()), elem)
@@ -136,24 +213,31 @@ object Console: KoinComponent {
         val appSettings: AppSettings by inject()
         val userSignaturesSettings: UserSignatureSettings by inject()
 
-        path = getArg(map, "-path", null)
-        val fileExtensions = getArg(map, "-extensions", scanSettings.extensions.joinToString(","))
-        val detectFunctions = getArg(map, "-detect", scanSettings.detectFunctions.joinToString(","))
-        val userSignatures = getArg(map, "-usig_detect", scanSettings.userSignatures.joinToString(","))
+        val filePath = getArg(map, "-file", "-f", null)
+
+        path = getArg(map, "-path", "-p", filePath)
+        val fileExtensions = getArg(map, "-extensions", "-e", scanSettings.extensions.joinToString(","))
+        val detectFunctions = getArg(map, "-detect_functions", "-df", scanSettings.detectFunctions.joinToString(","))
+        val userSignatures = getArg(map, "-user_signatures", "-us", scanSettings.userSignatures.joinToString(","))
         val fastScan = getArg(map, "-fast", scanSettings.fastScan.value)
         val fullScan = getArg(map, "-full", !fastScan)
-        val threadCount = getArg(map, "threads", appSettings.threadCount.value)
-        val reportPath = getArg(map, "-report", null)
-        val encoding = getArg(map, "-report_encoding", null)
+        val threadCount = getArg(map, "threads", "-t", appSettings.threadCount.value)
+        val reportPath = getArg(map, "-report", "-r", null)
+        val encoding = getArg(map, "-report_encoding", "-re", null)
 
-        if(encoding != null) {
+        if (encoding != null) {
             reportEncoding = encoding
             println("Report encoding: $reportEncoding")
         }
 
-        if(path == null) {
-            println("Chose path to scan with -path parameter")
+        if (filePath != null)
+            fileWithPaths = true
+
+        if (path == null) {
+            println("Chose path to scan with -path or -file parameter")
             exitProcess(1)
+        } else if (path != filePath && fileWithPaths) {
+            println("Only one of the parameters (-path or -file) allowed. Not both.")
         } else {
             println("Selected directory: $path")
         }
@@ -181,12 +265,16 @@ object Console: KoinComponent {
         }
 
         scanSettings.fastScan.value = !fullScan
-        if(scanSettings.fastScan.value)
+        if (scanSettings.fastScan.value)
             println("Fast scan enabled")
         else
             println("Full scan enabled")
-        if(threadCount > Runtime.getRuntime().availableProcessors()){
-            println("Thread count can't be greater than available processors (${Runtime.getRuntime().availableProcessors()})")
+        if (threadCount > Runtime.getRuntime().availableProcessors()) {
+            println(
+                "Thread count can't be greater than available processors (${
+                    Runtime.getRuntime().availableProcessors()
+                })"
+            )
             println("Using ${Runtime.getRuntime().availableProcessors()} instead")
             appSettings.threadCount.value = Runtime.getRuntime().availableProcessors()
         } else if (threadCount < 1) {
@@ -212,7 +300,7 @@ object Console: KoinComponent {
 
         if (detectFunctions != null) {
             scanSettings.detectFunctions.clear()
-            if(detectFunctions.isNotEmpty()) {
+            if (detectFunctions.isNotEmpty()) {
                 detectFunctions.split(",").forEach { df ->
                     val dfo = DetectFunction.entries.find { it.name == df }
                     if (dfo != null)
@@ -224,9 +312,9 @@ object Console: KoinComponent {
         }
         println("Detect functions: ${scanSettings.detectFunctions.joinToString(", ")}")
 
-        if(userSignatures != null) {
+        if (userSignatures != null) {
             scanSettings.userSignatures.clear()
-            if(userSignatures.isNotEmpty()) {
+            if (userSignatures.isNotEmpty()) {
                 userSignatures.split(",").forEach { sig ->
                     val sigo = userSignaturesSettings.userSignatures.find { it.name == sig }
                     if (sigo != null)
@@ -244,16 +332,17 @@ object Console: KoinComponent {
         println(
             """
 Allowed parameters:
--path [path] - path to scan
--extensions [extensions] - comma-separated list of file extensions
--detect [detect functions] - comma-separated list of detect functions
--usig_detect [user detect signatures] - comma-separated list of user detect signatures
+-path(-p) [path] - path to scan
+-file(-f) [path] - file with paths to scan
+-extensions(-e) [extensions] - comma-separated list of file extensions
+-detect_functions(-df) [detect functions] - comma-separated list of detect functions
+-user_signatures(-us) [user signatures] - comma-separated list of user detect signatures
 -fast - fast scan
 -full - full scan
--console - console mode
--report [path] - path to dir to save report
--threads [count] - count of threads
--report_encoding [encoding] - report encoding (UTF-8, Windows-1251) (default: UTF-8)
+-console(-c) - console mode
+-report(-r) [path] - path to dir to save report
+-report_encoding(-re) [encoding] - report encoding (UTF-8, Windows-1251) (default: UTF-8)
+-threads(-t) [count] - count of threads
 
 Allowed extensions: 
         ${

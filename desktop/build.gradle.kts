@@ -88,6 +88,7 @@ compose.desktop {
                 installationPath = "Big Data Scanner"
                 upgradeUuid = "baf17015-b8d3-4b88-9a59-0031a7b53b34"
                 iconFile.set(project(":shared").projectDir.resolve("src\\desktopMain\\composeResources\\files\\icon.ico"))
+                console = true
             }
             linux {
                 debMaintainer = "soulofpain.k@gmail.com"

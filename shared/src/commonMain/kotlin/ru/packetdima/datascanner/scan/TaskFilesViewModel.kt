@@ -26,7 +26,7 @@ data class TaskFileResult(
     val score: Long
 )
 
-class TaskFilesViewModel(val task: Task) : KoinComponent, ViewModel(){
+class TaskFilesViewModel(val task: Task) : KoinComponent, ViewModel() {
     private val database: DatabaseConnector by inject()
 
     private val taskScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
@@ -39,57 +39,62 @@ class TaskFilesViewModel(val task: Task) : KoinComponent, ViewModel(){
     val scoreSum
         get() = _scoreSum.asStateFlow()
 
+    private val _updated = MutableStateFlow(false)
+    val updated
+        get() = _updated.asStateFlow()
+
     init {
-        update()
+        taskScope.launch {
+            update()
+            _updated.value = true
+        }
     }
 
-    fun update() {
-        taskScope.launch {
-            database.transaction {
-                val fileRows = TaskFiles
-                    .innerJoin(TaskFileScanResults)
-                    .select(
-                        TaskFiles.path,
-                        TaskFiles.size,
-                        TaskFiles.id
-                    )
-                    .where {
-                        TaskFiles.task.eq(task.id) and TaskFiles.state.eq(TaskState.COMPLETED)
-                    }
-                    .withDistinct()
-
-                _taskFiles.value = fileRows.map { fileRow ->
-                    val detectRows = TaskFileScanResults
-                        .innerJoin(TaskDetectFunctions)
-                        .select(TaskDetectFunctions.function, TaskFileScanResults.count)
-                        .where { TaskFileScanResults.file.eq(fileRow[TaskFiles.id]) }
-                        .map { it[TaskDetectFunctions.function] to it[TaskFileScanResults.count] }
-
-                    val containsFIO = detectRows.map { it.first }.contains(DetectFunction.Name)
-
-                    TaskFileResult(
-                        id = fileRow[TaskFiles.id].value,
-                        path = fileRow[TaskFiles.path],
-                        size = FileSize(fileRow[TaskFiles.size]),
-                        foundAttributes = detectRows.map { it.first },
-                        count = detectRows.sumOf { it.second },
-                        score =  detectRows.sumOf { row ->
-                            (if(containsFIO) 20 else detectRows.size - 1) +
-                            (when(row.first) {
-                                DetectFunction.Name -> 5f
-                                DetectFunction.CardNumbers -> 30f
-                                DetectFunction.AccountNumber -> 30f
-                                CodeDetectFun -> 0.01f
-                                CertDetectFun -> 100f
-                                else -> 1f
-                            } * row.second).toLong()
-                        }
-                    )
+    suspend fun update() {
+        _updated.value = false
+        database.transaction {
+            val fileRows = TaskFiles
+                .innerJoin(TaskFileScanResults)
+                .select(
+                    TaskFiles.path,
+                    TaskFiles.size,
+                    TaskFiles.id
+                )
+                .where {
+                    TaskFiles.task.eq(task.id) and TaskFiles.state.eq(TaskState.COMPLETED)
                 }
-                _scoreSum.value = _taskFiles.value.sumOf { it.score }
+                .withDistinct()
 
+            _taskFiles.value = fileRows.map { fileRow ->
+                val detectRows = TaskFileScanResults
+                    .innerJoin(TaskDetectFunctions)
+                    .select(TaskDetectFunctions.function, TaskFileScanResults.count)
+                    .where { TaskFileScanResults.file.eq(fileRow[TaskFiles.id]) }
+                    .map { it[TaskDetectFunctions.function] to it[TaskFileScanResults.count] }
+
+                val containsFIO = detectRows.map { it.first }.contains(DetectFunction.Name)
+
+                TaskFileResult(
+                    id = fileRow[TaskFiles.id].value,
+                    path = fileRow[TaskFiles.path],
+                    size = FileSize(fileRow[TaskFiles.size]),
+                    foundAttributes = detectRows.map { it.first },
+                    count = detectRows.sumOf { it.second },
+                    score = detectRows.sumOf { row ->
+                        (if (containsFIO) 20 else detectRows.size - 1) +
+                                (when (row.first) {
+                                    DetectFunction.Name -> 5f
+                                    DetectFunction.CardNumbers -> 30f
+                                    DetectFunction.AccountNumber -> 30f
+                                    CodeDetectFun -> 0.01f
+                                    CertDetectFun -> 100f
+                                    else -> 1f
+                                } * row.second).toLong()
+                    }
+                )
             }
-        }
+            _scoreSum.value = _taskFiles.value.sumOf { it.score }
 
+        }
     }
 }

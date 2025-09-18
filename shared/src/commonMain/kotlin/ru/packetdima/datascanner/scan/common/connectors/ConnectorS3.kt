@@ -180,4 +180,8 @@ class ConnectorS3(
     override fun close() {
         s3Client.close()
     }
+
+    override fun toString(): String {
+        return "ConnectorS3"
+    }
 }

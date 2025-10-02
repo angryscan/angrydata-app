@@ -72,3 +72,29 @@ jobs:
           path: |
             desktop/build/packages/*.deb
             LICENSE*
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-amd64
+          path: |
+            desktop/build/packages/*-mac-amd64.zip
+            desktop/build/packages/*-amd64.rss
+            LICENSE*
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-aarch64
+          path: |
+            desktop/build/packages/*-mac-aarch64.zip
+            desktop/build/packages/*-aarch64.rss
+            LICENSE*
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-autoinstall
+          path: |
+            desktop/build/packages/launch.mac
+            LICENSE*

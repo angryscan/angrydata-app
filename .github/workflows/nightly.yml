@@ -90,11 +90,3 @@ jobs:
             desktop/build/packages/*-mac-aarch64.zip
             desktop/build/packages/*-aarch64.rss
             LICENSE*
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: mac-autoinstall
-          path: |
-            desktop/build/packages/launch.mac
-            LICENSE*

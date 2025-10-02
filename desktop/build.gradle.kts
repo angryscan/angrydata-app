@@ -82,8 +82,7 @@ compose.desktop {
             targetFormats(
                 TargetFormat.Msi,
                 TargetFormat.Deb,
-                TargetFormat.Dmg,
-                TargetFormat.Pkg
+                TargetFormat.Dmg
             )
 
             appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))

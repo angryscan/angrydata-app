@@ -114,6 +114,9 @@
     <string name="DetectFunction-Name">ФИО</string>
     <string name="DetectFunction-Code">Программный код</string>
     <string name="DetectFunction-Cert">Сертификат</string>
+    <string name="DetectFunction-Birthday">Дата рождения</string>
+    <string name="DetectFunction-BirthCert">Свидетельство о рождении</string>
+    <string name="DetectFunction-DeathDate">Дата смерти</string>
     <string name="DetectFunction-DetectBlockedDomains">Домен</string>
     <string name="DetectFunction-Description-Emails">Электронная почта</string>
     <string name="DetectFunction-Description-Phones">Номер телефона (+7)</string>
@@ -134,6 +137,9 @@
     <string name="DetectFunction-Description-IPv6">IP адрес v6</string>
     <string name="DetectFunction-Description-Code">Поиск программный кода</string>
     <string name="DetectFunction-Description-Cert">Поиск сертификатов</string>
+    <string name="DetectFunction-Description-Birthday">Дата рождения</string>
+    <string name="DetectFunction-Description-BirthCert">Свидетельство о рождении</string>
+    <string name="DetectFunction-Description-DeathDate">Дата смерти</string>
     <string name="DetectFunction-Description-DetectBlockedDomains">Поиск доменлв из реестра заблокированных РосКомНадзором</string>
 
     <string name="SettingsScreen-ThreadsCount">Количество потоков</string>

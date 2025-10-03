@@ -16,6 +16,7 @@ fun ApplicationScope.DorkTray(
     mainIsVisible: Boolean,
     mainVisibilitySet: (Boolean) -> Unit,
 ) {
+    SystemTray.AUTO_FIX_INCONSISTENCIES = false
     val tray by remember { mutableStateOf(SystemTray.get() ?: throw Exception("Unable to load SystemTray!")) }
 
     val trayImage = painterResource(Res.drawable.icon)

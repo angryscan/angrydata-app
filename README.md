@@ -1,3 +1,5 @@
+🇷🇺 [Русский](README.ru.md)
+
 Big Data Scanner is a cross-platform tool for detecting valuable data like PII, banking secrecy, payments cards like Visa/Mastercard, passwords etc.
 The scanner runs on a local machine and does not require administrator rights for installation.
 It makes no changes to the files being checked.
@@ -31,7 +33,7 @@ The scanner detects the following types of data:
 | IP-адреса                            | `IPv4`, `IPv6`                                                               |
 | Custom signatures                    | `Possible to create custom signatures`                                       |
 | TLS-certificates                     | `TLS-certificates`                                                           |
-| Passrods                             | `work in progress`                                                           |
+| Passwords                            | `work in progress`                                                           |
 | Source code                          | `Source code`                                                                |
 | AI-models, embeded in files          | `work in progress`                                                           |
 | Synthetic data                       | `work in progress`                                                           |
@@ -51,4 +53,4 @@ The scanner is intended to be a universal tool for scanning everything. Currentl
 `Windows`, `Linux `
 `400MB HDD` `4GB RAM` `1.3Ghz CPU`
 
-## [Console mode](CONSOLE.md)
+## [Console mode](doc/CONSOLE.md)

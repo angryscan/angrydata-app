@@ -1,55 +1,54 @@
-Big Data Scanner - кроссплатформенный сканер, выявляющих ценные данные (далее сканер). Сканер запускается на локальной машине и не требует для установки прав администратора.
-Сканер не вносит никаких изменений в проверяемые файлы. Для сканирования требуется доступ только для чтения.
-Проект - open-source и поддерживается образовательными коллективами.
+Big Data Scanner is a cross-platform tool for detecting valuable data like PII, banking secrecy, payments cards like Visa/Mastercard, passwords etc.
+The scanner runs on a local machine and does not require administrator rights for installation.
+It makes no changes to the files being checked.
+Only read-access is required for scanning.
+The project is open-source and supported by educational collectives.
 
-## Форматы файлов
-Сканер поддерживает следующие форматы файлов:
+## Supported file formats
+The scanner supports the following file formats:
 
-| Типа файлов               | Форматы файлов                                       |
+| File Type                 | File Format                                          |
 |---------------------------|------------------------------------------------------|
-| MS Office (таблицы)       | `.xlsx` `.xls`                                       |
-| MS Office (текст)         | `.docx` `.doc`                                       |
-| MS Office (презентации)   | `.pptx` `.potx` `.ppsx` `.pptm` `.ppt` `.pps` `.pot` |
-| Open Office (таблицы)     | `.ods`                                               |
-| Open Office (текст)       | `.odt`                                               | 
-| Open Office (презентации) | `.odp` `.otp`                                        |
+| MS Office (tables)        | `.xlsx` `.xls`                                       |
+| MS Office (text)          | `.docx` `.doc`                                       |
+| MS Office (presentation)  | `.pptx` `.potx` `.ppsx` `.pptm` `.ppt` `.pps` `.pot` |
+| Open Office (tables)      | `.ods`                                               |
+| Open Office (text)        | `.odt`                                               | 
+| Open Office (presentation)| `.odp` `.otp`                                        |
 | Adobe                     | `.pdf`                                               |
-| Архивы                    | `.zip` `.rar`                                        |
-| Tекстовые                 | `.txt` `.csv` `.xml` `.json` `.log`                  |
+| Archives                  | `.zip` `.rar`                                        |
+| Plain text                | `.txt` `.csv` `.xml` `.json` `.log`                  |
 
-## Типы данных
-Сканер выявляет следующие типы данных:
+## Supported data types
+The scanner detects the following types of data:
 
-| Типы данных, которые выявляет сканер | Микроданные, внутри типа данных                  |
-|--------------------------------------|--------------------------------------------------|
-| Персональные данные (текст)          | `ФИО`, `адрес`, `e-mail`                         |
-| Персональные данные (цифры)          | `паспорт`, `телефон`, `машина`, `СНИЛС`, `ОМС`   |
-| Банковская тайна                     | `номер счета`                                    |
-| Данные платежных карт                | `номер карты`, `CVV/CVV2`                        |
-| IP-адреса                            | `IPv4`, `IPv6`                                   |
-| Собственные сигнатуры                | `Возможно написать собственные сигнатуры поиска` |
-| TLS-сертификаты                      | `Детектор залежелей TLS-сертификатов в папках`   |
-| Пароли                               | `в разработке`                                   |
-| Исходных код                         | `Поиск файлов с исходным кодом`                  |
-| AI-модели, cпрятанные в файлах       | `в разработке`                                   |
-| Синтетические данные                 | `в разработке`                                   |
+| Типы данных, которые выявляет сканер | Микроданные, внутри типа данных                                              |
+|--------------------------------------|------------------------------------------------------------------------------|
+| Personal data (text)                 | `full name`, `address`, `e-mail`                                             |
+| Personal data (numbers)              | `passport number`, `phone number`, `car licence`, `social security number`   |
+| Banking secrecy                      | `account number`                                                             |
+| Payment cards                        | `card number`, `CVV/CVV2`                                                    |
+| IP-адреса                            | `IPv4`, `IPv6`                                                               |
+| Custom signatures                    | `Possible to create custom signatures`                                       |
+| TLS-certificates                     | `TLS-certificates`                                                           |
+| Passrods                             | `work in progress`                                                           |
+| Source code                          | `Source code`                                                                |
+| AI-models, embeded in files          | `work in progress`                                                           |
+| Synthetic data                       | `work in progress`                                                           |
 
-## Коннекторы
-Предполагается, что сканер является универсальным средством для сканирования всего. В настоящее время сканер может подключатся к следующим ресурсам:
+## Connectors
+The scanner is intended to be a universal tool for scanning everything. Currently, the scanner can connect to the following resources:
 
-| Коннектор         | Описание                           |
-|-------------------|------------------------------------|
-| Файловые каталоги | Сканирует сетевые папки CIFS / NFS |
-| HDD/SDD           | Сканирует локальные жесткие диски  |
-| S3                | Сканирует дерево каталогов S3      |
-| HTTP/HTTPS        | Сканирует веб-страницы             |
-| СУБД              | `в разработке`                     |
+| Connector               | Descriptio                                                  |
+|-------------------------|-------------------------------------------------------------|
+| Network Folder/Directory | Scans files on remote diretory like Windows environment    |
+| HDD/SDD                 | Scan local hard drive                                       |
+| S3                      | Scan files  in S3                                           |
+| HTTP/HTTPS              | Scans web site content                                      |
+| Databa            |      `work in progress`                                           |
 
-## Системные требования
-Поддержка ОС: 
-`Windows`, `Linux (Astra, Ubuntu)`
-
-Системные требования:
+## System Requirements
+`Windows`, `Linux `
 `400MB HDD` `4GB RAM` `1.3Ghz CPU`
 
-## [Консольный режим](CONSOLE.md)
+## [Console mode](CONSOLE.md)

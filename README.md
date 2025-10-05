@@ -1,5 +1,9 @@
 🇷🇺 [Русский](README.ru.md)
 
+# Angry Data Scanner repository
+Welcome to the `Angry Data Scanner` repository. This repository provides a code, documentation and software for discovering sensitive data using simple algothims. 
+The idea of this project is to provide fast and simple tool for people to find files with personal data, banking secrecy, card data, passwords/API-keys/secrects etc.
+
 Big Data Scanner is a cross-platform tool for detecting valuable data like PII, banking secrecy, payments cards like Visa/Mastercard, passwords etc.
 The scanner runs on a local machine and does not require administrator rights for installation.
 It makes no changes to the files being checked.

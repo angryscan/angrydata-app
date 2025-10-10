@@ -13,13 +13,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.angryscan.common.engine.hyperscan.HyperScanEngine
+import org.angryscan.common.engine.kotlin.KotlinEngine
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import ru.packetdima.datascanner.common.AppFiles
 import ru.packetdima.datascanner.common.AppSettings
+import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.resources.*
 import ru.packetdima.datascanner.scan.ScanService
 import ru.packetdima.datascanner.store.ContextMenu
@@ -27,9 +32,11 @@ import ru.packetdima.datascanner.ui.icons.icon
 import ru.packetdima.datascanner.ui.strings.composableName
 import java.awt.Desktop
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen() {
     val appSettings = koinInject<AppSettings>()
+    val scanSettings = koinInject<ScanSettings>()
     val scanService = koinInject<ScanService>()
 
     var sliderPosition by remember { mutableStateOf(appSettings.threadCount.value.toFloat()) }
@@ -42,6 +49,9 @@ fun SettingsScreen() {
     var language by remember { appSettings.language }
 
     var theme by remember { appSettings.theme }
+
+    var scanEngine by remember { scanSettings.engine }
+    var scanEngineMenuExpanded by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -100,7 +110,7 @@ fun SettingsScreen() {
 
                 }
 
-                if(ContextMenu.supported()) {
+                if (ContextMenu.supported()) {
                     SettingsRow(title = stringResource(Res.string.SettingsScreen_ContextMenu)) {
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -267,6 +277,64 @@ fun SettingsScreen() {
                                 lineHeight = 14.sp,
                                 fontWeight = MaterialTheme.typography.bodyMedium.fontWeight
                             )
+                        }
+                    }
+                }
+                SettingsRow(
+                    title = stringResource(Res.string.SettingsScreen_ScanEngine)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .width(300.dp)
+                    ) {
+                        ExposedDropdownMenuBox(
+                            expanded = scanEngineMenuExpanded,
+                            onExpandedChange = { scanEngineMenuExpanded = it },
+                            modifier = Modifier
+                                .pointerHoverIcon(PointerIcon.Hand)
+                        ) {
+                            TextField(
+                                readOnly = true,
+                                value = scanEngine.composableName(),
+                                onValueChange = {},
+                                trailingIcon = {
+                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = scanEngineMenuExpanded)
+                                },
+                                colors = OutlinedTextFieldDefaults.colors(),
+                                modifier = Modifier
+                                    .menuAnchor(MenuAnchorType.SecondaryEditable, true)
+                                    .fillMaxWidth()
+                                    .pointerHoverIcon(PointerIcon.Hand)
+                            )
+                            ExposedDropdownMenu(
+                                expanded = scanEngineMenuExpanded,
+                                onDismissRequest = { scanEngineMenuExpanded = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = HyperScanEngine::class.composableName()
+                                        )
+                                    },
+                                    onClick = {
+                                        scanEngine = HyperScanEngine::class
+                                        scanEngineMenuExpanded = false
+                                        scanSettings.save()
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = KotlinEngine::class.composableName()
+                                        )
+                                    },
+                                    onClick = {
+                                        scanEngine = KotlinEngine::class
+                                        scanEngineMenuExpanded = false
+                                        scanSettings.save()
+                                    }
+                                )
+                            }
                         }
                     }
                 }

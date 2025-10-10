@@ -1,9 +1,10 @@
 package ru.packetdima.datascanner.scan.common.files.types
 
-import info.downdetector.bigdatascanner.common.IDetectFunction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
+import org.angryscan.common.engine.IMatcher
+import org.angryscan.common.engine.IScanEngine
 import org.apache.poi.xslf.usermodel.XMLSlideShow
 import org.apache.poi.xslf.usermodel.XSLFTable
 import org.apache.poi.xslf.usermodel.XSLFTextBox
@@ -18,7 +19,7 @@ object PPTXType : IFileType {
     override suspend fun scanFile(
         file: File,
         context: CoroutineContext,
-        detectFunctions: List<IDetectFunction>,
+        engines: List<IScanEngine>,
         fastScan: Boolean
     ): Document {
         val str = StringBuilder()
@@ -37,7 +38,9 @@ object PPTXType : IFileType {
                                     is XSLFTextBox -> {
                                         str.append(shape.text).append("\n")
                                         if (isLengthOverload(str.length, isActive)) {
-                                            res + withContext(context) { scan(str.toString(), detectFunctions) }
+                                            engines.forEach { engine ->
+                                                res + withContext(context) { scan(str.toString(), engine) }
+                                            }
                                             str.clear()
                                             sample++
                                             if (isSampleOverload(sample, fastScan, isActive))
@@ -50,11 +53,13 @@ object PPTXType : IFileType {
                                             row.cells.forEach { cell ->
                                                 str.append(cell.text).append("\n")
                                                 if (isLengthOverload(str.length, isActive)) {
-                                                    res + withContext(context) {
-                                                        scan(
-                                                            str.toString(),
-                                                            detectFunctions
-                                                        )
+                                                    engines.forEach { engine ->
+                                                        res + withContext(context) {
+                                                            scan(
+                                                                str.toString(),
+                                                                engine
+                                                            )
+                                                        }
                                                     }
                                                     str.clear()
                                                     sample++
@@ -71,7 +76,9 @@ object PPTXType : IFileType {
                             slide.comments.forEach { comment ->
                                 str.append(comment.text).append("\n")
                                 if (isLengthOverload(str.length, isActive)) {
-                                    res + withContext(context) { scan(str.toString(), detectFunctions) }
+                                    engines.forEach { engine ->
+                                        res + withContext(context) { scan(str.toString(), engine) }
+                                    }
                                     str.clear()
                                     sample++
                                     if (isSampleOverload(sample, fastScan, isActive)) return@withContext
@@ -87,14 +94,17 @@ object PPTXType : IFileType {
         }
 
         if (str.isNotEmpty() && !isSampleOverload(sample, fastScan)) {
-            res + withContext(context) { scan(str.toString(), detectFunctions) }
+            engines.forEach { engine ->
+                res + withContext(context) { scan(str.toString(), engine) }
+            }
         }
         return res
     }
 
     override suspend fun findLocation(
         filePath: String,
-        detectFunction: IDetectFunction,
+        engine: IScanEngine,
+        matcher: IMatcher,
         fastScan: Boolean
     ): List<Location> {
         var length = 0
@@ -107,7 +117,9 @@ object PPTXType : IFileType {
                     XMLSlideShow(fileInputStream).use stream@{ presentation ->
                         presentation.slides.forEachIndexed { slideIndex, slide ->
                             if (slide.slideName != null) {
-                                getEntries(slide.slideName, detectFunction)
+                                engine
+                                    .scan(slide.slideName)
+                                    .filter { it.matcher::class == matcher::class }
                                     .forEach {
                                         locations.add(
                                             Location(
@@ -120,7 +132,9 @@ object PPTXType : IFileType {
                             }
 
                             if (slide.title != null) {
-                                getEntries(slide.title, detectFunction)
+                                engine
+                                    .scan(slide.title)
+                                    .filter { it.matcher::class == matcher::class }
                                     .forEach {
                                         locations.add(
                                             Location(
@@ -136,7 +150,9 @@ object PPTXType : IFileType {
                             slide.shapes.forEach { shape ->
                                 when (shape) {
                                     is XSLFTextBox -> {
-                                        getEntries(shape.text, detectFunction)
+                                        engine
+                                            .scan(shape.text)
+                                            .filter { it.matcher::class == matcher::class }
                                             .forEach {
                                                 locations.add(
                                                     Location(
@@ -157,7 +173,9 @@ object PPTXType : IFileType {
                                     is XSLFTable -> {
                                         shape.rows.forEach { row ->
                                             row.cells.forEach { cell ->
-                                                getEntries(cell.text, detectFunction)
+                                                engine
+                                                    .scan(cell.text)
+                                                    .filter { it.matcher::class == matcher::class }
                                                     .forEach {
                                                         locations.add(
                                                             Location(
@@ -179,7 +197,9 @@ object PPTXType : IFileType {
                                 }
                             }
                             slide.comments.forEach { comment ->
-                                getEntries(comment.text, detectFunction)
+                                engine
+                                    .scan(comment.text)
+                                    .filter { it.matcher::class == matcher::class }
                                     .forEach {
                                         locations.add(
                                             Location(

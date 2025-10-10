@@ -1,10 +1,8 @@
 package ru.packetdima.datascanner.scan.common.files
 
-import info.downdetector.bigdatascanner.common.extensions.MatchWithContext
+import org.angryscan.common.engine.Match
 
 data class Location(
-    val entry: MatchWithContext,
-    val location: String,
-    val leftContext: String = "",
-    val rightContext: String = ""
+    val entry: Match,
+    val location: String
 )

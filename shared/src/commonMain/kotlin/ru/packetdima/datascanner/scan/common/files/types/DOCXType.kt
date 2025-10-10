@@ -1,9 +1,10 @@
 package ru.packetdima.datascanner.scan.common.files.types
 
-import info.downdetector.bigdatascanner.common.IDetectFunction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
+import org.angryscan.common.engine.IMatcher
+import org.angryscan.common.engine.IScanEngine
 import org.apache.poi.hwpf.HWPFDocument
 import org.apache.poi.hwpf.extractor.WordExtractor
 import org.apache.poi.xwpf.usermodel.*
@@ -18,7 +19,7 @@ object DOCXType : IFileType {
     override suspend fun scanFile(
         file: File,
         context: CoroutineContext,
-        detectFunctions: List<IDetectFunction>,
+        engines: List<IScanEngine>,
         fastScan: Boolean
     ): Document {
         val str = StringBuilder()
@@ -39,7 +40,9 @@ object DOCXType : IFileType {
                             }
                             str.append(text).append("\n")
                             if (isLengthOverload(str.length, isActive)) {
-                                res + withContext(context) { scan(str.toString(), detectFunctions) }
+                                engines.forEach { engine ->
+                                    res + withContext(context) { scan(str.toString(), engine) }
+                                }
                                 str.clear()
                                 sample++
                                 if (isSampleOverload(
@@ -61,7 +64,9 @@ object DOCXType : IFileType {
                                 extractor.text.forEach { c ->
                                     str.append(c)
                                     if (isLengthOverload(str.length, isActive)) {
-                                        res + withContext(context) { scan(str.toString(), detectFunctions) }
+                                        engines.forEach { engine ->
+                                            res + withContext(context) { scan(str.toString(), engine) }
+                                        }
                                         str.clear()
                                         sample++
                                         if (isSampleOverload(sample, fastScan, isActive))
@@ -78,14 +83,17 @@ object DOCXType : IFileType {
             }
         }
         if (str.isNotEmpty() && !isSampleOverload(sample, fastScan)) {
-            res + withContext(context) { scan(str.toString(), detectFunctions) }
+            engines.forEach { engine ->
+                res + withContext(context) { scan(str.toString(), engine) }
+            }
         }
         return res
     }
 
     override suspend fun findLocation(
         filePath: String,
-        detectFunction: IDetectFunction,
+        engine: IScanEngine,
+        matcher: IMatcher,
         fastScan: Boolean
     ): List<Location> {
         var length = 0
@@ -112,7 +120,10 @@ object DOCXType : IFileType {
                                 is XWPFFooter -> "Footer"
                                 else -> ""
                             }
-                            getEntries(text, detectFunction).forEach {
+                            engine
+                                .scan(text)
+                                .filter { it.matcher::class == matcher::class }
+                                .forEach {
                                 locations.add(Location(it, "$elemType, Position:$elemPosition"))
                             }
 
@@ -138,7 +149,10 @@ object DOCXType : IFileType {
                         HWPFDocument(fileInputStream).use { document ->
                             WordExtractor(document).use { extractor ->
                                 extractor.paragraphText.forEachIndexed { index, text ->
-                                    getEntries(text, detectFunction).forEach {
+                                    engine
+                                        .scan(text)
+                                        .filter { it.matcher::class == matcher::class }
+                                        .forEach {
                                         locations.add(Location(it, "Paragraph:$index"))
                                     }
                                     length += text.length
@@ -150,7 +164,10 @@ object DOCXType : IFileType {
                                     }
                                 }
                                 extractor.commentsText.forEachIndexed { index, text ->
-                                    getEntries(text, detectFunction).forEach {
+                                    engine
+                                        .scan(text)
+                                        .filter { it.matcher::class == matcher::class }
+                                        .forEach {
                                         locations.add(Location(it, "Comment:$index"))
                                     }
                                     length += text.length
@@ -162,7 +179,10 @@ object DOCXType : IFileType {
                                     }
                                 }
                                 extractor.footnoteText.forEachIndexed { index, text ->
-                                    getEntries(text, detectFunction).forEach {
+                                    engine
+                                        .scan(text)
+                                        .filter { it.matcher::class == matcher::class }
+                                        .forEach {
                                         locations.add(Location(it, "Footnote:$index"))
                                     }
                                     length += text.length
@@ -174,7 +194,10 @@ object DOCXType : IFileType {
                                     }
                                 }
                                 extractor.endnoteText.forEachIndexed { index, text ->
-                                    getEntries(text, detectFunction).forEach {
+                                    engine
+                                        .scan(text)
+                                        .filter { it.matcher::class == matcher::class }
+                                        .forEach {
                                         locations.add(Location(it, "Endnote:$index"))
                                     }
                                     length += text.length

@@ -1,9 +1,10 @@
 package ru.packetdima.datascanner.scan.common.files.types
 
-import info.downdetector.bigdatascanner.common.IDetectFunction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
+import org.angryscan.common.engine.IMatcher
+import org.angryscan.common.engine.IScanEngine
 import org.mozilla.universalchardet.UniversalDetector
 import ru.packetdima.datascanner.scan.common.Document
 import ru.packetdima.datascanner.scan.common.files.Location
@@ -17,7 +18,7 @@ object TextType : IFileType {
     override suspend fun scanFile(
         file: File,
         context: CoroutineContext,
-        detectFunctions: List<IDetectFunction>,
+        engines: List<IScanEngine>,
         fastScan: Boolean
     ): Document {
         val str = StringBuilder()
@@ -39,7 +40,9 @@ object TextType : IFileType {
                             str.append(buf)
 
                             if (isLengthOverload(str.length, isActive)) {
-                                res + withContext(context) { scan(str.toString(), detectFunctions) }
+                                engines.forEach { engine ->
+                                    res + withContext(context) { scan(str.toString(), engine) }
+                                }
                                 str.clear()
                                 sample++
                                 if (isSampleOverload(sample, fastScan, isActive))
@@ -54,14 +57,17 @@ object TextType : IFileType {
             return res
         }
         if (str.isNotEmpty() && !isSampleOverload(sample, fastScan)) {
-            res + withContext(context) { scan(str.toString(), detectFunctions) }
+            engines.forEach { engine ->
+                res + withContext(context) { scan(str.toString(), engine) }
+            }
         }
         return res
     }
 
     override suspend fun findLocation(
         filePath: String,
-        detectFunction: IDetectFunction,
+        engine: IScanEngine,
+        matcher: IMatcher,
         fastScan: Boolean
     ): List<Location> {
         var length = 0
@@ -72,30 +78,29 @@ object TextType : IFileType {
             withContext(Dispatchers.IO) {
                 val file = File(filePath)
                 val encoding = UniversalDetector.detectCharset(file)
-                FileInputStream(file).use { fileInputStream ->
-                    file.bufferedReader(charset = Charset.forName(encoding)).use { reader ->
-                        var line = reader.readLine()
-                        while (line != null) {
-                            getEntries(line, detectFunction)
-                                .forEach {
-                                    locations.add(Location(it, "N $lineNumber"))
-                                }
-
-                            length += line.length
-                            lineNumber++
-                            if (isLengthOverload(length, isActive)) {
-                                length = 0
-                                sample++
-                                if (isSampleOverload(sample, fastScan, isActive))
-                                    return@withContext
+                file.bufferedReader(charset = Charset.forName(encoding)).use { reader ->
+                    var line = reader.readLine()
+                    while (line != null) {
+                        engine
+                            .scan(line)
+                            .filter { it.matcher::class == matcher::class }
+                            .forEach {
+                                locations.add(Location(it, "N $lineNumber"))
                             }
-                            line = reader.readLine()
+
+                        length += line.length
+                        lineNumber++
+                        if (isLengthOverload(length, isActive)) {
+                            length = 0
+                            sample++
+                            if (isSampleOverload(sample, fastScan, isActive))
+                                return@withContext
                         }
+                        line = reader.readLine()
                     }
                 }
             }
-        }
-        catch (_: Exception) {
+        } catch (_: Exception) {
             throw ScanException
         }
         return locations

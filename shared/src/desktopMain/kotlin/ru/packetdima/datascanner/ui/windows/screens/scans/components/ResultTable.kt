@@ -22,8 +22,8 @@ import androidx.compose.ui.input.pointer.isSecondaryPressed
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import info.downdetector.bigdatascanner.common.IDetectFunction
 import kotlinx.coroutines.launch
+import org.angryscan.common.engine.IMatcher
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import ru.packetdima.datascanner.common.OS
@@ -43,7 +43,7 @@ import java.io.File
 fun ResultTable(
     taskFilesViewModel: TaskFilesViewModel,
     task: TaskEntityViewModel,
-    selectedAttributes: List<IDetectFunction>
+    selectedAttributes: List<IMatcher>
 ) {
 
     val coroutineScope = rememberCoroutineScope()
@@ -71,7 +71,7 @@ fun ResultTable(
     val state by task.state.collectAsState()
 
     var filePathSelected by remember { mutableStateOf("") }
-    var attributeSelected by remember { mutableStateOf<IDetectFunction?>(null) }
+    var attributeSelected by remember { mutableStateOf<IMatcher?>(null) }
     var locationWindowVisible by remember { mutableStateOf(false) }
 
     var longScanMessageBoxVisible by remember { mutableStateOf(false) }

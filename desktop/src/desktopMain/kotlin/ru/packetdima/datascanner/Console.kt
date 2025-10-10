@@ -1,11 +1,12 @@
 package ru.packetdima.datascanner
 
-import info.downdetector.bigdatascanner.common.DetectFunction
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.*
 import me.tongfei.progressbar.ProgressBar
 import me.tongfei.progressbar.ProgressBarBuilder
 import me.tongfei.progressbar.ProgressBarStyle
+import org.angryscan.common.engine.hyperscan.HyperScanEngine
+import org.angryscan.common.engine.kotlin.KotlinEngine
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
@@ -18,7 +19,9 @@ import ru.packetdima.datascanner.scan.common.connectors.ConnectorFileShare
 import ru.packetdima.datascanner.scan.common.files.FileType
 import ru.packetdima.datascanner.scan.functions.CertDetectFun
 import ru.packetdima.datascanner.scan.functions.CodeDetectFun
+import ru.packetdima.datascanner.scan.functions.MatchersRegister
 import ru.packetdima.datascanner.scan.functions.RKNDomainDetectFun
+import ru.packetdima.datascanner.ui.strings.readableName
 import ru.packetdima.datascanner.ui.windows.screens.scans.components.SortColumn
 import ru.packetdima.datascanner.ui.windows.screens.scans.components.comparator
 import java.io.File
@@ -54,7 +57,7 @@ object Console : KoinComponent {
             logger.info(throwable = null, LogMarkers.UserAction) {
                 "Starting scanning with path: $path " +
                         "extensions: ${scanSettings.extensions.joinToString(", ")} " +
-                        "detect functions: ${scanSettings.detectFunctions.joinToString(", ")} " +
+                        "detect functions: ${scanSettings.matchers.joinToString(", ")} " +
                         "user signatures: ${scanSettings.userSignatures.joinToString(", ")} " +
                         "fast scan: ${scanSettings.fastScan} "
             }
@@ -66,21 +69,21 @@ object Console : KoinComponent {
             } else {
                 path
             }
-            val detectFunctions =
-                (scanSettings.detectFunctions + scanSettings.userSignatures)
+            val matchers =
+                (scanSettings.matchers + scanSettings.userSignatures)
                     .toMutableList()
             if (scanSettings.detectCert.value)
-                detectFunctions.add(CertDetectFun)
+                matchers.add(CertDetectFun)
             if (scanSettings.detectCode.value)
-                detectFunctions.add(CodeDetectFun)
+                matchers.add(CodeDetectFun)
             if (scanSettings.detectBlockedDomains.value)
-                detectFunctions.add(RKNDomainDetectFun)
+                matchers.add(RKNDomainDetectFun)
 
             val task = scanService.createTask(
                 name = if (fileWithPaths) path else null,
                 path = scanPath!!,
                 extensions = scanSettings.extensions,
-                detectFunctions = detectFunctions,
+                matchers = matchers,
                 fastScan = scanSettings.fastScan.value,
                 connector = ConnectorFileShare()
             )
@@ -178,7 +181,7 @@ object Console : KoinComponent {
                 writer.append(
                     listOf(
                         fileRow.path,
-                        fileRow.foundAttributes.joinToString(", ") { attr -> attr.writeName },
+                        fileRow.foundAttributes.joinToString(", ") { attr -> attr.name },
                         fileRow.score.toString(),
                         fileRow.count.toString(),
                         fileRow.size.toString()
@@ -217,13 +220,14 @@ object Console : KoinComponent {
 
         path = getArg(map, "-path", "-p", filePath)
         val fileExtensions = getArg(map, "-extensions", "-e", scanSettings.extensions.joinToString(","))
-        val detectFunctions = getArg(map, "-detect_functions", "-df", scanSettings.detectFunctions.joinToString(","))
+        val matchers = getArg(map, "-detect_functions", "-df", scanSettings.matchers.joinToString(","))
         val userSignatures = getArg(map, "-user_signatures", "-us", scanSettings.userSignatures.joinToString(","))
         val fastScan = getArg(map, "-fast", scanSettings.fastScan.value)
         val fullScan = getArg(map, "-full", !fastScan)
         val threadCount = getArg(map, "threads", "-t", appSettings.threadCount.value)
         val reportPath = getArg(map, "-report", "-r", null)
         val encoding = getArg(map, "-report_encoding", "-re", null)
+        val engine = getArg(map, "-engine", "-e", "hyperscan")
 
         if (encoding != null) {
             reportEncoding = encoding
@@ -298,25 +302,26 @@ object Console : KoinComponent {
         }
         println("Extensions: ${scanSettings.extensions.joinToString(", ")}")
 
-        if (detectFunctions != null) {
-            scanSettings.detectFunctions.clear()
-            if (detectFunctions.isNotEmpty()) {
-                detectFunctions.split(",").forEach { df ->
-                    val dfo = DetectFunction.entries.find { it.name == df }
+        if (matchers != null) {
+            scanSettings.matchers.clear()
+            if (matchers.isNotEmpty()) {
+                matchers.split(",").forEach { matcher ->
+                    val dfo = MatchersRegister.matchers.find { it.name.lowercase().replace(' ', '_') == matcher }
                     if (dfo != null)
-                        scanSettings.detectFunctions.add(dfo)
+                        scanSettings.matchers.add(dfo)
                     else
-                        println("Unknown detect function: $df, skipping...")
+                        println("Unknown detect matcher: $matcher, skipping...")
                 }
             }
         }
-        println("Detect functions: ${scanSettings.detectFunctions.joinToString(", ")}")
+        println("Detect functions: ${scanSettings.matchers.joinToString(", ")}")
 
         if (userSignatures != null) {
             scanSettings.userSignatures.clear()
             if (userSignatures.isNotEmpty()) {
                 userSignatures.split(",").forEach { sig ->
-                    val sigo = userSignaturesSettings.userSignatures.find { it.name == sig }
+                    val sigo =
+                        userSignaturesSettings.userSignatures.find { it.name.lowercase().replace(' ', '_') == sig }
                     if (sigo != null)
                         scanSettings.userSignatures.add(sigo)
                     else
@@ -325,10 +330,29 @@ object Console : KoinComponent {
             }
         }
         println("User signature functions: ${scanSettings.userSignatures.joinToString(", ")}")
+        if (engine != null) {
+            scanSettings.engine.value = when (engine) {
+                "hyperscan" -> {
+                    println("Scan engine: $engine")
+                    HyperScanEngine::class
+                }
+
+                "kotlin" -> {
+                    println("Scan engine: $engine")
+                    KotlinEngine::class
+                }
+
+                else -> {
+                    println("Unknown engine: $engine, using hyperscan")
+                    HyperScanEngine::class
+                }
+            }
+        }
     }
 
     fun help() {
         val userSignatureSettings: UserSignatureSettings by inject()
+        val scanSettings: ScanSettings by inject()
         println(
             """
 Allowed parameters:
@@ -343,21 +367,24 @@ Allowed parameters:
 -report(-r) [path] - path to dir to save report
 -report_encoding(-re) [encoding] - report encoding (UTF-8, Windows-1251) (default: UTF-8)
 -threads(-t) [count] - count of threads
+-engine(-e) [engine] - scan engine (hyperscan, kotlin) (default: ${runBlocking { scanSettings.engine.value.readableName() }})
 
 Allowed extensions: 
         ${
-                FileType.entries.filter { ft -> ft != FileType.CERT && ft != FileType.CODE }.joinToString("\n        ") {
-                    "${it.name} (${
-                        it.extensions.filter { ext -> 
-                            ext.toIntOrNull() == null }.joinToString(",")
-                    })"
-                }
+                FileType.entries.filter { ft -> ft != FileType.CERT && ft != FileType.CODE }
+                    .joinToString("\n        ") {
+                        "${it.name} (${
+                            it.extensions.filter { ext ->
+                                ext.toIntOrNull() == null
+                            }.joinToString(",")
+                        })"
+                    }
             }
 
 Allowed detect functions: 
-        ${DetectFunction.entries.joinToString("\n        ") { "${it.name} (${it.writeName})" }}
+        ${MatchersRegister.matchers.joinToString("\n        ") { it.name.lowercase().replace(' ', '_') }}
 Allowed user detect signatures:
-        ${userSignatureSettings.userSignatures.joinToString("\n        ") { "${it.name} (${it.writeName})" }} 
+        ${userSignatureSettings.userSignatures.joinToString("\n        ") { it.name.lowercase().replace(' ', '_') }} 
             """.trimIndent()
         )
     }

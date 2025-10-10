@@ -23,10 +23,10 @@ import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.rememberDialogState
 import org.jetbrains.compose.resources.stringResource
 import ru.packetdima.datascanner.resources.Res
-import ru.packetdima.datascanner.resources.Signature_Name
-import ru.packetdima.datascanner.resources.Signature_Signature
-import ru.packetdima.datascanner.resources.Signature_Title
-import ru.packetdima.datascanner.scan.functions.UserSignature
+import ru.packetdima.datascanner.resources.Matcher_UserSignature_Name
+import ru.packetdima.datascanner.resources.Matcher_UserSignature_Signature
+import ru.packetdima.datascanner.resources.Matcher_UserSignature_Title
+import org.angryscan.common.matchers.UserSignature
 import ru.packetdima.datascanner.ui.windows.components.DesktopWindowShapes
 import ru.packetdima.datascanner.ui.windows.components.TitleBar
 
@@ -69,7 +69,6 @@ fun UserSignatureEditor(
                             onSaveRequest(
                                 UserSignature(
                                     name = name,
-                                    writeName = name,
                                     searchSignatures = signaturesList
                                 )
                             )
@@ -109,7 +108,7 @@ fun UserSignatureEditor(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = stringResource(Res.string.Signature_Title),
+                                text = stringResource(Res.string.Matcher_UserSignature_Title),
                                 fontSize = 18.sp,
                                 color = MaterialTheme.colorScheme.primary
                             )
@@ -136,7 +135,7 @@ fun UserSignatureEditor(
                         onValueChange = {
                             name = it
                         },
-                        placeholder = { Text(text = stringResource(Res.string.Signature_Name)) },
+                        placeholder = { Text(text = stringResource(Res.string.Matcher_UserSignature_Name)) },
                         modifier = Modifier.width(350.dp),
                         enabled = userSignature == null
                     )
@@ -149,7 +148,7 @@ fun UserSignatureEditor(
                         OutlinedTextField(
                             value = signature,
                             onValueChange = { signature = it },
-                            placeholder = { Text(text = stringResource(Res.string.Signature_Signature)) },
+                            placeholder = { Text(text = stringResource(Res.string.Matcher_UserSignature_Signature)) },
                             modifier = Modifier.width(350.dp)
                         )
                         Box(

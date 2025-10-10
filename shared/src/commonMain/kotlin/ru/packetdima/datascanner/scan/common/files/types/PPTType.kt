@@ -1,9 +1,10 @@
 package ru.packetdima.datascanner.scan.common.files.types
 
-import info.downdetector.bigdatascanner.common.IDetectFunction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
+import org.angryscan.common.engine.IMatcher
+import org.angryscan.common.engine.IScanEngine
 import org.apache.poi.hslf.usermodel.HSLFSlideShow
 import org.apache.poi.hslf.usermodel.HSLFTable
 import org.apache.poi.hslf.usermodel.HSLFTextBox
@@ -18,7 +19,7 @@ object PPTType : IFileType {
     override suspend fun scanFile(
         file: File,
         context: CoroutineContext,
-        detectFunctions: List<IDetectFunction>,
+        engines: List<IScanEngine>,
         fastScan: Boolean
     ): Document {
         val str = StringBuilder()
@@ -37,7 +38,9 @@ object PPTType : IFileType {
                                     is HSLFTextBox -> {
                                         str.append(shape.text).append("\n")
                                         if (isLengthOverload(str.length, isActive)) {
-                                            res + withContext(context) { scan(str.toString(), detectFunctions) }
+                                            engines.forEach { engine ->
+                                                res + withContext(context) { scan(str.toString(), engine) }
+                                            }
                                             str.clear()
                                             sample++
                                             if (isSampleOverload(sample, fastScan, isActive))
@@ -50,11 +53,13 @@ object PPTType : IFileType {
                                             for (col in 0..shape.numberOfColumns - 1) {
                                                 str.append(shape.getCell(row, col).text).append("\n")
                                                 if (isLengthOverload(str.length, isActive)) {
-                                                    res + withContext(context) {
-                                                        scan(
-                                                            str.toString(),
-                                                            detectFunctions
-                                                        )
+                                                    engines.forEach { engine ->
+                                                        res + withContext(context) {
+                                                            scan(
+                                                                str.toString(),
+                                                                engine
+                                                            )
+                                                        }
                                                     }
                                                     str.clear()
                                                     sample++
@@ -70,7 +75,9 @@ object PPTType : IFileType {
                             slide.comments.forEach { comment ->
                                 str.append(comment.text).append("\n")
                                 if (isLengthOverload(str.length, isActive)) {
-                                    res + withContext(context) { scan(str.toString(), detectFunctions) }
+                                    engines.forEach { engine ->
+                                        res + withContext(context) { scan(str.toString(), engine) }
+                                    }
                                     str.clear()
                                     sample++
                                     if (isSampleOverload(sample, fastScan, isActive))
@@ -87,14 +94,17 @@ object PPTType : IFileType {
         }
 
         if (str.isNotEmpty() && !isSampleOverload(sample, fastScan)) {
-            res + withContext(context) { scan(str.toString(), detectFunctions) }
+            engines.forEach { engine ->
+                res + withContext(context) { scan(str.toString(), engine) }
+            }
         }
         return res
     }
 
     override suspend fun findLocation(
         filePath: String,
-        detectFunction: IDetectFunction,
+        engine: IScanEngine,
+        matcher: IMatcher,
         fastScan: Boolean
     ): List<Location> {
         var length = 0
@@ -108,7 +118,9 @@ object PPTType : IFileType {
                         presentation.slides.forEachIndexed { slideIndex, slide ->
 
                             if (slide.slideName != null) {
-                                getEntries(slide.slideName, detectFunction)
+                                engine
+                                    .scan(slide.slideName)
+                                    .filter { it.matcher::class == matcher::class }
                                     .forEach {
                                         locations.add(
                                             Location(
@@ -121,7 +133,9 @@ object PPTType : IFileType {
                             }
 
                             if (slide.title != null) {
-                                getEntries(slide.title, detectFunction)
+                                engine
+                                    .scan(slide.title)
+                                    .filter { it.matcher::class == matcher::class }
                                     .forEach {
                                         locations.add(
                                             Location(
@@ -136,7 +150,9 @@ object PPTType : IFileType {
                             slide.shapes.forEach { shape ->
                                 when (shape) {
                                     is HSLFTextBox -> {
-                                        getEntries(shape.text, detectFunction)
+                                        engine
+                                            .scan(shape.text)
+                                            .filter { it.matcher::class == matcher::class }
                                             .forEach {
                                                 locations.add(
                                                     Location(
@@ -157,7 +173,9 @@ object PPTType : IFileType {
                                     is HSLFTable -> {
                                         for (row in 0..shape.numberOfRows - 1) {
                                             for (col in 0..shape.numberOfColumns - 1) {
-                                                getEntries(shape.getCell(row, col).text, detectFunction)
+                                                engine
+                                                    .scan(shape.getCell(row, col).text)
+                                                    .filter { it.matcher::class == matcher::class }
                                                     .forEach {
                                                         locations.add(
                                                             Location(
@@ -178,7 +196,9 @@ object PPTType : IFileType {
 
                             }
                             slide.comments.forEach { comment ->
-                                getEntries(comment.text, detectFunction)
+                                engine
+                                    .scan(comment.text)
+                                    .filter { it.matcher::class == matcher::class }
                                     .forEach {
                                         locations.add(
                                             Location(

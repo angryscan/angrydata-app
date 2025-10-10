@@ -6,70 +6,62 @@ import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import ru.packetdima.datascanner.resources.*
 
+// Маппинг DetectFunction к ресурсам
+private val detectFunctionResources = mapOf(
+    DetectFunction.Name to Pair(Res.string.DetectFunction_Name, Res.string.DetectFunction_Description_Name),
+    DetectFunction.Emails to Pair(Res.string.DetectFunction_Emails, Res.string.DetectFunction_Description_Emails),
+    DetectFunction.Phones to Pair(Res.string.DetectFunction_Phones, Res.string.DetectFunction_Description_Phones),
+    DetectFunction.CardNumbers to Pair(Res.string.DetectFunction_CardNumbers, Res.string.DetectFunction_Description_CardNumbers),
+    DetectFunction.CarNumber to Pair(Res.string.DetectFunction_CarNumber, Res.string.DetectFunction_Description_CarNumber),
+    DetectFunction.SNILS to Pair(Res.string.DetectFunction_SNILS, Res.string.DetectFunction_Description_SNILS),
+    DetectFunction.Passport to Pair(Res.string.DetectFunction_Passport, Res.string.DetectFunction_Description_Passport),
+    DetectFunction.OMS to Pair(Res.string.DetectFunction_OMS, Res.string.DetectFunction_Description_OMS),
+    DetectFunction.INN to Pair(Res.string.DetectFunction_INN, Res.string.DetectFunction_Description_INN),
+    DetectFunction.AccountNumber to Pair(Res.string.DetectFunction_AccountNumber, Res.string.DetectFunction_Description_AccountNumber),
+    DetectFunction.Address to Pair(Res.string.DetectFunction_Address, Res.string.DetectFunction_Description_Address),
+    DetectFunction.ValuableInfo to Pair(Res.string.DetectFunction_ValuableInfo, Res.string.DetectFunction_Description_ValuableInfo),
+    DetectFunction.Login to Pair(Res.string.DetectFunction_Login, Res.string.DetectFunction_Description_Login),
+    DetectFunction.Password to Pair(Res.string.DetectFunction_Password, Res.string.DetectFunction_Description_Password),
+    DetectFunction.CVV to Pair(Res.string.DetectFunction_CVV, Res.string.DetectFunction_Description_CVV),
+    DetectFunction.IP to Pair(Res.string.DetectFunction_IP, Res.string.DetectFunction_Description_IP),
+    DetectFunction.IPv6 to Pair(Res.string.DetectFunction_IPv6, Res.string.DetectFunction_Description_IPv6),
+    DetectFunction.Birthday to Pair(Res.string.DetectFunction_Birthday, Res.string.DetectFunction_Description_Birthday),
+    DetectFunction.DeathDate to Pair(Res.string.DetectFunction_DeathDate, Res.string.DetectFunction_Description_DeathDate),
+    DetectFunction.BirthCert to Pair(Res.string.DetectFunction_BirthCert, Res.string.DetectFunction_Description_BirthCert),
+    DetectFunction.ForeignPassport to Pair(Res.string.DetectFunction_ForeignPassport, Res.string.DetectFunction_Description_ForeignPassport),
+    DetectFunction.RefugeeCert to Pair(Res.string.DetectFunction_RefugeeCert, Res.string.DetectFunction_Description_RefugeeCert),
+    DetectFunction.ResidencePermit to Pair(Res.string.DetectFunction_ResidencePermit, Res.string.DetectFunction_Description_ResidencePermit),
+    DetectFunction.TemporaryID to Pair(Res.string.DetectFunction_TemporaryID, Res.string.DetectFunction_Description_TemporaryID),
+    DetectFunction.MilitaryID to Pair(Res.string.DetectFunction_MilitaryID, Res.string.DetectFunction_Description_MilitaryID),
+    DetectFunction.DriverLicense to Pair(Res.string.DetectFunction_DriverLicense, Res.string.DetectFunction_Description_DriverLicense),
+    DetectFunction.ForeignTIN to Pair(Res.string.DetectFunction_ForeignTIN, Res.string.DetectFunction_Description_ForeignTIN),
+    DetectFunction.EducationDoc to Pair(Res.string.DetectFunction_EducationDoc, Res.string.DetectFunction_Description_EducationDoc),
+    DetectFunction.MarriageCert to Pair(Res.string.DetectFunction_MarriageCert, Res.string.DetectFunction_Description_MarriageCert),
+    DetectFunction.InheritanceDoc to Pair(Res.string.DetectFunction_InheritanceDoc, Res.string.DetectFunction_Description_InheritanceDoc),
+    DetectFunction.OGRNIP to Pair(Res.string.DetectFunction_OGRNIP, Res.string.DetectFunction_Description_OGRNIP),
+    DetectFunction.OSAGOPolicy to Pair(Res.string.DetectFunction_OSAGOPolicy, Res.string.DetectFunction_Description_OSAGOPolicy),
+    DetectFunction.SecurityAffiliation to Pair(Res.string.DetectFunction_SecurityAffiliation, Res.string.DetectFunction_Description_SecurityAffiliation),
+    DetectFunction.MilitaryRank to Pair(Res.string.DetectFunction_MilitaryRank, Res.string.DetectFunction_Description_MilitaryRank),
+    DetectFunction.EpCertificateNumber to Pair(Res.string.DetectFunction_EpCertificateNumber, Res.string.DetectFunction_Description_EpCertificateNumber),
+    DetectFunction.CadastralNumber to Pair(Res.string.DetectFunction_CadastralNumber, Res.string.DetectFunction_Description_CadastralNumber),
+    DetectFunction.VIN to Pair(Res.string.DetectFunction_VIN, Res.string.DetectFunction_Description_VIN),
+    DetectFunction.VehicleRegNumber to Pair(Res.string.DetectFunction_VehicleRegNumber, Res.string.DetectFunction_Description_VehicleRegNumber),
+    DetectFunction.SocialUserId to Pair(Res.string.DetectFunction_SocialUserId, Res.string.DetectFunction_Description_SocialUserId),
+)
+
 suspend fun DetectFunction.readableName(): String {
-    return when (this) {
-        DetectFunction.Name -> getString(Res.string.DetectFunction_Name)
-        DetectFunction.Emails -> getString(Res.string.DetectFunction_Emails)
-        DetectFunction.Phones -> getString(Res.string.DetectFunction_Phones)
-        DetectFunction.CardNumbers -> getString(Res.string.DetectFunction_CardNumbers)
-        DetectFunction.CarNumber -> getString(Res.string.DetectFunction_CarNumber)
-        DetectFunction.SNILS -> getString(Res.string.DetectFunction_SNILS)
-        DetectFunction.Passport -> getString(Res.string.DetectFunction_Passport)
-        DetectFunction.OMS -> getString(Res.string.DetectFunction_OMS)
-        DetectFunction.INN -> getString(Res.string.DetectFunction_INN)
-        DetectFunction.AccountNumber -> getString(Res.string.DetectFunction_AccountNumber)
-        DetectFunction.Address -> getString(Res.string.DetectFunction_Address)
-        DetectFunction.ValuableInfo -> getString(Res.string.DetectFunction_ValuableInfo)
-        DetectFunction.Login -> getString(Res.string.DetectFunction_Login)
-        DetectFunction.Password -> getString(Res.string.DetectFunction_Password)
-        DetectFunction.CVV -> getString(Res.string.DetectFunction_CVV)
-        DetectFunction.IP -> getString(Res.string.DetectFunction_IP)
-        DetectFunction.IPv6 -> getString(Res.string.DetectFunction_IPv6)
-    }
+    return detectFunctionResources[this]?.first?.let { getString(it) }
+        ?: throw IllegalStateException("No name resource for $this")
 }
 
 @Composable
 fun DetectFunction.composableName(): String {
-    return when (this) {
-        DetectFunction.Name -> stringResource(Res.string.DetectFunction_Name)
-        DetectFunction.Emails -> stringResource(Res.string.DetectFunction_Emails)
-        DetectFunction.Phones -> stringResource(Res.string.DetectFunction_Phones)
-        DetectFunction.CardNumbers -> stringResource(Res.string.DetectFunction_CardNumbers)
-        DetectFunction.CarNumber -> stringResource(Res.string.DetectFunction_CarNumber)
-        DetectFunction.SNILS -> stringResource(Res.string.DetectFunction_SNILS)
-        DetectFunction.Passport -> stringResource(Res.string.DetectFunction_Passport)
-        DetectFunction.OMS -> stringResource(Res.string.DetectFunction_OMS)
-        DetectFunction.INN -> stringResource(Res.string.DetectFunction_INN)
-        DetectFunction.AccountNumber -> stringResource(Res.string.DetectFunction_AccountNumber)
-        DetectFunction.Address -> stringResource(Res.string.DetectFunction_Address)
-        DetectFunction.ValuableInfo -> stringResource(Res.string.DetectFunction_ValuableInfo)
-        DetectFunction.Login -> stringResource(Res.string.DetectFunction_Login)
-        DetectFunction.Password -> stringResource(Res.string.DetectFunction_Password)
-        DetectFunction.CVV -> stringResource(Res.string.DetectFunction_CVV)
-        DetectFunction.IP -> stringResource(Res.string.DetectFunction_IP)
-        DetectFunction.IPv6 -> stringResource(Res.string.DetectFunction_IPv6)
-    }
+    return detectFunctionResources[this]?.first?.let { stringResource(it) }
+        ?: throw IllegalStateException("No name resource for $this")
 }
 
 @Composable
 fun DetectFunction.description(): String {
-    return when (this) {
-        DetectFunction.Name -> stringResource(Res.string.DetectFunction_Description_Name)
-        DetectFunction.Emails -> stringResource(Res.string.DetectFunction_Description_Emails)
-        DetectFunction.Phones -> stringResource(Res.string.DetectFunction_Description_Phones)
-        DetectFunction.CardNumbers -> stringResource(Res.string.DetectFunction_Description_CardNumbers)
-        DetectFunction.CarNumber -> stringResource(Res.string.DetectFunction_Description_CarNumber)
-        DetectFunction.SNILS -> stringResource(Res.string.DetectFunction_Description_SNILS)
-        DetectFunction.Passport -> stringResource(Res.string.DetectFunction_Description_Passport)
-        DetectFunction.OMS -> stringResource(Res.string.DetectFunction_Description_OMS)
-        DetectFunction.INN -> stringResource(Res.string.DetectFunction_Description_INN)
-        DetectFunction.AccountNumber -> stringResource(Res.string.DetectFunction_Description_AccountNumber)
-        DetectFunction.Address -> stringResource(Res.string.DetectFunction_Description_Address)
-        DetectFunction.ValuableInfo -> stringResource(Res.string.DetectFunction_Description_ValuableInfo)
-        DetectFunction.Login -> stringResource(Res.string.DetectFunction_Description_Login)
-        DetectFunction.Password -> stringResource(Res.string.DetectFunction_Description_Password)
-        DetectFunction.CVV -> stringResource(Res.string.DetectFunction_Description_CVV)
-        DetectFunction.IP -> stringResource(Res.string.DetectFunction_Description_IP)
-        DetectFunction.IPv6 -> stringResource(Res.string.DetectFunction_Description_IPv6)
-    }
+    return detectFunctionResources[this]?.second?.let { stringResource(it) }
+        ?: throw IllegalStateException("No description resource for $this")
 }

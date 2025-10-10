@@ -27,7 +27,26 @@ private val detectFunctionResources = mapOf(
     DetectFunction.IPv6 to Pair(Res.string.DetectFunction_IPv6, Res.string.DetectFunction_Description_IPv6),
     DetectFunction.Birthday to Pair(Res.string.DetectFunction_Birthday, Res.string.DetectFunction_Description_Birthday),
     DetectFunction.DeathDate to Pair(Res.string.DetectFunction_DeathDate, Res.string.DetectFunction_Description_DeathDate),
-    DetectFunction.BirthCert to Pair(Res.string.DetectFunction_BirthCert, Res.string.DetectFunction_Description_BirthCert)
+    DetectFunction.BirthCert to Pair(Res.string.DetectFunction_BirthCert, Res.string.DetectFunction_Description_BirthCert),
+    DetectFunction.ForeignPassport to Pair(Res.string.DetectFunction_ForeignPassport, Res.string.DetectFunction_Description_ForeignPassport),
+    DetectFunction.RefugeeCert to Pair(Res.string.DetectFunction_RefugeeCert, Res.string.DetectFunction_Description_RefugeeCert),
+    DetectFunction.ResidencePermit to Pair(Res.string.DetectFunction_ResidencePermit, Res.string.DetectFunction_Description_ResidencePermit),
+    DetectFunction.TemporaryID to Pair(Res.string.DetectFunction_TemporaryID, Res.string.DetectFunction_Description_TemporaryID),
+    DetectFunction.MilitaryID to Pair(Res.string.DetectFunction_MilitaryID, Res.string.DetectFunction_Description_MilitaryID),
+    DetectFunction.DriverLicense to Pair(Res.string.DetectFunction_DriverLicense, Res.string.DetectFunction_Description_DriverLicense),
+    DetectFunction.ForeignTIN to Pair(Res.string.DetectFunction_ForeignTIN, Res.string.DetectFunction_Description_ForeignTIN),
+    DetectFunction.EducationDoc to Pair(Res.string.DetectFunction_EducationDoc, Res.string.DetectFunction_Description_EducationDoc),
+    DetectFunction.MarriageCert to Pair(Res.string.DetectFunction_MarriageCert, Res.string.DetectFunction_Description_MarriageCert),
+    DetectFunction.InheritanceDoc to Pair(Res.string.DetectFunction_InheritanceDoc, Res.string.DetectFunction_Description_InheritanceDoc),
+    DetectFunction.OGRNIP to Pair(Res.string.DetectFunction_OGRNIP, Res.string.DetectFunction_Description_OGRNIP),
+    DetectFunction.OSAGOPolicy to Pair(Res.string.DetectFunction_OSAGOPolicy, Res.string.DetectFunction_Description_OSAGOPolicy),
+    DetectFunction.SecurityAffiliation to Pair(Res.string.DetectFunction_SecurityAffiliation, Res.string.DetectFunction_Description_SecurityAffiliation),
+    DetectFunction.MilitaryRank to Pair(Res.string.DetectFunction_MilitaryRank, Res.string.DetectFunction_Description_MilitaryRank),
+    DetectFunction.EpCertificateNumber to Pair(Res.string.DetectFunction_EpCertificateNumber, Res.string.DetectFunction_Description_EpCertificateNumber),
+    DetectFunction.CadastralNumber to Pair(Res.string.DetectFunction_CadastralNumber, Res.string.DetectFunction_Description_CadastralNumber),
+    DetectFunction.VIN to Pair(Res.string.DetectFunction_VIN, Res.string.DetectFunction_Description_VIN),
+    DetectFunction.VehicleRegNumber to Pair(Res.string.DetectFunction_VehicleRegNumber, Res.string.DetectFunction_Description_VehicleRegNumber),
+    DetectFunction.SocialUserId to Pair(Res.string.DetectFunction_SocialUserId, Res.string.DetectFunction_Description_SocialUserId),
 )
 
 suspend fun DetectFunction.readableName(): String {

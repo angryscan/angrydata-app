@@ -17,17 +17,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.rememberDialogState
-import info.downdetector.bigdatascanner.common.IDetectFunction
 import kotlinx.coroutines.launch
+import org.angryscan.common.engine.IMatcher
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
-import ru.packetdima.datascanner.resources.Error_FileOpen
-import ru.packetdima.datascanner.resources.LocationWindow_Error
-import ru.packetdima.datascanner.resources.LocationWindow_NotFound
-import ru.packetdima.datascanner.resources.LocationWindow_Title
-import ru.packetdima.datascanner.resources.Res
+import org.koin.compose.koinInject
+import ru.packetdima.datascanner.common.ScanSettings
+import ru.packetdima.datascanner.resources.*
 import ru.packetdima.datascanner.scan.common.files.Location
 import ru.packetdima.datascanner.scan.common.files.LocationFinder
+import ru.packetdima.datascanner.scan.engine.fallback
+import ru.packetdima.datascanner.scan.engine.getEngine
 import ru.packetdima.datascanner.ui.strings.composableName
 import ru.packetdima.datascanner.ui.windows.components.DesktopWindowShapes
 import ru.packetdima.datascanner.ui.windows.components.TitleBar
@@ -37,7 +37,7 @@ import java.io.File
 @Composable
 fun AttributeLocationWindow(
     filePath: String,
-    attribute: IDetectFunction,
+    attribute: IMatcher,
     onClose: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -50,11 +50,27 @@ fun AttributeLocationWindow(
 
     var failedToFind by remember { mutableStateOf(false) }
 
+    val scanSettings = koinInject<ScanSettings>()
+
+
     coroutineScope.launch {
         searching = true
+        var engine = scanSettings.engine.value.getEngine(listOf(attribute))
+        while (engine.matchers.isEmpty()) {
+            engine = engine.fallback().getEngine(listOf(attribute))
+
+            if (engine::class == scanSettings.engine) {
+                onClose()
+                errorSearching = true
+                searching = false
+                return@launch
+            }
+        }
+
         try {
             locations = LocationFinder.findLocations(
                 filePath,
+                engine,
                 attribute
             )
             if (locations.isEmpty())

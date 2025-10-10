@@ -1,8 +1,7 @@
 package ru.packetdima.datascanner.scan.common.files.types
 
-import info.downdetector.bigdatascanner.common.Cleaner
-import info.downdetector.bigdatascanner.common.IDetectFunction
-import info.downdetector.bigdatascanner.common.extensions.MatchWithContext
+import org.angryscan.common.engine.IMatcher
+import org.angryscan.common.engine.IScanEngine
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import ru.packetdima.datascanner.common.ScanSettings
@@ -11,34 +10,36 @@ import ru.packetdima.datascanner.scan.common.files.Location
 import java.io.File
 import kotlin.coroutines.CoroutineContext
 
-interface IFileType: KoinComponent {
+interface IFileType : KoinComponent {
     suspend fun scanFile(
         file: File,
         context: CoroutineContext,
-        detectFunctions: List<IDetectFunction>,
+        engines: List<IScanEngine>,
         fastScan: Boolean
     ): Document
 
     suspend fun findLocation(
         filePath: String,
-        detectFunction: IDetectFunction,
+        engine: IScanEngine,
+
+        matcher: IMatcher,
         fastScan: Boolean = false
     ): List<Location>
 
-    fun getEntries(text: String, detectFunction: IDetectFunction): List<MatchWithContext> {
-        val cleanText = Cleaner.cleanText(text)
-        return detectFunction.scan(text = cleanText, withContext = true).toList()
-    }
+//    fun getEntries(text: String, engine: IScanEngine, matcher: IMatcher): List<Match> {
+//
+//        return matcher.scan(text = text).toList()
+//    }
 
-    fun scan(text: String, detectFunctions: List<IDetectFunction>): Map<IDetectFunction, Int> {
-        val cleanText = Cleaner.cleanText(text)
-        return detectFunctions.mapNotNull { f ->
-            f.scan(cleanText).count().takeIf { it > 0 }
-                .let {
-                    if(it != null) f to it
-                    else null
-                }
-        }.toMap()
+//    fun scan(text: String, engine: IScanEngine): List<Match> {
+//        return engine.scan(text)
+//    }
+    fun scan(text: String, engine: IScanEngine): Map<IMatcher, Int> {
+        return engine
+            .scan(text)
+            .groupBy { it.matcher }
+            .map { it.key to it.value.size }
+            .toMap()
     }
 
     fun isSampleOverload(sample: Int, fastScan: Boolean): Boolean {
@@ -47,7 +48,7 @@ interface IFileType: KoinComponent {
     }
 
     fun isSampleOverload(sample: Int, fastScan: Boolean, isActive: Boolean): Boolean {
-        if(!isActive) return true
+        if (!isActive) return true
         return isSampleOverload(sample, fastScan)
     }
 
@@ -57,7 +58,7 @@ interface IFileType: KoinComponent {
     }
 
     fun isLengthOverload(length: Int, isActive: Boolean): Boolean {
-        if(!isActive) return true
+        if (!isActive) return true
         return (isLengthOverload(length))
     }
 }

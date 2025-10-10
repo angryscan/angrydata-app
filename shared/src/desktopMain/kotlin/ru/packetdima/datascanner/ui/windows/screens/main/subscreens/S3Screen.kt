@@ -74,15 +74,15 @@ fun S3Screen(
 
     LaunchedEffect(scanNotCorrectPath, incorrectConnection) {
         if (scanNotCorrectPath || incorrectConnection) {
-            if(incorrectPathError)
+            if (incorrectPathError)
                 selectPathError = true
-            if(endpoint.isEmpty())
+            if (endpoint.isEmpty())
                 endpointError = true
-            if(accessKey.isEmpty())
+            if (accessKey.isEmpty())
                 accessKeyError = true
-            if(secretKey.isEmpty())
+            if (secretKey.isEmpty())
                 secretKeyError = true
-            if(bucket.isEmpty())
+            if (bucket.isEmpty())
                 bucketError = true
             delay(200)
 
@@ -93,15 +93,15 @@ fun S3Screen(
             bucketError = false
             delay(400)
 
-            if(incorrectPathError)
+            if (incorrectPathError)
                 selectPathError = true
-            if(endpoint.isEmpty())
+            if (endpoint.isEmpty())
                 endpointError = true
-            if(accessKey.isEmpty())
+            if (accessKey.isEmpty())
                 accessKeyError = true
-            if(secretKey.isEmpty())
+            if (secretKey.isEmpty())
                 secretKeyError = true
-            if(bucket.isEmpty())
+            if (bucket.isEmpty())
                 bucketError = true
             delay(200)
 
@@ -112,15 +112,15 @@ fun S3Screen(
             bucketError = false
             delay(400)
 
-            if(incorrectPathError)
+            if (incorrectPathError)
                 selectPathError = true
-            if(endpoint.isEmpty())
+            if (endpoint.isEmpty())
                 endpointError = true
-            if(accessKey.isEmpty())
+            if (accessKey.isEmpty())
                 accessKeyError = true
-            if(secretKey.isEmpty())
+            if (secretKey.isEmpty())
                 secretKeyError = true
-            if(bucket.isEmpty())
+            if (bucket.isEmpty())
                 bucketError = true
             delay(200)
 
@@ -186,10 +186,11 @@ fun S3Screen(
                             .background(MaterialTheme.colorScheme.onBackground)
                             .pointerHoverIcon(PointerIcon.Hand)
                             .clickable {
-                                if(endpoint.isNotEmpty() &&
+                                if (endpoint.isNotEmpty() &&
                                     accessKey.isNotEmpty() &&
                                     secretKey.isNotEmpty() &&
-                                    bucket.isNotEmpty()) {
+                                    bucket.isNotEmpty()
+                                ) {
                                     selectPathDialog = true
                                 } else {
                                     incorrectConnection = true
@@ -280,20 +281,20 @@ fun S3Screen(
                                 if (scanSettings.detectCert.value)
                                     extensions.add(FileType.CERT)
 
-                                val detectFunctions =
-                                    (scanSettings.detectFunctions + scanSettings.userSignatures)
+                                val matchers =
+                                    (scanSettings.matchers + scanSettings.userSignatures)
                                         .toMutableList()
                                 if (scanSettings.detectCert.value)
-                                    detectFunctions.add(CertDetectFun)
+                                    matchers.add(CertDetectFun)
                                 if (scanSettings.detectCode.value)
-                                    detectFunctions.add(CodeDetectFun)
-                                if(scanSettings.detectBlockedDomains.value)
-                                    detectFunctions.add(RKNDomainDetectFun)
+                                    matchers.add(CodeDetectFun)
+                                if (scanSettings.detectBlockedDomains.value)
+                                    matchers.add(RKNDomainDetectFun)
 
                                 val task = scanService.createTask(
                                     path = path,
                                     extensions = scanSettings.extensions,
-                                    detectFunctions = detectFunctions,
+                                    matchers = matchers,
                                     fastScan = scanSettings.fastScan.value,
                                     connector = ConnectorS3(
                                         endpointStr = endpoint,

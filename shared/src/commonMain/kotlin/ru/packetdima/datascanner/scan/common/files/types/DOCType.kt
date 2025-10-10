@@ -1,9 +1,10 @@
 package ru.packetdima.datascanner.scan.common.files.types
 
-import info.downdetector.bigdatascanner.common.IDetectFunction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
+import org.angryscan.common.engine.IMatcher
+import org.angryscan.common.engine.IScanEngine
 import org.apache.poi.hwpf.HWPFOldDocument
 import org.apache.poi.hwpf.extractor.WordExtractor
 import org.apache.poi.poifs.filesystem.POIFSFileSystem
@@ -14,11 +15,11 @@ import java.io.File
 import java.io.FileInputStream
 import kotlin.coroutines.CoroutineContext
 
-object DOCType: IFileType {
+object DOCType : IFileType {
     override suspend fun scanFile(
         file: File,
         context: CoroutineContext,
-        detectFunctions: List<IDetectFunction>,
+        engines: List<IScanEngine>,
         fastScan: Boolean
     ): Document {
         val str = StringBuilder()
@@ -31,7 +32,9 @@ object DOCType: IFileType {
                         wordExtractor.text.forEach { c ->
                             str.append(c)
                             if (isLengthOverload(str.length, isActive)) {
-                                res + withContext(context) { scan(str.toString(), detectFunctions) }
+                                engines.forEach { engine ->
+                                    res + withContext(context) { scan(str.toString(), engine) }
+                                }
                                 str.clear()
                                 sample++
                                 if (isSampleOverload(sample, fastScan, isActive))
@@ -49,7 +52,9 @@ object DOCType: IFileType {
                             hwpfOldDocument.documentText.forEach { c ->
                                 str.append(c)
                                 if (isLengthOverload(str.length, isActive)) {
-                                    res + withContext(context) { scan(str.toString(), detectFunctions) }
+                                    engines.forEach { engine ->
+                                        res + withContext(context) { scan(str.toString(), engine) }
+                                    }
                                     str.clear()
                                     sample++
                                     if (isSampleOverload(sample, fastScan, isActive))
@@ -65,14 +70,17 @@ object DOCType: IFileType {
             }
         }
         if (str.isNotEmpty() && !isSampleOverload(sample, fastScan)) {
-            res + withContext(context) { scan(str.toString(), detectFunctions) }
+            engines.forEach { engine ->
+                res + withContext(context) { scan(str.toString(), engine) }
+            }
         }
         return res
     }
 
     override suspend fun findLocation(
         filePath: String,
-        detectFunction: IDetectFunction,
+        engine: IScanEngine,
+        matcher: IMatcher,
         fastScan: Boolean
     ): List<Location> {
         var length = 0
@@ -84,9 +92,13 @@ object DOCType: IFileType {
                 FileInputStream(file).use { inputStream ->
                     WordExtractor(inputStream).use { extractor ->
                         extractor.paragraphText.forEachIndexed { index, text ->
-                            getEntries(text, detectFunction).forEach {
-                                locations.add(Location(it, "Paragraph:$index"))
-                            }
+                            engine
+                                .scan(text)
+                                .filter { it.matcher::class == matcher::class }
+                                .forEach {
+                                    locations.add(Location(it, "Paragraph:$index"))
+                                }
+
                             length += text.length
                             if (isLengthOverload(length, isActive)) {
                                 length = 0
@@ -96,7 +108,10 @@ object DOCType: IFileType {
                             }
                         }
                         extractor.commentsText.forEachIndexed { index, text ->
-                            getEntries(text, detectFunction).forEach {
+                            engine
+                                .scan(text)
+                                .filter { it.matcher::class == matcher::class }
+                                .forEach {
                                 locations.add(Location(it, "Comment:$index"))
                             }
                             length += text.length
@@ -108,7 +123,10 @@ object DOCType: IFileType {
                             }
                         }
                         extractor.footnoteText.forEachIndexed { index, text ->
-                            getEntries(text, detectFunction).forEach {
+                            engine
+                                .scan(text)
+                                .filter { it.matcher::class == matcher::class }
+                                .forEach {
                                 locations.add(Location(it, "Footnote:$index"))
                             }
                             length += text.length
@@ -120,7 +138,10 @@ object DOCType: IFileType {
                             }
                         }
                         extractor.endnoteText.forEachIndexed { index, text ->
-                            getEntries(text, detectFunction).forEach {
+                            engine
+                                .scan(text)
+                                .filter { it.matcher::class == matcher::class }
+                                .forEach {
                                 locations.add(Location(it, "Endnote:$index"))
                             }
                             length += text.length
@@ -144,7 +165,10 @@ object DOCType: IFileType {
                             hwpfOldDocument.documentText.forEach { c ->
                                 str.append(c)
                                 if (isLengthOverload(str.length, isActive)) {
-                                    getEntries(str.toString(), detectFunction).forEach {
+                                    engine
+                                        .scan(str.toString())
+                                        .filter { it.matcher::class == matcher::class }
+                                        .forEach {
                                         locations.add(Location(it, ""))
                                     }
                                     str.clear()

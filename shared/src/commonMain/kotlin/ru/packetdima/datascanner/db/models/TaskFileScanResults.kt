@@ -10,13 +10,13 @@ val format = Json { prettyPrint = false }
 
 object TaskFileScanResults: IntIdTable() {
     val file = reference("file", TaskFiles)
-    val detectFunction = reference("detect_function", TaskDetectFunctions)
+    val matcher = reference("matcher", TaskMatchers)
     val count = integer("count")
 }
 
 class TaskFileScanResult(id: EntityID<Int>) : IntEntity(id) {
     companion object: IntEntityClass<TaskFileScanResult>(TaskFileScanResults)
     var file by TaskFile referencedOn TaskFileScanResults.file
-    var detectFunction by TaskDetectFunction referencedOn TaskFileScanResults.detectFunction
+    var matcher by TaskMatcher referencedOn TaskFileScanResults.matcher
     var count by TaskFileScanResults.count
 }

@@ -1,10 +1,11 @@
 package ru.packetdima.datascanner.scan
 
 import MigrationUtils
-import info.downdetector.bigdatascanner.common.IDetectFunction
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.*
+import org.angryscan.common.engine.IMatcher
 import org.flywaydb.core.Flyway
+import org.flywaydb.core.api.exception.FlywayValidateException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -19,8 +20,6 @@ import ru.packetdima.datascanner.db.models.*
 import ru.packetdima.datascanner.scan.common.connectors.ConnectorS3
 import ru.packetdima.datascanner.scan.common.connectors.IConnector
 import ru.packetdima.datascanner.scan.common.files.FileType
-import ru.packetdima.datascanner.scan.functions.CertDetectFun
-import ru.packetdima.datascanner.scan.functions.CodeDetectFun
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.io.path.absolutePathString
@@ -50,9 +49,10 @@ class ScanService : KoinComponent {
                 Tasks,
                 TaskFiles,
                 TaskFileExtensions,
-                TaskDetectFunctions,
+                TaskMatchers,
                 TaskFileScanResults
             )
+
 
             val statements = MigrationUtils.statementsRequiredForDatabaseMigration(Tasks, withLogs = false)
             if (statements.isNotEmpty()) {
@@ -63,42 +63,12 @@ class ScanService : KoinComponent {
                 if (!File(AppFiles.MigrationsDirectory.absolutePathString()).exists()) {
                     File(AppFiles.MigrationsDirectory.absolutePathString()).mkdir()
                 }
-                if (!File(
-                        AppFiles
-                            .MigrationsDirectory
-                            .resolve("V2__AddMissingColumns.sql")
-                            .absolutePathString()
-                    )
-                        .exists()
-                ) {
-                    MigrationUtils.generateMigrationScript(
-                        Tasks,
-                        scriptDirectory = AppFiles.MigrationsDirectory.absolutePathString(),
-                        scriptName = "V2__AddMissingColumns",
-                    )
-                } else {
-                    if (!File(
-                            AppFiles
-                                .MigrationsDirectory
-                                .resolve("V3__AddConnectors.sql")
-                                .absolutePathString()
-                        )
-                            .exists()
-                    ) {
-                        MigrationUtils.generateMigrationScript(
-                            Tasks,
-                            scriptDirectory = AppFiles.MigrationsDirectory.absolutePathString(),
-                            scriptName = "V3__AddConnectors",
-                        )
-                    } else {
-                        MigrationUtils.generateMigrationScript(
-                            Tasks,
-                            scriptDirectory = AppFiles.MigrationsDirectory.absolutePathString(),
-                            scriptName = "V4__AddScanName",
-                        )
-                    }
-                }
 
+                MigrationUtils.generateMigrationScript(
+                    Tasks,
+                    scriptDirectory = AppFiles.MigrationsDirectory.absolutePathString(),
+                    scriptName = "V2__AddMissingColumns",
+                )
             }
         }
 
@@ -110,25 +80,29 @@ class ScanService : KoinComponent {
                 .locations("filesystem:${AppFiles.MigrationsDirectory}")
                 .baselineOnMigrate(appSettings.firstMigration.value)
                 .load()
+            try {
+                flyway.validate()
 
+                val m = runBlocking {
+                    database.transaction {
+                        flyway.migrate()
+                    }
+                }
 
-            val m = runBlocking {
-                database.transaction {
-                    flyway.migrate()
+                if (m.success && m.successfulMigrations.isNotEmpty()) {
+                    appSettings.firstMigration.value = false
+                    appSettings.save()
+                    migrationRequired = false
+                    logger.info {
+                        "Database migration completed."
+                    }
+                } else {
+                    logger.error {
+                        "Database migration failed."
+                    }
                 }
-            }
+            } catch (_: FlywayValidateException) {
 
-            if (m.success && m.successfulMigrations.isNotEmpty()) {
-                appSettings.firstMigration.value = false
-                appSettings.save()
-                migrationRequired = false
-                logger.info {
-                    "Database migration completed."
-                }
-            } else {
-                logger.error {
-                    "Database migration failed."
-                }
             }
         }
 
@@ -141,11 +115,11 @@ class ScanService : KoinComponent {
                         dbTask = task,
                         state = task.taskState,
                         totalFiles = task.filesCount,
-                        foundAttributes = (TaskFileScanResults innerJoin TaskFiles innerJoin TaskDetectFunctions)
-                            .select(TaskDetectFunctions.function)
+                        foundAttributes = (TaskFileScanResults innerJoin TaskFiles innerJoin TaskMatchers)
+                            .select(TaskMatchers.matcher)
                             .where { TaskFiles.task.eq(task.id) }
                             .withDistinct()
-                            .map { it[TaskDetectFunctions.function] }
+                            .map { it[TaskMatchers.matcher] }
                             .toSet(),
                         foundFiles = TaskFiles
                             .innerJoin(TaskFileScanResults)
@@ -245,7 +219,7 @@ class ScanService : KoinComponent {
         name: String? = null,
         path: String,
         extensions: List<FileType>? = null,
-        detectFunctions: List<IDetectFunction>? = null,
+        matchers: List<IMatcher>,
         fastScan: Boolean? = null,
         connector: IConnector
     ): TaskEntityViewModel {
@@ -267,16 +241,7 @@ class ScanService : KoinComponent {
                                 scanSettings.extensions).joinToString { it.name }
                         }. " +
                         "Detect functions: ${
-                            (if (detectFunctions != null)
-                                detectFunctions
-                            else (scanSettings.detectFunctions
-                                    + scanSettings.userSignatures
-                                    + (if (scanSettings.detectCert.value)
-                                listOf(CertDetectFun) else listOf())
-                                    + (if (scanSettings.detectCode.value)
-                                listOf(CodeDetectFun) else listOf())
-                                    )
-                                    ).joinToString { it.name }
+                            matchers.joinToString { it.name }
                         }. " +
                         "Fast scan: ${fastScan ?: scanSettings.fastScan.value}. " +
                         "Threads: ${appSettings.threadCount.value}. " +
@@ -315,37 +280,10 @@ class ScanService : KoinComponent {
                 }
             }
 
-            if (detectFunctions != null) {
-                detectFunctions.forEach { df ->
-                    TaskDetectFunction.new {
-                        this.task = task
-                        this.function = df
-                    }
-                }
-            } else {
-                scanSettings.detectFunctions.forEach { df ->
-                    TaskDetectFunction.new {
-                        this.task = task
-                        this.function = df
-                    }
-                }
-                scanSettings.userSignatures.forEach { df ->
-                    TaskDetectFunction.new {
-                        this.task = task
-                        this.function = df
-                    }
-                }
-                if (scanSettings.detectCert.value) {
-                    TaskDetectFunction.new {
-                        this.task = task
-                        this.function = CertDetectFun
-                    }
-                }
-                if (scanSettings.detectCode.value) {
-                    TaskDetectFunction.new {
-                        this.task = task
-                        this.function = CertDetectFun
-                    }
+            matchers.forEach { m ->
+                TaskMatcher.new {
+                    this.task = task
+                    matcher = m
                 }
             }
 
@@ -363,9 +301,6 @@ class ScanService : KoinComponent {
         database.transaction {
             TaskFileExtensions.deleteWhere {
                 TaskFileExtensions.task.eq(task.dbTask.id)
-            }
-            TaskDetectFunctions.deleteWhere {
-                TaskDetectFunctions.task.eq(task.dbTask.id)
             }
             TaskFiles.deleteWhere {
                 TaskFiles.task.eq(task.dbTask.id)

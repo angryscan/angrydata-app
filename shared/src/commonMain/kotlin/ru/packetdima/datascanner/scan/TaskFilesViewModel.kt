@@ -1,13 +1,15 @@
 package ru.packetdima.datascanner.scan
 
 import androidx.lifecycle.ViewModel
-import info.downdetector.bigdatascanner.common.DetectFunction
-import info.downdetector.bigdatascanner.common.IDetectFunction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.angryscan.common.engine.IMatcher
+import org.angryscan.common.matchers.AccountNumber
+import org.angryscan.common.matchers.CardNumber
+import org.angryscan.common.matchers.FullName
 import org.jetbrains.exposed.sql.and
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -21,7 +23,7 @@ data class TaskFileResult(
     val id: Int,
     val path: String,
     val size: FileSize,
-    val foundAttributes: List<IDetectFunction>,
+    val foundAttributes: List<IMatcher>,
     val count: Int,
     val score: Long
 )
@@ -67,12 +69,12 @@ class TaskFilesViewModel(val task: Task) : KoinComponent, ViewModel() {
 
             _taskFiles.value = fileRows.map { fileRow ->
                 val detectRows = TaskFileScanResults
-                    .innerJoin(TaskDetectFunctions)
-                    .select(TaskDetectFunctions.function, TaskFileScanResults.count)
+                    .innerJoin(TaskMatchers)
+                    .select(TaskMatchers.matcher, TaskFileScanResults.count)
                     .where { TaskFileScanResults.file.eq(fileRow[TaskFiles.id]) }
-                    .map { it[TaskDetectFunctions.function] to it[TaskFileScanResults.count] }
+                    .map { it[TaskMatchers.matcher] to it[TaskFileScanResults.count] }
 
-                val containsFIO = detectRows.map { it.first }.contains(DetectFunction.Name)
+                val containsFIO = detectRows.map { it.first }.contains(FullName)
 
                 TaskFileResult(
                     id = fileRow[TaskFiles.id].value,
@@ -83,11 +85,11 @@ class TaskFilesViewModel(val task: Task) : KoinComponent, ViewModel() {
                     score = detectRows.sumOf { row ->
                         (if (containsFIO) 20 else detectRows.size - 1) +
                                 (when (row.first) {
-                                    DetectFunction.Name -> 5f
-                                    DetectFunction.CardNumbers -> 30f
-                                    DetectFunction.AccountNumber -> 30f
-                                    CodeDetectFun -> 0.01f
-                                    CertDetectFun -> 100f
+                                    is FullName -> 5f
+                                    is CardNumber -> 30f
+                                    is AccountNumber -> 30f
+                                    is CodeDetectFun -> 0.01f
+                                    is CertDetectFun -> 100f
                                     else -> 1f
                                 } * row.second).toLong()
                     }

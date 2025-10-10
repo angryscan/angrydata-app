@@ -6,11 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowDropDown
-import androidx.compose.material.icons.outlined.DocumentScanner
-import androidx.compose.material.icons.outlined.FileOpen
-import androidx.compose.material.icons.outlined.FolderOpen
-import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -145,9 +141,9 @@ fun FileShareScreen(
             onValueChange = { path = it },
             placeholder = {
                 Text(
-                    text = when(selectionType) {
+                    text = when (selectionType) {
                         SelectionTypes.FileWithPaths -> stringResource(Res.string.MainScreen_SelectFileWithPathsPlaceholder)
-                        else ->stringResource(Res.string.MainScreen_SelectPathPlaceholder)
+                        else -> stringResource(Res.string.MainScreen_SelectPathPlaceholder)
                     }
                 )
             },
@@ -282,7 +278,7 @@ fun FileShareScreen(
                                 }
                                 .all { it }
                         ) {
-                            val scanPath = if(selectionType == SelectionTypes.FileWithPaths) {
+                            val scanPath = if (selectionType == SelectionTypes.FileWithPaths) {
                                 val file = File(path)
                                 file.readLines().joinToString(separator = ";")
                             } else {
@@ -295,21 +291,21 @@ fun FileShareScreen(
                                 if (scanSettings.detectCert.value)
                                     extensions.add(FileType.CERT)
 
-                                val detectFunctions =
-                                    (scanSettings.detectFunctions + scanSettings.userSignatures)
+                                val matchers =
+                                    (scanSettings.matchers + scanSettings.userSignatures)
                                         .toMutableList()
                                 if (scanSettings.detectCert.value)
-                                    detectFunctions.add(CertDetectFun)
+                                    matchers.add(CertDetectFun)
                                 if (scanSettings.detectCode.value)
-                                    detectFunctions.add(CodeDetectFun)
+                                    matchers.add(CodeDetectFun)
                                 if (scanSettings.detectBlockedDomains.value)
-                                    detectFunctions.add(RKNDomainDetectFun)
+                                    matchers.add(RKNDomainDetectFun)
 
                                 val task = scanService.createTask(
-                                    name = if(selectionType == SelectionTypes.FileWithPaths) path else null,
+                                    name = if (selectionType == SelectionTypes.FileWithPaths) path else null,
                                     path = scanPath,
                                     extensions = scanSettings.extensions,
-                                    detectFunctions = detectFunctions,
+                                    matchers = matchers,
                                     fastScan = scanSettings.fastScan.value,
                                     connector = ConnectorFileShare()
                                 )

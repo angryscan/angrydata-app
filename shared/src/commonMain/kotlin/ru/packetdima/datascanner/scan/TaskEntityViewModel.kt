@@ -1,7 +1,6 @@
 package ru.packetdima.datascanner.scan
 
 import androidx.lifecycle.ViewModel
-import info.downdetector.bigdatascanner.common.IDetectFunction
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -10,6 +9,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.*
+import org.angryscan.common.engine.IMatcher
+import org.angryscan.common.matchers.UserSignature
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
@@ -18,11 +19,11 @@ import org.jetbrains.exposed.sql.update
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import ru.packetdima.datascanner.common.LogMarkers
+import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.db.DatabaseConnector
 import ru.packetdima.datascanner.db.models.*
 import ru.packetdima.datascanner.scan.common.FilesCounter
 import ru.packetdima.datascanner.scan.common.connectors.FoundedFile
-import ru.packetdima.datascanner.scan.functions.UserSignature
 import kotlin.time.DurationUnit
 
 private val logger = KotlinLogging.logger {}
@@ -30,7 +31,7 @@ private val logger = KotlinLogging.logger {}
 class TaskEntityViewModel(
     val dbTask: Task,
     totalFiles: Long? = null,
-    foundAttributes: Set<IDetectFunction>? = null,
+    foundAttributes: Set<IMatcher>? = null,
     foundFiles: Long? = null,
     folderSize: String? = null,
     state: TaskState = TaskState.LOADING
@@ -74,7 +75,7 @@ class TaskEntityViewModel(
     val skippedFiles
         get() = _skippedFiles.asStateFlow()
 
-    private var _foundAttributes = MutableStateFlow(setOf<IDetectFunction>())
+    private var _foundAttributes = MutableStateFlow(setOf<IMatcher>())
     val foundAttributes
         get() = _foundAttributes.asStateFlow()
 
@@ -107,6 +108,8 @@ class TaskEntityViewModel(
         get() = _folderSize.asStateFlow()
 
     init {
+        val scanSettings = inject<ScanSettings>()
+
         if (_state.value == TaskState.LOADING) {
             taskScope.launch {
                 database.transaction {
@@ -142,10 +145,10 @@ class TaskEntityViewModel(
 
                 _foundAttributes.value =
                     TaskFileScanResults
-                        .innerJoin(TaskDetectFunctions)
-                        .select(TaskDetectFunctions.function)
-                        .where { TaskDetectFunctions.task.eq(dbTask.id) }
-                        .map { it[TaskDetectFunctions.function] }
+                        .innerJoin(TaskMatchers)
+                        .select(TaskMatchers.matcher)
+                        .where { TaskMatchers.task.eq(dbTask.id) }
+                        .map { it[TaskMatchers.matcher] }
                         .toSet()
             }
         }
@@ -155,13 +158,13 @@ class TaskEntityViewModel(
         }
     }
 
-    fun addFoundAttribute(detectFunction: IDetectFunction) {
+    fun addFoundAttribute(matcher: IMatcher) {
         //Check if user signature already added
         if (
-            detectFunction !is UserSignature ||
-            _foundAttributes.value.none { it.name == detectFunction.name }
+            matcher !is UserSignature ||
+            _foundAttributes.value.none { it.name == matcher.name }
         )
-            _foundAttributes.value += detectFunction
+            _foundAttributes.value += matcher
     }
 
     fun incrementFoundFiles() {

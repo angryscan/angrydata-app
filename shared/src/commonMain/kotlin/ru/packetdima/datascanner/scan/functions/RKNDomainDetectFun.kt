@@ -1,26 +1,30 @@
 package ru.packetdima.datascanner.scan.functions
 
-import info.downdetector.bigdatascanner.common.IDetectFunction
-import info.downdetector.bigdatascanner.common.extensions.MatchWithContext
 import kotlinx.serialization.Serializable
+import org.angryscan.common.engine.ExpressionOption
+import org.angryscan.common.engine.hyperscan.IHyperMatcher
+import org.angryscan.common.engine.kotlin.IKotlinMatcher
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import ru.packetdima.datascanner.scan.functions.rkn.DomainRepository
 
 @Serializable
-object RKNDomainDetectFun: IDetectFunction, KoinComponent {
-    override val name = "RKNDomainDetectFun"
-    override val writeName = "RKNDomainDetectFun"
+object RKNDomainDetectFun: IHyperMatcher, IKotlinMatcher, KoinComponent {
+    val domainRepo by inject<DomainRepository>()
 
-    private val regex = """(?<=https?\s)?([\w.-]+\.[a-z]{2,})(?=\s|$)"""
-        .toRegex(RegexOption.MULTILINE)
+    override val name = "RKN Blocked Domain"
+    override fun check(value: String) = domainRepo.checkDomain(value)
 
-    override fun scan(text: String, withContext: Boolean): Sequence<MatchWithContext> {
-        val domainRepo by inject<DomainRepository>()
-        return regex
-            .findAll(text)
-            .filter { domainRepo.checkDomain(it.value) }
-            .map {MatchWithContext(it.value) }
-
-    }
+    override val hyperPatterns = listOf(
+        """(?<=https?\s)?([\w.-]+\.[a-z]{2,})(?=\s|$)"""
+    )
+    override val expressionOptions = setOf(
+        ExpressionOption.MULTILINE
+    )
+    override val javaPatterns = listOf(
+        """(?<=https?\s)?([\w.-]+\.[a-z]{2,})(?=\s|$)"""
+    )
+    override val regexOptions = setOf(
+        RegexOption.MULTILINE
+    )
 }

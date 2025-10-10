@@ -18,39 +18,36 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import info.downdetector.bigdatascanner.common.DetectFunction
 import org.jetbrains.compose.resources.stringResource
 import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.resources.*
 import ru.packetdima.datascanner.scan.functions.CertDetectFun
 import ru.packetdima.datascanner.scan.functions.CodeDetectFun
+import ru.packetdima.datascanner.scan.functions.MatchersRegister
 import ru.packetdima.datascanner.scan.functions.RKNDomainDetectFun
 import ru.packetdima.datascanner.ui.strings.composableName
-import ru.packetdima.datascanner.ui.windows.components.DetectFunctionTooltip
+import ru.packetdima.datascanner.ui.windows.components.MatcherTooltip
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsBoxDetectFunctions(
     scanSettings: ScanSettings
 ) {
-    val detectFunctions = remember { scanSettings.detectFunctions }
-    var expanded by remember { scanSettings.detectFunctionsExpanded }
+    val matchers = remember { scanSettings.matchers }
+    var expanded by remember { scanSettings.matchersSettingsExpanded }
     var detectCode by remember { scanSettings.detectCode }
     var detectCert by remember { scanSettings.detectCert }
-    var detectDomains by remember { scanSettings.detectBlockedDomains }
-
-    LaunchedEffect(detectFunctions, expanded, detectCert, detectCode, detectDomains) {
-        scanSettings.save()
-    }
+    var detectBlockedDomains by remember { scanSettings.detectBlockedDomains }
 
     SettingsBoxSpan(
         text = stringResource(Res.string.ScanSettings_DetectFunctions),
         expanded = expanded,
         onExpandClick = {
             expanded = !expanded
+            scanSettings.save()
         }
     ) {
-        val size = DetectFunction.entries.size + 2
+        val size = MatchersRegister.matchers.size + 2
         val rows = size / 3 + if (size % 3 > 0) 1 else 0
 
         val height = (24 * rows + (6 * (rows - 1))).dp + 52.dp + 24.dp
@@ -69,25 +66,25 @@ fun SettingsBoxDetectFunctions(
                     modifier = Modifier.height(42.dp)
                 ) {
                     Checkbox(
-                        checked = scanSettings.detectFunctions.containsAll(DetectFunction.entries)
-                                && scanSettings.detectCert.value
-                                && scanSettings.detectCode.value
-                                && scanSettings.detectBlockedDomains.value,
+                        checked = matchers.containsAll(MatchersRegister.matchers)
+                                && detectCert
+                                && detectCode
+                                && detectBlockedDomains,
                         onCheckedChange = { checked ->
                             if (checked) { // Select all detect functions
-                                scanSettings.detectFunctions.addAll(DetectFunction.entries.filter {
-                                    !scanSettings.detectFunctions.contains(
+                                matchers.addAll(MatchersRegister.matchers.filter {
+                                    !matchers.contains(
                                         it
                                     )
                                 })
-                                scanSettings.detectCert.value = true
-                                scanSettings.detectCode.value = true
-                                scanSettings.detectBlockedDomains.value = true
+                                detectCert = true
+                                detectCode = true
+                                detectBlockedDomains = true
                             } else { // Deselect all detect functions
-                                scanSettings.detectFunctions.clear()
-                                scanSettings.detectCert.value = false
-                                scanSettings.detectCode.value = false
-                                scanSettings.detectBlockedDomains.value = false
+                                matchers.clear()
+                                detectCert = false
+                                detectCode = false
+                                detectBlockedDomains = false
                             }
                             scanSettings.save()
                         }
@@ -97,18 +94,20 @@ fun SettingsBoxDetectFunctions(
                             text = stringResource(Res.string.ScanSettings_SelectAll),
                             fontSize = 14.sp,
                             modifier = Modifier.clickable {
-                                if (!scanSettings.detectFunctions.containsAll(DetectFunction.entries)) {
-                                    scanSettings.detectFunctions.addAll(DetectFunction.entries.filter {
-                                        !scanSettings.detectFunctions.contains(
+                                if (!matchers.containsAll(MatchersRegister.matchers)) {
+                                    matchers.addAll(MatchersRegister.matchers.filter {
+                                        !matchers.contains(
                                             it
                                         )
                                     })
-                                    scanSettings.detectCert.value = true
-                                    scanSettings.detectCode.value = true
+                                    detectCert = true
+                                    detectCode = true
+                                    detectBlockedDomains = true
                                 } else {
-                                    scanSettings.detectFunctions.clear()
-                                    scanSettings.detectCert.value = false
-                                    scanSettings.detectCode.value = false
+                                    matchers.clear()
+                                    detectCert = false
+                                    detectCode = false
+                                    detectBlockedDomains = false
                                 }
                                 scanSettings.save()
                             }
@@ -116,34 +115,34 @@ fun SettingsBoxDetectFunctions(
                     }
                 }
             }
-            items(DetectFunction.entries) { detectFunction ->
+            items(MatchersRegister.matchers) { matcher ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(1f)
                         .height(24.dp)
                 ) {
                     Checkbox(
-                        checked = scanSettings.detectFunctions.contains(detectFunction),
+                        checked = matchers.contains(matcher),
                         onCheckedChange = { checked ->
-                            if (checked && !scanSettings.detectFunctions.contains(detectFunction))
-                                scanSettings.detectFunctions.add(detectFunction)
+                            if (checked && !matchers.contains(matcher))
+                                matchers.add(matcher)
                             else if (!checked)
-                                scanSettings.detectFunctions.remove(detectFunction)
+                                matchers.remove(matcher)
                             scanSettings.save()
                         }
                     )
                     CompositionLocalProvider(LocalRippleConfiguration provides null) {
-                        DetectFunctionTooltip(
-                            detectFunction = detectFunction
+                        MatcherTooltip(
+                            matcher = matcher
                         ) {
                             Text(
-                                text = detectFunction.composableName(),
+                                text = matcher.composableName(),
                                 fontSize = 14.sp,
                                 modifier = Modifier.clickable {
-                                    if (scanSettings.detectFunctions.contains(detectFunction))
-                                        scanSettings.detectFunctions.remove(detectFunction)
+                                    if (matchers.contains(matcher))
+                                        matchers.remove(matcher)
                                     else
-                                        scanSettings.detectFunctions.add(detectFunction)
+                                        matchers.add(matcher)
                                     scanSettings.save()
                                 }
                             )
@@ -160,19 +159,19 @@ fun SettingsBoxDetectFunctions(
                     Checkbox(
                         checked = scanSettings.detectCode.value,
                         onCheckedChange = { checked ->
-                            scanSettings.detectCode.value = checked
+                            detectCode = checked
                             scanSettings.save()
                         }
                     )
                     CompositionLocalProvider(LocalRippleConfiguration provides null) {
-                        DetectFunctionTooltip(
-                            detectFunction = CodeDetectFun
+                        MatcherTooltip(
+                            matcher = CodeDetectFun
                         ) {
                             Text(
-                                text = stringResource(Res.string.DetectFunction_Code),
+                                text = stringResource(Res.string.Matcher_Code),
                                 fontSize = 14.sp,
                                 modifier = Modifier.clickable {
-                                    scanSettings.detectCode.value = !scanSettings.detectCode.value
+                                    detectCode = !scanSettings.detectCode.value
                                     scanSettings.save()
                                 }
                             )
@@ -187,21 +186,21 @@ fun SettingsBoxDetectFunctions(
                         .height(24.dp)
                 ) {
                     Checkbox(
-                        checked = scanSettings.detectCert.value,
+                        checked = detectCert,
                         onCheckedChange = { checked ->
-                            scanSettings.detectCert.value = checked
+                            detectCert = checked
                             scanSettings.save()
                         }
                     )
                     CompositionLocalProvider(LocalRippleConfiguration provides null) {
-                        DetectFunctionTooltip(
-                            detectFunction = CertDetectFun
+                        MatcherTooltip(
+                            matcher = CertDetectFun
                         ) {
                             Text(
-                                text = stringResource(Res.string.DetectFunction_Cert),
+                                text = stringResource(Res.string.Matcher_Cert),
                                 fontSize = 14.sp,
                                 modifier = Modifier.clickable {
-                                    scanSettings.detectCert.value = !scanSettings.detectCert.value
+                                    detectCert = !detectCert
                                     scanSettings.save()
                                 }
                             )
@@ -216,21 +215,21 @@ fun SettingsBoxDetectFunctions(
                         .height(24.dp)
                 ) {
                     Checkbox(
-                        checked = scanSettings.detectBlockedDomains.value,
+                        checked = detectBlockedDomains,
                         onCheckedChange = { checked ->
-                            scanSettings.detectBlockedDomains.value = checked
+                            detectBlockedDomains = checked
                             scanSettings.save()
                         }
                     )
                     CompositionLocalProvider(LocalRippleConfiguration provides null) {
-                        DetectFunctionTooltip(
-                            detectFunction = RKNDomainDetectFun
+                        MatcherTooltip(
+                            matcher = RKNDomainDetectFun
                         ) {
                             Text(
-                                text = stringResource(Res.string.DetectFunction_DetectBlockedDomains),
+                                text = stringResource(Res.string.Matcher_DetectBlockedDomains),
                                 fontSize = 14.sp,
                                 modifier = Modifier.clickable {
-                                    scanSettings.detectBlockedDomains.value = !scanSettings.detectBlockedDomains.value
+                                    detectBlockedDomains = !detectBlockedDomains
                                     scanSettings.save()
                                 }
                             )

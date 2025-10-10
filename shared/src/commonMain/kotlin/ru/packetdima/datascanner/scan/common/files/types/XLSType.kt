@@ -1,9 +1,10 @@
 package ru.packetdima.datascanner.scan.common.files.types
 
-import info.downdetector.bigdatascanner.common.IDetectFunction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
+import org.angryscan.common.engine.IMatcher
+import org.angryscan.common.engine.IScanEngine
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.DataFormatter
@@ -18,7 +19,7 @@ object XLSType : IFileType {
     override suspend fun scanFile(
         file: File,
         context: CoroutineContext,
-        detectFunctions: List<IDetectFunction>,
+        engines: List<IScanEngine>,
         fastScan: Boolean
     ): Document {
         val str = StringBuilder()
@@ -45,7 +46,9 @@ object XLSType : IFileType {
                                             else -> {}
                                         }
                                         if (isLengthOverload(str.length, isActive)) {
-                                            res + withContext(context) { scan(str.toString(), detectFunctions) }
+                                            engines.forEach { engine ->
+                                                res + withContext(context) { scan(str.toString(), engine) }
+                                            }
                                             str.clear()
                                             sample++
                                             if (isSampleOverload(sample, fastScan, isActive))
@@ -63,14 +66,17 @@ object XLSType : IFileType {
             return res
         }
         if (str.isNotEmpty() && !isSampleOverload(sample, fastScan)) {
-            res + withContext(context) { scan(str.toString(), detectFunctions) }
+            engines.forEach { engine ->
+                res + withContext(context) { scan(str.toString(), engine) }
+            }
         }
         return res
     }
 
     override suspend fun findLocation(
         filePath: String,
-        detectFunction: IDetectFunction,
+        engine: IScanEngine,
+        matcher: IMatcher,
         fastScan: Boolean
     ): List<Location> {
         var length = 0
@@ -95,7 +101,9 @@ object XLSType : IFileType {
                                             else -> ""
                                         }
 
-                                        getEntries(text, detectFunction)
+                                        engine
+                                            .scan(text)
+                                            .filter { it.matcher::class == matcher::class }
                                             .forEach {
                                                 locations.add(Location(it, "${sheet.sheetName}:${cell.address}"))
                                             }

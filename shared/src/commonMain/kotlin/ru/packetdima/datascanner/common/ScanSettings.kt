@@ -3,18 +3,23 @@ package ru.packetdima.datascanner.common
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import info.downdetector.bigdatascanner.common.DetectFunction
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import kotlinx.serialization.json.Json
+import org.angryscan.common.engine.IMatcher
+import org.angryscan.common.engine.IScanEngine
+import org.angryscan.common.engine.hyperscan.HyperScanEngine
+import org.angryscan.common.matchers.AccountNumber
+import org.angryscan.common.matchers.UserSignature
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import ru.packetdima.datascanner.scan.common.files.FileType
-import ru.packetdima.datascanner.scan.functions.UserSignature
+import ru.packetdima.datascanner.serializers.MutableStateKClassSerializer
 import ru.packetdima.datascanner.serializers.MutableStateSerializer
+import ru.packetdima.datascanner.serializers.PolymorphicFormatter
 import ru.packetdima.datascanner.ui.components.SelectionTypes
 import java.io.File
+import kotlin.reflect.KClass
 
 @Serializable
 class ScanSettings : KoinComponent {
@@ -29,25 +34,28 @@ class ScanSettings : KoinComponent {
     val extensions: MutableList<FileType> = mutableStateListOf()
 
     @Serializable(with = MutableStateSerializer::class)
-    var extensionsExpanded: MutableState<Boolean>
+    var extensionsSettingsExpanded: MutableState<Boolean>
 
     @Serializable
-    val detectFunctions: MutableList<DetectFunction> = mutableStateListOf()
+    val matchers: MutableList<IMatcher> = mutableStateListOf()
+
     @Serializable(with = MutableStateSerializer::class)
     var detectCode: MutableState<Boolean>
+
     @Serializable(with = MutableStateSerializer::class)
     var detectCert: MutableState<Boolean>
+
     @Serializable(with = MutableStateSerializer::class)
     var detectBlockedDomains: MutableState<Boolean>
 
     @Serializable(with = MutableStateSerializer::class)
-    var detectFunctionsExpanded: MutableState<Boolean>
+    var matchersSettingsExpanded: MutableState<Boolean>
 
     @Serializable
     val userSignatures: MutableList<UserSignature> = mutableStateListOf()
 
     @Serializable(with = MutableStateSerializer::class)
-    var userSignatureExpanded: MutableState<Boolean>
+    var userSignatureSettingsExpanded: MutableState<Boolean>
 
     @Serializable(with = MutableStateSerializer::class)
     var selectionType: MutableState<SelectionTypes>
@@ -57,25 +65,29 @@ class ScanSettings : KoinComponent {
     val sampleLength = 10_000
     val sampleCount = 100
 
+    @Serializable(with = MutableStateKClassSerializer::class)
+    var engine: MutableState<KClass<out IScanEngine>>
+
     constructor() {
         val userSignatureSettings by inject<UserSignatureSettings>()
         try {
-            val prop: ScanSettings = Json.decodeFromString(settingsFile.readText())
+            val prop: ScanSettings = PolymorphicFormatter.decodeFromString(settingsFile.readText())
 
             this.extensions.addAll(prop.extensions)
-            this.extensionsExpanded = prop.extensionsExpanded
+            this.extensionsSettingsExpanded = prop.extensionsSettingsExpanded
 
             this.fastScan = prop.fastScan
 
-            this.detectFunctions.addAll(prop.detectFunctions)
-            this.detectFunctionsExpanded = prop.detectFunctionsExpanded
+            this.matchers.addAll(prop.matchers)
+            this.matchersSettingsExpanded = prop.matchersSettingsExpanded
 
             this.userSignatures.addAll(prop.userSignatures.filter { it in userSignatureSettings.userSignatures })
-            this.userSignatureExpanded = prop.userSignatureExpanded
+            this.userSignatureSettingsExpanded = prop.userSignatureSettingsExpanded
             this.detectCert = prop.detectCert
             this.detectCode = prop.detectCode
             this.detectBlockedDomains = prop.detectBlockedDomains
             this.selectionType = prop.selectionType
+            this.engine = prop.engine
         } catch (_: Exception) {
             logger.error {
                 "Failed to load ScanSettings. Loading default."
@@ -87,20 +99,31 @@ class ScanSettings : KoinComponent {
                         it != FileType.CERT &&
                         it != FileType.CODE
             })
-            this.extensionsExpanded = mutableStateOf(false)
-            this.detectFunctions.clear()
-            this.detectFunctions.addAll(DetectFunction.entries.toTypedArray())
-            this.detectFunctionsExpanded = mutableStateOf(false)
+            this.extensionsSettingsExpanded = mutableStateOf(false)
+            this.matchers.clear()
+            this.matchers.addAll(
+                listOf(
+                    AccountNumber,
+                )
+            )
+            this.matchersSettingsExpanded = mutableStateOf(false)
             this.fastScan = mutableStateOf(false)
-            this.userSignatureExpanded = mutableStateOf(false)
+            this.userSignatureSettingsExpanded = mutableStateOf(false)
             this.detectCert = mutableStateOf(false)
             this.detectCode = mutableStateOf(false)
             this.detectBlockedDomains = mutableStateOf(true)
             this.selectionType = mutableStateOf(SelectionTypes.Folder)
+            this.engine = mutableStateOf(HyperScanEngine::class)
         }
     }
 
     fun save() {
-        settingsFile.writeText(Json.encodeToString(this))
+        try {
+            settingsFile.writeText(PolymorphicFormatter.encodeToString(this))
+        } catch (_: Exception) {
+            logger.error {
+                "Failed to save ScanSettings."
+            }
+        }
     }
 }

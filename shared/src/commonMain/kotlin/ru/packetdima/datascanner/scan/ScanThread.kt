@@ -5,18 +5,23 @@ import kotlinx.coroutines.*
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.angryscan.common.engine.IScanEngine
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.db.DatabaseConnector
-import ru.packetdima.datascanner.db.models.TaskDetectFunctions
+import ru.packetdima.datascanner.db.models.TaskMatchers
 import ru.packetdima.datascanner.db.models.TaskFileScanResults
 import ru.packetdima.datascanner.db.models.TaskFiles
 import ru.packetdima.datascanner.db.models.TaskState
 import ru.packetdima.datascanner.scan.common.files.FileType
+import ru.packetdima.datascanner.scan.engine.fallback
+import ru.packetdima.datascanner.scan.engine.getEngine
+import ru.packetdima.datascanner.scan.engine.inappropriateMatchers
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.system.measureTimeMillis
@@ -53,6 +58,7 @@ class ScanThread : KoinComponent {
         logger.debug { "Starting scan thread [$scanThreadScope]." }
         _started.set(true)
         scanThreadScope.launch {
+            val scanSettings = inject<ScanSettings>()
             while (_started.get() && !stopRequested.get()) {
                 yield()
                 val tasksToScan = tasks.tasks.value.filter { it.state.value == TaskState.SCANNING }
@@ -109,26 +115,36 @@ class ScanThread : KoinComponent {
                 val fileId = dbFile[TaskFiles.id].value
                 val filePath = dbFile[TaskFiles.path]
                 val fileObject = taskEntity.dbTask.connector.getFile(filePath)
-                val detectFunctions = database.transaction {
+
+                val matchers = database.transaction {
                     taskEntity.dbTask.lastFileDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 
-                    TaskDetectFunctions
-                        .select(TaskDetectFunctions.function, TaskDetectFunctions.id)
-                        .where { TaskDetectFunctions.task.eq(taskEntity.dbTask.id) }
-                        .associate { it[TaskDetectFunctions.function] to it[TaskDetectFunctions.id].value }
+                    TaskMatchers
+                        .select(TaskMatchers.matcher, TaskMatchers.id)
+                        .where { TaskMatchers.task.eq(taskEntity.dbTask.id) }
+                        .associate { it[TaskMatchers.matcher] to it[TaskMatchers.id].value }
                 }
+                val engines: MutableList<IScanEngine> = mutableListOf()
+                engines.add(
+                    scanSettings.value.engine.value.getEngine(matchers.map { it.key })
+                )
+                val iMatchers = engines[0].inappropriateMatchers(matchers.map { it.key }).toMutableList()
+                do {
+                    val fbe = engines.last().fallback().getEngine(iMatchers)
+                    iMatchers.removeAll(fbe.matchers)
+                } while (iMatchers.isNotEmpty() || fbe::class == engines[0])
+
 
                 scanningFileId.set(fileId)
 
                 val timer = measureTimeMillis {
-
 
                     val scanRes = FileType
                         .getFileType(fileObject)
                         ?.scanFile(
                             file = fileObject,
                             context = currentCoroutineContext(),
-                            detectFunctions = detectFunctions.map { it.key },
+                            engines = engines,
                             fastScan = fastScan
                         )
 
@@ -138,7 +154,7 @@ class ScanThread : KoinComponent {
                             scanRes.getDocumentFields().forEach { field ->
                                 TaskFileScanResults.insert {
                                     it[file] = fileId
-                                    it[detectFunction] = detectFunctions[field.key] ?: 0
+                                    it[matcher] = matchers[field.key] ?: 0
                                     it[count] = field.value
                                 }
                                 taskEntity.addFoundAttribute(field.key)

@@ -28,6 +28,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import ru.packetdima.datascanner.common.AppSettings
+import ru.packetdima.datascanner.common.OS
 import ru.packetdima.datascanner.logging.LogLevel
 import ru.packetdima.datascanner.navigation.AppScreen
 import ru.packetdima.datascanner.resources.Res
@@ -60,7 +61,7 @@ fun MainWindow(
     val appSettings = koinInject<AppSettings>()
 
     val hideOnMinimize by remember { appSettings.hideOnMinimize }
-    val isMac = ru.packetdima.datascanner.common.OS.currentOS() == ru.packetdima.datascanner.common.OS.MAC
+    val isMac = OS.currentOS() == OS.MAC
 
     val navController = rememberNavController()
 

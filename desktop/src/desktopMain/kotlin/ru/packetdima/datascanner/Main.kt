@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.koin.core.context.startKoin
 import ru.packetdima.datascanner.common.AppFiles
 import ru.packetdima.datascanner.common.AppVersion
@@ -39,7 +38,7 @@ private val logger = KotlinLogging.logger {}
 @OptIn(ExperimentalComposeUiApi::class)
 suspend fun main(args: Array<String>) {
 
-    if(AppVersion != "Debug") {
+    if (AppVersion != "Debug") {
         LogLevel.setLoggingLevel(Level.INFO)
     }
 
@@ -70,8 +69,9 @@ suspend fun main(args: Array<String>) {
     val selectorManager = SelectorManager(Dispatchers.IO)
 
     try {
-        if(args.isEmpty() ||
-            arrayOf("-c", "-console", "-h", "-help").all { !args.contains(it) }) {
+        if (args.isEmpty() ||
+            arrayOf("-c", "-console", "-h", "-help").all { !args.contains(it) }
+        ) {
             val serverSocket = aSocket(selectorManager).tcp().bind("127.0.0.1", port)
             logger.info { "Server started at port $port" }
             CoroutineScope(Dispatchers.IO).launch {
@@ -96,17 +96,15 @@ suspend fun main(args: Array<String>) {
     } catch (_: BindException) {
         logger.info { "Application already running!" }
         if (args.isNotEmpty() && args.first().let { it != "-c" && it != "-console" }) {
-            runBlocking {
-                val path = args.firstOrNull()
-                if (path != null && File(path).exists()) {
-                    logger.info { "Sending path to running app" }
-                    val clientSocket = aSocket(selectorManager).tcp().connect("127.0.0.1", port)
-                    val output = clientSocket.openWriteChannel(autoFlush = true)
-                    output.writeFully(path.toByteArray())
-                    clientSocket.close()
-                    selectorManager.close()
-                    logger.info { "Path sent to running app" }
-                }
+            val path = args.firstOrNull()
+            if (path != null && File(path).exists()) {
+                logger.info { "Sending path to running app" }
+                val clientSocket = aSocket(selectorManager).tcp().connect("127.0.0.1", port)
+                val output = clientSocket.openWriteChannel(autoFlush = true)
+                output.writeFully(path.toByteArray())
+                clientSocket.close()
+                selectorManager.close()
+                logger.info { "Path sent to running app" }
             }
         }
         logger.info { "Terminating app" }
@@ -118,22 +116,21 @@ suspend fun main(args: Array<String>) {
 
     var lastError: Throwable? by mutableStateOf(null)
 
-
+    startKoin { //Start Koin
+        modules(
+            settingsModule,
+            databaseModule,
+            scanModule,
+            s3Module
+        )
+    }
 
     if (args.isNotEmpty() &&
         arrayOf("-c", "-console", "-h", "-help").any { args.contains(it) }
     ) {
-        startKoin {
-            modules(
-                settingsModule,
-                consoldeDatabaseModule,
-                scanModule
-            )
-        }
         if (arrayOf("-h", "-help").any { args.contains(it) }) {
             Console.help()
-        }
-        else if (arrayOf("-c", "-console").any { args.contains(it) }){
+        } else if (arrayOf("-c", "-console").any { args.contains(it) }) {
             if (AppFiles.ResultDBFile.exists()) {
                 if (!AppFiles.ResultDBFile.delete()) {
                     logger.error { "Cannot access to database. Check it is in use by another process!" }
@@ -144,15 +141,6 @@ suspend fun main(args: Array<String>) {
             Console.consoleRun(args)
         }
     } else {
-        // Start Koin GUI mode
-        startKoin {
-            modules(
-                settingsModule,
-                databaseModule,
-                scanModule,
-                s3Module
-            )
-        }
         if (args.isNotEmpty()) {
             logger.warn { "Started with ${args.size} argument(s): ${args.joinToString(", ")}" }
             logger.info { "Set path to: ${args.first()}" }

@@ -7,6 +7,7 @@ import me.tongfei.progressbar.ProgressBarBuilder
 import me.tongfei.progressbar.ProgressBarStyle
 import org.angryscan.common.engine.hyperscan.HyperScanEngine
 import org.angryscan.common.engine.kotlin.KotlinEngine
+import org.angryscan.common.extensions.Matchers
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.parameter.parametersOf
@@ -19,7 +20,6 @@ import ru.packetdima.datascanner.scan.common.connectors.ConnectorFileShare
 import ru.packetdima.datascanner.scan.common.files.FileType
 import ru.packetdima.datascanner.scan.functions.CertDetectFun
 import ru.packetdima.datascanner.scan.functions.CodeDetectFun
-import ru.packetdima.datascanner.scan.functions.MatchersRegister
 import ru.packetdima.datascanner.scan.functions.RKNDomainDetectFun
 import ru.packetdima.datascanner.ui.strings.readableName
 import ru.packetdima.datascanner.ui.windows.screens.scans.components.SortColumn
@@ -306,7 +306,7 @@ object Console : KoinComponent {
             scanSettings.matchers.clear()
             if (matchers.isNotEmpty()) {
                 matchers.split(",").forEach { matcher ->
-                    val dfo = MatchersRegister.matchers.find { it.name.lowercase().replace(' ', '_') == matcher }
+                    val dfo = Matchers.find { it.name.lowercase().replace(' ', '_') == matcher }
                     if (dfo != null)
                         scanSettings.matchers.add(dfo)
                     else
@@ -382,7 +382,7 @@ Allowed extensions:
             }
 
 Allowed detect functions: 
-        ${MatchersRegister.matchers.joinToString("\n        ") { it.name.lowercase().replace(' ', '_') }}
+        ${Matchers.joinToString("\n        ") { it.name.lowercase().replace(' ', '_') }}
 Allowed user detect signatures:
         ${userSignatureSettings.userSignatures.joinToString("\n        ") { it.name.lowercase().replace(' ', '_') }} 
             """.trimIndent()

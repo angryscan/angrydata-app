@@ -28,7 +28,7 @@ val PolymorphicSerializationModule = SerializersModule {
         subclass(Email::class)
         subclass(FullName::class)
         subclass(INN::class)
-        subclass(IP::class)
+        subclass(IPv4::class)
         subclass(IPv6::class)
         subclass(Login::class)
         subclass(OMS::class)

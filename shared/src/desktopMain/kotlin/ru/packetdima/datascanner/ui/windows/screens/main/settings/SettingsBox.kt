@@ -100,7 +100,7 @@ fun SettingsBox(
                 SettingsBoxExtensionsSelection(scanSettings)
 
                 // Detect functions selection
-                SettingsBoxDetectFunctions(scanSettings)
+                SettingsBoxMatchers(scanSettings)
 
                 // User signatures selection
                 SettingsBoxUserSignature(scanSettings)

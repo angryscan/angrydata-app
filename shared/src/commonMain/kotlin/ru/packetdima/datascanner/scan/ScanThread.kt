@@ -148,6 +148,12 @@ class ScanThread : KoinComponent {
                             fastScan = fastScan
                         )
 
+                    engines.forEach { eng ->
+                        if(eng is AutoCloseable) {
+                            eng.close()
+                        }
+                    }
+
 
                     if (scanRes != null && !scanRes.skipped()) {
                         database.transaction {

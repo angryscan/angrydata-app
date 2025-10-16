@@ -18,19 +18,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.angryscan.common.extensions.Matchers
 import org.jetbrains.compose.resources.stringResource
 import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.resources.*
 import ru.packetdima.datascanner.scan.functions.CertDetectFun
 import ru.packetdima.datascanner.scan.functions.CodeDetectFun
-import ru.packetdima.datascanner.scan.functions.MatchersRegister
 import ru.packetdima.datascanner.scan.functions.RKNDomainDetectFun
 import ru.packetdima.datascanner.ui.strings.composableName
 import ru.packetdima.datascanner.ui.windows.components.MatcherTooltip
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsBoxDetectFunctions(
+fun SettingsBoxMatchers(
     scanSettings: ScanSettings
 ) {
     val matchers = remember { scanSettings.matchers }
@@ -47,7 +47,7 @@ fun SettingsBoxDetectFunctions(
             scanSettings.save()
         }
     ) {
-        val size = MatchersRegister.matchers.size + 2
+        val size = Matchers.size + 2
         val rows = size / 3 + if (size % 3 > 0) 1 else 0
 
         val height = (24 * rows + (6 * (rows - 1))).dp + 52.dp + 24.dp
@@ -66,13 +66,13 @@ fun SettingsBoxDetectFunctions(
                     modifier = Modifier.height(42.dp)
                 ) {
                     Checkbox(
-                        checked = matchers.containsAll(MatchersRegister.matchers)
+                        checked = matchers.containsAll(Matchers)
                                 && detectCert
                                 && detectCode
                                 && detectBlockedDomains,
                         onCheckedChange = { checked ->
                             if (checked) { // Select all detect functions
-                                matchers.addAll(MatchersRegister.matchers.filter {
+                                matchers.addAll(Matchers.filter {
                                     !matchers.contains(
                                         it
                                     )
@@ -94,8 +94,8 @@ fun SettingsBoxDetectFunctions(
                             text = stringResource(Res.string.ScanSettings_SelectAll),
                             fontSize = 14.sp,
                             modifier = Modifier.clickable {
-                                if (!matchers.containsAll(MatchersRegister.matchers)) {
-                                    matchers.addAll(MatchersRegister.matchers.filter {
+                                if (!matchers.containsAll(Matchers)) {
+                                    matchers.addAll(Matchers.filter {
                                         !matchers.contains(
                                             it
                                         )
@@ -115,7 +115,7 @@ fun SettingsBoxDetectFunctions(
                     }
                 }
             }
-            items(MatchersRegister.matchers) { matcher ->
+            items(Matchers) { matcher ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(1f)

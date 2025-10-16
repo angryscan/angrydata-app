@@ -1,8 +1,8 @@
 package ru.packetdima.datascanner.scan.functions
 
-import info.downdetector.bigdatascanner.common.IDetectFunction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import org.angryscan.common.engine.kotlin.KotlinEngine
 import org.junit.Rule
 import org.koin.dsl.module
 import org.koin.test.KoinTestRule
@@ -55,7 +55,7 @@ class CertFileTypeTest {
             val res = CertFileType.PKCS.scanFile(
                 File(p7sFile),
                 coroutineContext,
-                detectFunctions = listOf<IDetectFunction>(CertDetectFun),
+                engines = listOf(KotlinEngine(listOf(CertDetectFun))),
                 false
             )
             assertEquals(3, res.getDocumentFields()[CertDetectFun])
@@ -67,7 +67,7 @@ class CertFileTypeTest {
             val res = CertFileType.PKCS.scanFile(
                 File(p7b1File),
                 coroutineContext,
-                detectFunctions = listOf<IDetectFunction>(CertDetectFun),
+                engines = listOf(KotlinEngine(listOf(CertDetectFun))),
                 false
             )
             assertEquals(1, res.getDocumentFields()[CertDetectFun])
@@ -79,7 +79,7 @@ class CertFileTypeTest {
             val res = CertFileType.PKCS.scanFile(
                 File(keyDerFile),
                 coroutineContext,
-                detectFunctions = listOf<IDetectFunction>(CertDetectFun),
+                engines = listOf(KotlinEngine(listOf(CertDetectFun))),
                 false
             )
             assertEquals(1, res.getDocumentFields()[CertDetectFun])

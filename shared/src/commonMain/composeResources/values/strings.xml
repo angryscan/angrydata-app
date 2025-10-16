@@ -138,6 +138,16 @@
     <string name="DetectFunction-VIN">VIN Number</string>
     <string name="DetectFunction-VehicleRegNumber">Vehicle Reg Number</string>
     <string name="DetectFunction-SocialUserId">Social User Id</string>
+    <string name="DetectFunction-LegalEntityName">Legal Entity Name</string>
+    <string name="DetectFunction-LegalEntityId">Legal Entity Id</string>
+    <string name="DetectFunction-OKPO">OKPO</string>
+    <string name="DetectFunction-StateRegContract">State Reg Contract</string>
+    <string name="DetectFunction-UidContractBank">Uid Contract Bank</string>
+    <string name="DetectFunction-ExecDocNumber">Exec Doc Number</string>
+    <string name="DetectFunction-BankAccount">Bank Account</string>
+    <string name="DetectFunction-SberBook">Sber Book</string>
+    <string name="DetectFunction-BankAccountLE">Bank Account Legal Entity</string>
+    <string name="DetectFunction-HashData">Hash Data</string>
     <string name="DetectFunction-DetectBlockedDomains">Domain</string>
     <string name="DetectFunction-Description-Emails">Email</string>
     <string name="DetectFunction-Description-Phones">Phone (+7)</string>
@@ -180,6 +190,16 @@
     <string name="DetectFunction-Description-VIN">VIN Number</string>
     <string name="DetectFunction-Description-VehicleRegNumber">Vehicle Reg Number</string>
     <string name="DetectFunction-Description-SocialUserId">Social User Id</string>
+    <string name="DetectFunction-Description-LegalEntityName">Legal Entity Name</string>
+    <string name="DetectFunction-Description-LegalEntityId">Legal Entity Id</string>
+    <string name="DetectFunction-Description-OKPO">OKPO</string>
+    <string name="DetectFunction-Description-StateRegContract">State Reg Contract</string>
+    <string name="DetectFunction-Description-UidContractBank">Uid Contract Bank</string>
+    <string name="DetectFunction-Description-ExecDocNumber">Exec Doc Number</string>
+    <string name="DetectFunction-Description-BankAccount">Bank Account</string>
+    <string name="DetectFunction-Description-SberBook">Sber Book</string>
+    <string name="DetectFunction-Description-BankAccountLE">Bank Account Legal Entity</string>
+    <string name="DetectFunction-Description-HashData">Hash Data</string>
     <string name="DetectFunction-Description-DetectBlockedDomains">Domain from registry blocked by RKN</string>
 
     <string name="SettingsScreen-ThreadsCount">Threads count</string>

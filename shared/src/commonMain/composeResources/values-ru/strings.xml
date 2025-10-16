@@ -115,7 +115,7 @@
     <string name="DetectFunction-Code">Программный код</string>
     <string name="DetectFunction-Cert">Сертификат</string>
     <string name="DetectFunction-Birthday">Дата рождения</string>
-    <string name="DetectFunction-BirthCert">Свидетельство о рождении</string>
+    <string name="DetectFunction-BirthCert">Св-во о рождении</string>
     <string name="DetectFunction-DeathDate">Дата смерти</string>
     <string name="DetectFunction-ForeignPassport">Иностранный паспорт</string>
     <string name="DetectFunction-RefugeeCert">Беженец</string>
@@ -136,6 +136,16 @@
     <string name="DetectFunction-VIN">VIN-номер</string>
     <string name="DetectFunction-VehicleRegNumber">Номер авто</string>
     <string name="DetectFunction-SocialUserId">Соцсети ID</string>
+    <string name="DetectFunction-LegalEntityName">Наименование ЮЛ</string>
+    <string name="DetectFunction-LegalEntityId">Идентификатор ЮЛ</string>
+    <string name="DetectFunction-OKPO">ОКПО ЮЛ</string>
+    <string name="DetectFunction-StateRegContract">Договор с ФЛ</string>
+    <string name="DetectFunction-UidContractBank">УИД ФЛ</string>
+    <string name="DetectFunction-ExecDocNumber">Номер ИД</string>
+    <string name="DetectFunction-BankAccount">Номер БС ФЛ</string>
+    <string name="DetectFunction-SberBook">Сберкнижка</string>
+    <string name="DetectFunction-BankAccountLE">Номер БС ЮЛ</string>
+    <string name="DetectFunction-HashData">Хеш</string>
     <string name="DetectFunction-DetectBlockedDomains">Домен</string>
     <string name="DetectFunction-Description-Emails">Электронная почта</string>
     <string name="DetectFunction-Description-Phones">Номер телефона (+7)</string>
@@ -178,6 +188,16 @@
     <string name="DetectFunction-Description-VIN">Идентификационный номер транспортного средства VIN</string>
     <string name="DetectFunction-Description-VehicleRegNumber">Регистрационный номер транспортного средства</string>
     <string name="DetectFunction-Description-SocialUserId">Идентификатор в социальных сетях/мессенджерах</string>
+    <string name="DetectFunction-Description-LegalEntityName">Наименование юридического лица</string>
+    <string name="DetectFunction-Description-LegalEntityId">Идентификатор юридического лица</string>
+    <string name="DetectFunction-Description-OKPO">ОКПО юридического лица</string>
+    <string name="DetectFunction-Description-StateRegContract">Номер государственной регистрации договора</string>
+    <string name="DetectFunction-Description-UidContractBank">Уникальный идентификатор договора ФЛ с банком для БКИ</string>
+    <string name="DetectFunction-Description-ExecDocNumber">Номер исполнительного договора</string>
+    <string name="DetectFunction-Description-BankAccount">Номер банковского счета ФЛ</string>
+    <string name="DetectFunction-Description-SberBook">Сберкнижка</string>
+    <string name="DetectFunction-Description-BankAccountLE">Номер банковского счета ЮЛ</string>
+    <string name="DetectFunction-Description-HashData">Хешированные данные</string>
     <string name="DetectFunction-Description-DetectBlockedDomains">Поиск доменов из реестра заблокированных РосКомНадзором</string>
 
     <string name="SettingsScreen-ThreadsCount">Количество потоков</string>

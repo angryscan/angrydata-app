@@ -47,6 +47,16 @@ private val detectFunctionResources = mapOf(
     DetectFunction.VIN to Pair(Res.string.DetectFunction_VIN, Res.string.DetectFunction_Description_VIN),
     DetectFunction.VehicleRegNumber to Pair(Res.string.DetectFunction_VehicleRegNumber, Res.string.DetectFunction_Description_VehicleRegNumber),
     DetectFunction.SocialUserId to Pair(Res.string.DetectFunction_SocialUserId, Res.string.DetectFunction_Description_SocialUserId),
+    DetectFunction.LegalEntityName to Pair(Res.string.DetectFunction_LegalEntityName, Res.string.DetectFunction_Description_LegalEntityName),
+    DetectFunction.LegalEntityId to Pair(Res.string.DetectFunction_LegalEntityId, Res.string.DetectFunction_Description_LegalEntityId),
+    DetectFunction.OKPO to Pair(Res.string.DetectFunction_OKPO, Res.string.DetectFunction_Description_OKPO),
+    DetectFunction.StateRegContract to Pair(Res.string.DetectFunction_StateRegContract, Res.string.DetectFunction_Description_StateRegContract),
+    DetectFunction.UidContractBank to Pair(Res.string.DetectFunction_UidContractBank, Res.string.DetectFunction_Description_UidContractBank),
+    DetectFunction.ExecDocNumber to Pair(Res.string.DetectFunction_ExecDocNumber, Res.string.DetectFunction_Description_ExecDocNumber),
+    DetectFunction.BankAccount to Pair(Res.string.DetectFunction_BankAccount, Res.string.DetectFunction_Description_BankAccount),
+    DetectFunction.SberBook to Pair(Res.string.DetectFunction_SberBook, Res.string.DetectFunction_Description_SberBook),
+    DetectFunction.BankAccountLE to Pair(Res.string.DetectFunction_BankAccountLE, Res.string.DetectFunction_Description_BankAccountLE),
+    DetectFunction.HashData to Pair(Res.string.DetectFunction_HashData, Res.string.DetectFunction_Description_HashData),
 )
 
 suspend fun DetectFunction.readableName(): String {

@@ -44,6 +44,20 @@ class ScanService : KoinComponent {
     private var migrationRequired = false
 
     init {
+        if (File(
+                AppFiles
+                    .MigrationsDirectory
+                    .resolve("V2__AddMissingColumns.sql")
+                    .absolutePathString()
+            ).exists()
+        ) {
+            File(AppFiles.MigrationsDirectory.absolutePathString()).listFiles()?.forEach {
+                it.delete()
+            }
+            appSettings.firstMigration.value = true
+            appSettings.save()
+        }
+
         transaction(database.connection) {
             SchemaUtils.create(
                 Tasks,
@@ -67,7 +81,7 @@ class ScanService : KoinComponent {
                 MigrationUtils.generateMigrationScript(
                     Tasks,
                     scriptDirectory = AppFiles.MigrationsDirectory.absolutePathString(),
-                    scriptName = "V2__AddMissingColumns",
+                    scriptName = "V2__FirstMigration",
                 )
             }
         }

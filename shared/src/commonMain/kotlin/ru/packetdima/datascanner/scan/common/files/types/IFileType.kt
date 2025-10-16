@@ -26,14 +26,6 @@ interface IFileType : KoinComponent {
         fastScan: Boolean = false
     ): List<Location>
 
-//    fun getEntries(text: String, engine: IScanEngine, matcher: IMatcher): List<Match> {
-//
-//        return matcher.scan(text = text).toList()
-//    }
-
-//    fun scan(text: String, engine: IScanEngine): List<Match> {
-//        return engine.scan(text)
-//    }
     fun scan(text: String, engine: IScanEngine): Map<IMatcher, Int> {
         return engine
             .scan(text)

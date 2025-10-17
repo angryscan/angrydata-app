@@ -6,6 +6,8 @@ layout: default
 
 [![Latest release](https://img.shields.io/github/v/release/angryscan/angrydata-app?sort=semver)](https://github.com/angryscan/angrydata-app/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/angryscan/angrydata-app/total.svg)](https://github.com/angryscan/angrydata-app/releases)
+[![Release date](https://img.shields.io/github/release-date/angryscan/angrydata-app?label=release%20date&display_date=published_at&color=orange)](https://github.com/angryscan/angrydata-app/releases/latest)
+
 
 Big Data Scanner - кроссплатформенный сканер, выявляющих ценные данные (далее сканер). Сканер запускается на локальной машине и не требует для установки прав администратора.
 Сканер не вносит никаких изменений в проверяемые файлы. Для сканирования требуется доступ только для чтения.

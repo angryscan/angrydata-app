@@ -64,5 +64,5 @@ The scanner is intended to be a universal tool for scanning everything. Currentl
 [![Latest release](https://img.shields.io/github/v/release/angryscan/angrydata-app?sort=semver)](https://github.com/angryscan/angrydata-app/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/angryscan/angrydata-app/total.svg)](https://github.com/angryscan/angrydata-app/releases)
 
-- **Latest:** https://github.com/angryscan/angrydata-app/releases/latest
-- **All releases:** https://github.com/angryscan/angrydata-app/releases
+- **Latest:** [https://github.com/angryscan/angrydata-app/releases/latest](https://github.com/angryscan/angrydata-app/releases/latest)
+- **All releases:** [https://github.com/angryscan/angrydata-app/releases](https://github.com/angryscan/angrydata-app/releases)

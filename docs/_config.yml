@@ -1,6 +1,6 @@
 title: "Angry Data Scanner"
 description: "Fast data scanner with friendly UI"
-theme: minima
+remote_theme: pages-themes/cayman@v0.2.0
 plugins:
   - jekyll-seo-tag
   - jekyll-remote-theme

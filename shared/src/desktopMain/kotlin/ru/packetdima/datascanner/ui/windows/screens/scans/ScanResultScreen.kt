@@ -62,14 +62,14 @@ import kotlin.time.toDuration
 @Composable
 fun ScanResultScreen(
     taskId: Int,
-    onCloseClick: () -> Unit
+    onBackClick: () -> Unit
 ) {
     val scanService = koinInject<ScanService>()
     val appSettings = koinInject<AppSettings>()
     val task = scanService.tasks.tasks.value.firstOrNull { it.id.value == taskId }
 
     if (task == null) {
-        onCloseClick()
+        onBackClick()
         return
     }
 
@@ -253,7 +253,7 @@ fun ScanResultScreen(
                         modifier = Modifier.weight(0.8f)
                     ) {
                         IconButton(
-                            onClick = onCloseClick
+                            onClick = onBackClick
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.ArrowBackIosNew,
@@ -400,7 +400,7 @@ fun ScanResultScreen(
                                 .clip(MaterialTheme.shapes.medium)
                                 .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
                                 .clickable {
-                                    onCloseClick()
+                                    onBackClick()
                                     coroutineScope.launch {
                                         scanService.deleteTask(task)
                                     }

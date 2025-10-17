@@ -190,15 +190,15 @@ fun MainWindow(
                         ) {
                             composable<AppScreen.Main> {
                                 MainScreen(
-                                    showScan = {
-                                        navController.navigate(AppScreen.Scans)
+                                    showScan = { taskID ->
+                                        navController.navigate(AppScreen.ScanResult(taskID))
                                     }
                                 )
                             }
                             composable<AppScreen.Scans> {
                                 ScansScreen(
-                                    onTaskClick = { taskId ->
-                                        navController.navigate(AppScreen.ScanResult(taskId))
+                                    onTaskClick = { taskID ->
+                                        navController.navigate(AppScreen.ScanResult(taskID))
                                     }
                                 )
                             }
@@ -206,7 +206,7 @@ fun MainWindow(
                                 val scanResult: AppScreen.ScanResult = backStackEntry.toRoute()
                                 ScanResultScreen(
                                     scanResult.scanId,
-                                    onCloseClick = { navController.navigate(AppScreen.Scans) }
+                                    onBackClick = { navController.popBackStack() }
                                 )
                             }
                             composable<AppScreen.Settings> {

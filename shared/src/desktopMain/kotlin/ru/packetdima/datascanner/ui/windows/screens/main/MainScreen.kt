@@ -21,7 +21,7 @@ import ru.packetdima.datascanner.ui.windows.screens.main.subscreens.S3Screen
 
 @Composable
 fun MainScreen(
-    showScan:() -> Unit
+    showScan:(taskID:Int) -> Unit
 ) {
     var settingsExpanded by remember { mutableStateOf(false) }
 
@@ -76,7 +76,7 @@ fun MainScreen(
                         hideSettings = {
                             settingsExpanded = false
                         },
-                        expandScanState = showScan
+                        taskStarted = showScan
                     )
                 }
                 composable<MainScreenConnector.S3> {
@@ -90,7 +90,7 @@ fun MainScreen(
                         hideSettings = {
                             settingsExpanded = false
                         },
-                        expandScanState = showScan
+                        taskStarted = showScan
                     )
                 }
                 composable<MainScreenConnector.HTTP> {
@@ -104,7 +104,7 @@ fun MainScreen(
                         hideSettings = {
                             settingsExpanded = false
                         },
-                        expandScanState = showScan
+                        taskStarted = showScan
                     )
                 }
             }

@@ -1,9 +1,8 @@
 title: "Angry Data Scanner"
 description: "Fast data scanner with friendly UI"
-remote_theme: pages-themes/cayman@v0.2.0
+# Можно оставить встроенную тему Pages или без неё
 plugins:
   - jekyll-seo-tag
-  - jekyll-remote-theme
 
 permalink: /:path/
 

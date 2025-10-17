@@ -1,0 +1,9 @@
+---
+layout: default
+---
+<article class="page">
+    {% if page.h1 != false %}
+    <h1>{{ page.title | default: site.title }}</h1>
+    {% endif %}
+    {{ content }}
+</article>

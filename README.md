@@ -1,7 +1,3 @@
----
-title: "Fast data scanner with friendly UI|angrydata-app"
-layout: default
----
 🇷🇺 [Русский](README.ru.md)
 
 [![Latest release](https://img.shields.io/github/v/release/angryscan/angrydata-app?sort=semver)](https://github.com/angryscan/angrydata-app/releases/latest)
@@ -65,7 +61,7 @@ The scanner is intended to be a universal tool for scanning everything. Currentl
 `Windows`, `Linux `
 `400MB HDD` `4GB RAM` `1.3Ghz CPU`
 
-## [Console mode](doc/CONSOLE.md)
+## [Console mode](docs/en/CONSOLE.md)
 
 ## Direct Download
 

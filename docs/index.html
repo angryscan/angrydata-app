@@ -1,0 +1,13 @@
+---
+layout: default
+title: "Language"
+h1: false
+---
+<script>
+    (function(){
+        var lang=(navigator.language||'').toLowerCase();
+        if (lang.startsWith('ru')) window.location.href='{{ "/ru/" | relative_url }}';
+        else window.location.href='{{ "/en/" | relative_url }}';
+    })();
+</script>
+<p><a href="{{ '/en/' | relative_url }}">English</a> · <a href="{{ '/ru/' | relative_url }}">Русский</a></p>

@@ -57,6 +57,11 @@ private val detectFunctionResources = mapOf(
     DetectFunction.SberBook to Pair(Res.string.DetectFunction_SberBook, Res.string.DetectFunction_Description_SberBook),
     DetectFunction.BankAccountLE to Pair(Res.string.DetectFunction_BankAccountLE, Res.string.DetectFunction_Description_BankAccountLE),
     DetectFunction.HashData to Pair(Res.string.DetectFunction_HashData, Res.string.DetectFunction_Description_HashData),
+    DetectFunction.Geo to Pair(Res.string.DetectFunction_Geo, Res.string.DetectFunction_Description_Geo),
+    DetectFunction.EducationLicense to Pair(Res.string.DetectFunction_EducationLicense, Res.string.DetectFunction_Description_EducationLicense),
+    DetectFunction.IdentityDocType to Pair(Res.string.DetectFunction_IdentityDocType, Res.string.DetectFunction_Description_IdentityDocType),
+    DetectFunction.MaritalStatus to Pair(Res.string.DetectFunction_MaritalStatus, Res.string.DetectFunction_Description_MaritalStatus),
+    DetectFunction.EducationLevel to Pair(Res.string.DetectFunction_EducationLevel, Res.string.DetectFunction_Description_EducationLevel),
 )
 
 suspend fun DetectFunction.readableName(): String {

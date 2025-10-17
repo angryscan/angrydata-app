@@ -146,6 +146,11 @@
     <string name="DetectFunction-SberBook">Сберкнижка</string>
     <string name="DetectFunction-BankAccountLE">Номер БС ЮЛ</string>
     <string name="DetectFunction-HashData">Хеш</string>
+    <string name="DetectFunction-Geo">Геолокация</string>
+    <string name="DetectFunction-EducationLicense">Образ-ая лицензия</string>
+    <string name="DetectFunction-IdentityDocType">Наименование ДУЛ</string>
+    <string name="DetectFunction-MaritalStatus">Семейное положение</string>
+    <string name="DetectFunction-EducationLevel">Уровень образования</string>
     <string name="DetectFunction-DetectBlockedDomains">Домен</string>
     <string name="DetectFunction-Description-Emails">Электронная почта</string>
     <string name="DetectFunction-Description-Phones">Номер телефона (+7)</string>
@@ -198,6 +203,11 @@
     <string name="DetectFunction-Description-SberBook">Сберкнижка</string>
     <string name="DetectFunction-Description-BankAccountLE">Номер банковского счета ЮЛ</string>
     <string name="DetectFunction-Description-HashData">Хешированные данные</string>
+    <string name="DetectFunction-Description-Geo">Геолокация</string>
+    <string name="DetectFunction-Description-EducationLicense">Номер лицензии обучающей организации</string>
+    <string name="DetectFunction-Description-IdentityDocType">Наименование вида документа удостоверяющего личность</string>
+    <string name="DetectFunction-Description-MaritalStatus">Семейное положение</string>
+    <string name="DetectFunction-Description-EducationLevel">Уровень образования</string>
     <string name="DetectFunction-Description-DetectBlockedDomains">Поиск доменов из реестра заблокированных РосКомНадзором</string>
 
     <string name="SettingsScreen-ThreadsCount">Количество потоков</string>

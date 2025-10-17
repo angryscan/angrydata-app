@@ -148,6 +148,11 @@
     <string name="DetectFunction-SberBook">Sber Book</string>
     <string name="DetectFunction-BankAccountLE">Bank Account Legal Entity</string>
     <string name="DetectFunction-HashData">Hash Data</string>
+    <string name="DetectFunction-Geo">Geo</string>
+    <string name="DetectFunction-EducationLicense">Education License</string>
+    <string name="DetectFunction-IdentityDocType">Identity Doc Type</string>
+    <string name="DetectFunction-MaritalStatus">Marital Status</string>
+    <string name="DetectFunction-EducationLevel">Education Level</string>
     <string name="DetectFunction-DetectBlockedDomains">Domain</string>
     <string name="DetectFunction-Description-Emails">Email</string>
     <string name="DetectFunction-Description-Phones">Phone (+7)</string>
@@ -200,6 +205,11 @@
     <string name="DetectFunction-Description-SberBook">Sber Book</string>
     <string name="DetectFunction-Description-BankAccountLE">Bank Account Legal Entity</string>
     <string name="DetectFunction-Description-HashData">Hash Data</string>
+    <string name="DetectFunction-Description-Geo">Geo</string>
+    <string name="DetectFunction-Description-EducationLicense">Education License</string>
+    <string name="DetectFunction-Description-IdentityDocType">Identity Doc Type</string>
+    <string name="DetectFunction-Description-MaritalStatus">Marital Status</string>
+    <string name="DetectFunction-Description-EducationLevel">Education Level</string>
     <string name="DetectFunction-Description-DetectBlockedDomains">Domain from registry blocked by RKN</string>
 
     <string name="SettingsScreen-ThreadsCount">Threads count</string>

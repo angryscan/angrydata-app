@@ -16,10 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.WindowPlacement
-import androidx.compose.ui.window.rememberDialogState
-import androidx.compose.ui.window.rememberWindowState
+import androidx.compose.ui.window.*
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -31,6 +28,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import ru.packetdima.datascanner.common.AppSettings
+import ru.packetdima.datascanner.common.OS
 import ru.packetdima.datascanner.logging.LogLevel
 import ru.packetdima.datascanner.navigation.AppScreen
 import ru.packetdima.datascanner.resources.Res
@@ -63,6 +61,7 @@ fun MainWindow(
     val appSettings = koinInject<AppSettings>()
 
     val hideOnMinimize by remember { appSettings.hideOnMinimize }
+    val isMac = OS.currentOS() == OS.MAC
 
     val navController = rememberNavController()
 
@@ -147,10 +146,11 @@ fun MainWindow(
                             windowPlacement = windowState.placement,
                             expanded = windowState.placement == WindowPlacement.Maximized,
                             onMinimizeClick = {
-                                if (hideOnMinimize)
+                                if (hideOnMinimize && !isMac) {
                                     onHideRequest()
-                                else
+                                } else {
                                     windowState.isMinimized = true
+                                }
                             },
                             onExpandClick = {
                                 if (windowState.placement == WindowPlacement.Maximized)

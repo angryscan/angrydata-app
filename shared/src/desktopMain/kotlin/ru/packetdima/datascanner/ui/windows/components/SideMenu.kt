@@ -104,13 +104,14 @@ fun SideMenu(navController: NavController) {
             DescriptionTooltip(
                 description = stringResource(Res.string.SideMenu_MainPage),
                 delay = 1000
-            ){
+            ) {
                 SideMenuItem(
                     isSelected = destination?.hasRoute(AppScreen.Main::class) ?: false,
                     expanded = expanded,
                     icon = painterResource(Res.drawable.SideMenu_IconMainPage),
                     text = stringResource(Res.string.SideMenu_MainPage),
                     onClick = { navController.navigate(AppScreen.Main) },
+                    enabled = destination?.hasRoute(AppScreen.Main::class)?.not() ?: true
                 )
             }
 
@@ -124,7 +125,15 @@ fun SideMenu(navController: NavController) {
                     expanded = expanded,
                     icon = painterResource(Res.drawable.SideMenu_IconScans),
                     text = stringResource(Res.string.SideMenu_ScanListPage),
-                    onClick = { navController.navigate(AppScreen.Scans) },
+                    onClick = {
+                        if (destination?.hasRoute(AppScreen.Scans::class) ?: false ||
+                            destination?.hasRoute(AppScreen.ScanResult::class) ?: false
+                        ) {
+                            navController.navigate(AppScreen.Main)
+                        } else {
+                            navController.navigate(AppScreen.Scans)
+                        }
+                    },
                 )
             }
 
@@ -139,7 +148,13 @@ fun SideMenu(navController: NavController) {
                     expanded = expanded,
                     icon = painterResource(Res.drawable.SideMenu_IconSettings),
                     text = stringResource(Res.string.SideMenu_SettingsPage),
-                    onClick = { navController.navigate(AppScreen.Settings) },
+                    onClick = {
+                        if (destination?.hasRoute(AppScreen.Settings::class) ?: false) {
+                            navController.navigate(AppScreen.Main)
+                        } else {
+                            navController.navigate(AppScreen.Settings)
+                        }
+                    },
                 )
             }
 
@@ -152,7 +167,13 @@ fun SideMenu(navController: NavController) {
                     expanded = expanded,
                     icon = painterResource(Res.drawable.SideMenu_IconAbout),
                     text = stringResource(Res.string.SideMenu_AboutPage),
-                    onClick = { navController.navigate(AppScreen.About) },
+                    onClick = {
+                        if (destination?.hasRoute(AppScreen.About::class) ?: false) {
+                            navController.navigate(AppScreen.Main)
+                        } else {
+                            navController.navigate(AppScreen.About)
+                        }
+                    },
                 )
             }
         }
@@ -178,7 +199,7 @@ fun SideMenuItem(
                 color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
             )
             .clickable(
-                enabled = enabled && !isSelected,
+                enabled = enabled,
                 onClick = onClick
             )
             .padding(14.dp, 6.dp),

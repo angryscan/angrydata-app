@@ -1,5 +1,5 @@
 ---
-title: "Fast data scanner with friendly UI|angrydata-app"
+title: "Fast data scanner with friendly UI|Angry Data Scanner"
 layout: default
 ---
 🇷🇺 [Русский](README.ru.md)

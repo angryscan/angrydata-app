@@ -1,4 +1,8 @@
-🇺🇸 [English](README.md)
+---
+title: "Быстрый сканер данных с удобным интерфейсом|angrydata-app"
+layout: default
+---
+🇺🇸 [English](index.md)
 
 [![Latest release](https://img.shields.io/github/v/release/angryscan/angrydata-app?sort=semver)](https://github.com/angryscan/angrydata-app/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/angryscan/angrydata-app/total.svg)](https://github.com/angryscan/angrydata-app/releases)
@@ -59,7 +63,7 @@ Big Data Scanner - кроссплатформенный сканер, выявл
 Системные требования:
 `400MB HDD` `4GB RAM` `1.3Ghz CPU`
 
-## [Консольный режим](docs/ru/CONSOLE.md)
+## [Консольный режим](doc/CONSOLE.ru.md)
 
 ## Прямая загрузка
 

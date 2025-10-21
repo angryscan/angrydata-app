@@ -454,16 +454,25 @@ fun ScanResultScreen(
                             )
                         }
                     }
-                    LinearProgressIndicator(
-                        progress = {
-                            animatedProgress
-                        },
-                        color = state.color(),
+                    Column(
                         modifier = Modifier.width(600.dp),
-                        strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
-                        trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-
-                    )
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = "$progress% (${scanned + skipped} / $selectedFiles)",
+                            fontSize = 12.sp,
+                            color = androidx.compose.ui.graphics.Color.White
+                        )
+                        LinearProgressIndicator(
+                            progress = {
+                                animatedProgress
+                            },
+                            color = state.color(),
+                            modifier = Modifier.fillMaxWidth(),
+                            strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
+                            trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        )
+                    }
                 }
 
             }

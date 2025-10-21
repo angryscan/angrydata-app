@@ -241,6 +241,7 @@ fun FileShareScreen(
                                 selectionType = SelectionTypes.Folder
                                 selectionTypeChooserExpanded = false
                                 scanSettings.save()
+                                folderPicker.launch()
                             },
                             text = { Text(text = stringResource(Res.string.MainScreen_SelectTypeFolder)) }
                         )
@@ -251,6 +252,7 @@ fun FileShareScreen(
                                 selectionType = SelectionTypes.File
                                 selectionTypeChooserExpanded = false
                                 scanSettings.save()
+                                filePicker.launch()
                             },
                             text = { Text(text = stringResource(Res.string.MainScreen_SelectTypeFile)) }
                         )
@@ -261,6 +263,7 @@ fun FileShareScreen(
                                 selectionType = SelectionTypes.FileWithPaths
                                 selectionTypeChooserExpanded = false
                                 scanSettings.save()
+                                pathFilePicker.launch()
                             },
                             text = { Text(text = stringResource(Res.string.MainScreen_SelectTypeFileWithPaths)) }
                         )

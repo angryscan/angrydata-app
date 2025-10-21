@@ -483,13 +483,12 @@ fun ScanResultScreen(
                     .height(IntrinsicSize.Min),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                ScanStat(
-                    totalFiles = totalFiles,
-                    selectedFiles = selectedFiles,
-                    foundFiles = foundFiles,
-                    folderSize = folderSize,
-                    scanTime = scanTime,
-                    scoreSum = scoreSum
+                ScanTimeStatItem(
+                    startedAt = startedAt,
+                    finishedAt = finishedAt,
+                    pausedAt = pausedAt,
+                    state = state,
+                    progress = progress
                 )
 
                 VerticalDivider(
@@ -497,12 +496,13 @@ fun ScanResultScreen(
                     color = MaterialTheme.colorScheme.primary
                 )
 
-                ScanTimeStatItem(
-                    startedAt = startedAt,
-                    finishedAt = finishedAt,
-                    pausedAt = pausedAt,
-                    state = state,
-                    progress = progress
+                ScanStat(
+                    totalFiles = totalFiles,
+                    selectedFiles = selectedFiles,
+                    foundFiles = foundFiles,
+                    folderSize = folderSize,
+                    scanTime = scanTime,
+                    scoreSum = scoreSum
                 )
             }
 

@@ -1,7 +1,7 @@
 package ru.packetdima.datascanner.ui.windows.screens.scans
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,8 +14,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.unit.dp
@@ -50,7 +48,12 @@ import ru.packetdima.datascanner.ui.extensions.color
 import ru.packetdima.datascanner.ui.extensions.icon
 import ru.packetdima.datascanner.ui.strings.composableName
 import ru.packetdima.datascanner.ui.windows.components.DetectFunctionTooltip
-import ru.packetdima.datascanner.ui.windows.screens.scans.components.*
+import ru.packetdima.datascanner.ui.windows.screens.scans.components.AttributeFilterChip
+import ru.packetdima.datascanner.ui.windows.screens.scans.components.ResultTable
+import ru.packetdima.datascanner.ui.windows.screens.scans.components.ScanStat
+import ru.packetdima.datascanner.ui.windows.screens.scans.components.ScanTimeStatItem
+import ru.packetdima.datascanner.ui.windows.screens.scans.components.SortColumn
+import ru.packetdima.datascanner.ui.windows.screens.scans.components.comparator
 import java.awt.datatransfer.StringSelection
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -59,14 +62,14 @@ import kotlin.time.toDuration
 @Composable
 fun ScanResultScreen(
     taskId: Int,
-    onBackClick: () -> Unit
+    onCloseClick: () -> Unit
 ) {
     val scanService = koinInject<ScanService>()
     val appSettings = koinInject<AppSettings>()
     val task = scanService.tasks.tasks.value.firstOrNull { it.id.value == taskId }
 
     if (task == null) {
-        onBackClick()
+        onCloseClick()
         return
     }
 
@@ -94,8 +97,6 @@ fun ScanResultScreen(
     val totalFiles by task.totalFiles.collectAsState()
 
     val folderSize by task.folderSize.collectAsState()
-    val selectedFilesSize by task.selectedFilesSize.collectAsState()
-    val foundFilesSize by task.foundFilesSize.collectAsState()
 
     val foundAttributes by task.foundAttributes.collectAsState()
 
@@ -252,7 +253,7 @@ fun ScanResultScreen(
                         modifier = Modifier.weight(0.8f)
                     ) {
                         IconButton(
-                            onClick = onBackClick
+                            onClick = onCloseClick
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.ArrowBackIosNew,
@@ -399,7 +400,7 @@ fun ScanResultScreen(
                                 .clip(MaterialTheme.shapes.medium)
                                 .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
                                 .clickable {
-                                    onBackClick()
+                                    onCloseClick()
                                     coroutineScope.launch {
                                         scanService.deleteTask(task)
                                     }
@@ -454,68 +455,23 @@ fun ScanResultScreen(
                         }
                     }
                     Column(
-                        modifier = Modifier.width(800.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        modifier = Modifier.width(600.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Row(
+                        Text(
+                            text = "$progress% (${scanned + skipped} / $selectedFiles)",
+                            fontSize = 12.sp,
+                            color = androidx.compose.ui.graphics.Color.White
+                        )
+                        LinearProgressIndicator(
+                            progress = {
+                                animatedProgress
+                            },
+                            color = state.color(),
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "$progress% (${scanned + skipped} / $selectedFiles)",
-                                fontSize = 14.sp,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(8.dp)
-                                .clip(MaterialTheme.shapes.small)
-                                .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
-                        ) {
-                            // Progress fill with bright gradient
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .fillMaxWidth(animatedProgress)
-                                    .background(state.color())
-                            )
-                            
-                            // Shimmer effect for active scanning
-                            if (state == TaskState.SCANNING) {
-                                val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
-                                val shimmerOffset by infiniteTransition.animateFloat(
-                                    initialValue = -1f,
-                                    targetValue = 1f,
-                                    animationSpec = infiniteRepeatable(
-                                        animation = tween(1500, easing = LinearEasing),
-                                        repeatMode = RepeatMode.Restart
-                                    ),
-                                    label = "shimmer"
-                                )
-                                
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxHeight()
-                                        .fillMaxWidth(animatedProgress)
-                                        .background(
-                                            brush = Brush.horizontalGradient(
-                                                colors = listOf(
-                                                    Color.Transparent,
-                                                    Color.White.copy(alpha = 0.4f),
-                                                    Color.Transparent
-                                                ),
-                                                startX = shimmerOffset * 300f,
-                                                endX = (shimmerOffset + 0.3f) * 300f
-                                            )
-                                        )
-                                )
-                            }
-                        }
+                            strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
+                            trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        )
                     }
                 }
 
@@ -527,11 +483,13 @@ fun ScanResultScreen(
                     .height(IntrinsicSize.Min),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                ScanTimeStatItem(
-                    startedAt = startedAt,
-                    finishedAt = finishedAt,
-                    pausedAt = pausedAt,
-                    state = state
+                ScanStat(
+                    totalFiles = totalFiles,
+                    selectedFiles = selectedFiles,
+                    foundFiles = foundFiles,
+                    folderSize = folderSize,
+                    scanTime = scanTime,
+                    scoreSum = scoreSum
                 )
 
                 VerticalDivider(
@@ -539,15 +497,12 @@ fun ScanResultScreen(
                     color = MaterialTheme.colorScheme.primary
                 )
 
-                ScanStat(
-                    totalFiles = totalFiles,
-                    selectedFiles = selectedFiles,
-                    foundFiles = foundFiles,
-                    folderSize = folderSize,
-                    selectedFilesSize = selectedFilesSize,
-                    foundFilesSize = foundFilesSize,
-                    scanTime = scanTime,
-                    scoreSum = scoreSum
+                ScanTimeStatItem(
+                    startedAt = startedAt,
+                    finishedAt = finishedAt,
+                    pausedAt = pausedAt,
+                    state = state,
+                    progress = progress
                 )
             }
 

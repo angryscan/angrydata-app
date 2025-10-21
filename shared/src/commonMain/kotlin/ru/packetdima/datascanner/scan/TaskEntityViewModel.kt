@@ -106,6 +106,10 @@ class TaskEntityViewModel(
     val folderSize
         get() = _folderSize.asStateFlow()
 
+    private var _selectedFilesSize = MutableStateFlow(0L)
+    val selectedFilesSize
+        get() = _selectedFilesSize.asStateFlow()
+
     init {
         if (_state.value == TaskState.LOADING) {
             taskScope.launch {
@@ -181,6 +185,13 @@ class TaskEntityViewModel(
                             TaskFiles.task.eq(dbTask.id)
                         }
                         .count()
+                    
+                    _selectedFilesSize.value = TaskFiles
+                        .select(TaskFiles.size)
+                        .where {
+                            TaskFiles.task.eq(dbTask.id)
+                        }
+                        .sumOf { it[TaskFiles.size] }
                 }
 
 

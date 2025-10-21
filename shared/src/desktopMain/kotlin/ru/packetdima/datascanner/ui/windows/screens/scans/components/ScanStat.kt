@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import ru.packetdima.datascanner.resources.*
+import ru.packetdima.datascanner.ui.extensions.toHumanReadable
 
 @Composable
 fun ScanStat(
@@ -13,6 +14,7 @@ fun ScanStat(
     selectedFiles: Long,
     foundFiles: Long,
     folderSize: String,
+    selectedFilesSize: Long,
     scanTime: String,
     scoreSum: Long
 ) {
@@ -30,7 +32,11 @@ fun ScanStat(
     //Selected files count
     ScanStatItem(
         title = stringResource(Res.string.Task_SelectedFiles),
-        text = selectedFiles.toString()
+        text = if (selectedFiles > 0 && selectedFilesSize > 0) {
+            "$selectedFiles (${selectedFilesSize.toHumanReadable()})"
+        } else {
+            selectedFiles.toString()
+        }
     )
 
     VerticalDivider(
@@ -42,17 +48,6 @@ fun ScanStat(
     ScanStatItem(
         title = stringResource(Res.string.Task_FoundFiles),
         text = foundFiles.toString()
-    )
-
-    VerticalDivider(
-        thickness = 1.dp,
-        color = MaterialTheme.colorScheme.primary
-    )
-
-    //Folder size
-    ScanStatItem(
-        title = stringResource(Res.string.Task_FolderSize),
-        text = folderSize
     )
 
     VerticalDivider(

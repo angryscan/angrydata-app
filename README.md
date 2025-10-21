@@ -1,7 +1,3 @@
----
-title: "Fast data scanner with friendly UI|Angry Data Scanner"
-layout: default
----
 🇷🇺 [Русский](README.ru.md)
 
 [![Latest release](https://img.shields.io/github/v/release/angryscan/angrydata-app?sort=semver)](https://github.com/angryscan/angrydata-app/releases/latest)

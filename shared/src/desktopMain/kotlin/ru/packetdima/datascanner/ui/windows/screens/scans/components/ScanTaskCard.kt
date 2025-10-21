@@ -68,6 +68,7 @@ fun ScanTaskCard(
     val progress = if (selectedFiles > 0) 100 * (scanned + skipped) / selectedFiles else 0
 
     val folderSize by taskEntity.folderSize.collectAsState()
+    val selectedFilesSize by taskEntity.selectedFilesSize.collectAsState()
 
     val pausedAtInstant = pausedAt?.toInstant(TimeZone.currentSystemDefault())
     val startedAtInstant = startedAt?.toInstant(TimeZone.currentSystemDefault())
@@ -214,6 +215,7 @@ fun ScanTaskCard(
                     selectedFiles = selectedFiles,
                     foundFiles = foundFiles,
                     folderSize = folderSize,
+                    selectedFilesSize = selectedFilesSize,
                     scanTime = scanTime,
                     scoreSum = scoreSum
                 )

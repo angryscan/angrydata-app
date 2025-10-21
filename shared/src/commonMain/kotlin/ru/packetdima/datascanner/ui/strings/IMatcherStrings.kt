@@ -14,9 +14,8 @@ import org.angryscan.common.matchers.UserSignature
 import ru.packetdima.datascanner.resources.*
 import kotlin.reflect.KClass
 
-// Маппинг IMatcher к ресурсам
 private val matcherResources: Map<KClass<out IMatcher>, Pair<StringResource, StringResource>> = buildMap {
-    // Базовые матчеры из библиотеки angryscan (в алфавитном порядке)
+    // Base matchers
     put(AccountNumber::class, Res.string.Matcher_AccountNumber to Res.string.Matcher_Description_AccountNumber)
     put(Address::class, Res.string.Matcher_Address to Res.string.Matcher_Description_Address)
     put(BankAccount::class, Res.string.Matcher_BankAccount to Res.string.Matcher_Description_BankAccount)
@@ -70,13 +69,13 @@ private val matcherResources: Map<KClass<out IMatcher>, Pair<StringResource, Str
     put(UidContractBankBki::class, Res.string.Matcher_UidContractBank to Res.string.Matcher_Description_UidContractBank)
     put(VIN::class, Res.string.Matcher_VIN to Res.string.Matcher_Description_VIN)
     put(VehicleRegNumber::class, Res.string.Matcher_VehicleRegNumber to Res.string.Matcher_Description_VehicleRegNumber)
-    
-    // Дополнительные детекторы проекта
+
+    // Extension detectors
     put(CertDetectFun::class, Res.string.Matcher_Cert to Res.string.Matcher_Description_Cert)
     put(CodeDetectFun::class, Res.string.Matcher_Code to Res.string.Matcher_Description_Code)
     put(RKNDomainDetectFun::class, Res.string.Matcher_DetectBlockedDomains to Res.string.Matcher_Description_DetectBlockedDomains)
     
-    // Пользовательские сигнатуры
+    // User signatures
     put(UserSignature::class, Res.string.Matcher_UserSignature_Title to Res.string.Matcher_UserSignature_Title)
 }
 

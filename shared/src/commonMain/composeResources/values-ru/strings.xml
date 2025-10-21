@@ -102,7 +102,7 @@
     <string name="Matcher-Emails">Эл. адрес</string>
     <string name="Matcher-Phones">Телефон</string>
     <string name="Matcher-CardNumbers">Номер карты</string>
-    <string name="Matcher-CarNumber">Номер авто</string>
+    <string name="Matcher-CarNumber">Номер авто (old)</string>
     <string name="Matcher-SNILS">СНИЛС</string>
     <string name="Matcher-Passport">Паспорт</string>
     <string name="Matcher-OMS">ОМС</string>

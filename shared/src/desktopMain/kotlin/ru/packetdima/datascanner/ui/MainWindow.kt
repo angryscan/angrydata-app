@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
+import java.awt.Dimension
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -99,6 +100,10 @@ fun MainWindow(
         alwaysOnTop = focusRemember
     ) {
         mainWindow = this.window
+
+        LaunchedEffect(Unit) {
+            window.minimumSize = Dimension(1280, 720)
+        }
 
         var eulaAgreedVersion by remember { appSettings.eulaAgreedVersion }
         val eulaVersion = stringResource(Res.string.eula_version).toInt()

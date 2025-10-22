@@ -49,7 +49,7 @@ fun FileShareScreen(
     settingsExpanded: Boolean,
     expandSettings: () -> Unit,
     hideSettings: () -> Unit,
-    expandScanState: () -> Unit
+    taskStarted: (taskID:Int) -> Unit
 ) {
     val scanService = koinInject<ScanService>()
 
@@ -314,7 +314,7 @@ fun FileShareScreen(
                                     connector = ConnectorFileShare()
                                 )
                                 scanService.startTask(task)
-                                expandScanState()
+                                taskStarted(task.dbTask.id.value)
 
                             }
                         } else {

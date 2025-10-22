@@ -16,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogState
 import androidx.compose.ui.window.rememberDialogState
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -51,12 +52,11 @@ fun SettingsScreen() {
     val descriptionDialogState = rememberDialogState(width = 600.dp, height = 450.dp)
     
     var showLicenseDialog by remember { mutableStateOf(false) }
-    val licenseDialogState = rememberDialogState(width = 600.dp, height = 580.dp)
+    val licenseDialogState = rememberDialogState(width = 600.dp, height = 600.dp)
 
     Box(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 32.dp),
+            .fillMaxSize(),
         contentAlignment = Alignment.TopCenter
     ) {
         Surface(
@@ -242,7 +242,7 @@ fun SettingsScreen() {
                     title = stringResource(Res.string.SettingsScreen_Logging)
                 ) {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(32.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(
@@ -276,8 +276,7 @@ fun SettingsScreen() {
                                 text = stringResource(Res.string.SettingsScreen_OpenFolder),
                                 fontSize = 14.sp,
                                 lineHeight = 14.sp,
-                                fontWeight = MaterialTheme.typography.bodyMedium.fontWeight,
-                                textAlign = TextAlign.Center
+                                fontWeight = MaterialTheme.typography.bodyMedium.fontWeight
                             )
                         }
                     }

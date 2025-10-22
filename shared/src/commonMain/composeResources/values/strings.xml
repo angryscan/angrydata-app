@@ -1,6 +1,6 @@
 <resources>
     <string name="locale">English</string>
-    <string name="appName">Big Data Scanner</string>
+    <string name="appName">Angry Data Scanner</string>
     <string name="plannerWindowTitle">BDS Planner</string>
     <string name="uiLanguage">Language</string>
     <string name="uiTheme">Theme</string>
@@ -193,7 +193,7 @@
 
     <string name="AboutScreen-Version">Version: %1$s</string>
     <string name="AboutScreen-Copyright">Open Source Software, 2025</string>
-    <string name="AboutScreen-Description">Big Data Scanner is a personal software to quickly check the presence of personal data and card numbers in files. Big Data Scanner supports the following file formats: .xlsx, .docx, .txt, .csv, .xml, .json, .log, .doc, .xls, .pdf, .zip.\nBig Data Scanner does not make any changes into the files it scans, and it requires read-only access to the file.\n\nScan results are advisory and may require additional verification from the user.</string>
+    <string name="AboutScreen-Description">Angry Data Scanner is a personal software to quickly check the presence of personal data and card numbers in files. Angry Data Scanner supports the following file formats: .xlsx, .docx, .txt, .csv, .xml, .json, .log, .doc, .xls, .pdf, .zip.\nAngry Data Scanner does not make any changes into the files it scans, and it requires read-only access to the file.\n\nScan results are advisory and may require additional verification from the user.</string>
 
     <string name="MessageBox-Cancel">Cancel</string>
     <string name="MessageBox-OK">OK</string>

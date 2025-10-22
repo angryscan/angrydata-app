@@ -10,6 +10,7 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.material3.ripple
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
@@ -29,10 +30,16 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.currentBackStackEntryAsState
+import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import org.koin.compose.koinInject
 import ru.packetdima.datascanner.navigation.AppScreen
 import ru.packetdima.datascanner.resources.*
+import ru.packetdima.datascanner.scan.ScanService
+import ru.packetdima.datascanner.db.models.TaskState
 
 @Composable
 fun TopNavigation(
@@ -213,25 +220,47 @@ private fun NavigationTabs(
     navController: NavController,
     currentDestination: androidx.navigation.NavDestination?
 ) {
+    val scanService = koinInject<ScanService>()
+    val allTasks by scanService.tasks.tasks.collectAsState()
+
+    var currentTime by remember { mutableStateOf(System.currentTimeMillis()) }
+    
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(1000)
+            currentTime = System.currentTimeMillis()
+        }
+    }
+    
+    val hasActiveScans = remember(currentTime, allTasks) {
+        allTasks.any { task ->
+            val state = task.state.value
+            state == TaskState.SCANNING || state == TaskState.SEARCHING
+        }
+    }
+    
     val navigationItems = listOf(
         NavigationItem(
             route = AppScreen.Main,
             icon = painterResource(Res.drawable.SideMenu_IconMainPage),
             label = stringResource(Res.string.SideMenu_MainPage),
-            isSelected = currentDestination?.hasRoute(AppScreen.Main::class) ?: false
+            isSelected = currentDestination?.hasRoute(AppScreen.Main::class) ?: false,
+            hasActiveIndicator = false
         ),
         NavigationItem(
             route = AppScreen.Scans,
             icon = painterResource(Res.drawable.SideMenu_IconScans),
             label = stringResource(Res.string.SideMenu_ScanListPage),
             isSelected = currentDestination?.hasRoute(AppScreen.Scans::class) ?: false ||
-                    currentDestination?.hasRoute(AppScreen.ScanResult::class) ?: false
+                    currentDestination?.hasRoute(AppScreen.ScanResult::class) ?: false,
+            hasActiveIndicator = hasActiveScans
         ),
         NavigationItem(
             route = AppScreen.Settings,
             icon = painterResource(Res.drawable.SideMenu_IconSettings),
             label = stringResource(Res.string.SideMenu_SettingsPage),
-            isSelected = currentDestination?.hasRoute(AppScreen.Settings::class) ?: false
+            isSelected = currentDestination?.hasRoute(AppScreen.Settings::class) ?: false,
+            hasActiveIndicator = false
         )
     )
 
@@ -362,45 +391,53 @@ private fun NavigationTab(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val iconScale by animateFloatAsState(
-                targetValue = when {
-                    isPressed -> 0.95f
-                    isHovered -> 1.05f
-                    item.isSelected -> 1.08f
-                    else -> 1f
-                },
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioNoBouncy,
-                    stiffness = Spring.StiffnessMedium
-                ),
-                label = "iconScale"
-            )
-            
-            val iconRotation by animateFloatAsState(
-                targetValue = when {
-                    isPressed -> 2f
-                    isHovered -> -1f
-                    else -> 0f
-                },
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioNoBouncy,
-                    stiffness = Spring.StiffnessMedium
-                ),
-                label = "iconRotation"
-            )
-            
-            Icon(
-                painter = item.icon,
-                contentDescription = item.label,
-                modifier = Modifier
-                    .size(18.dp)
-                    .scale(iconScale)
-                    .rotate(iconRotation),
-                tint = if (item.isSelected) 
-                    MaterialTheme.colorScheme.onPrimary
-                else 
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-            )
+            Box(
+                contentAlignment = Alignment.Center
+            ) {
+                val iconScale by animateFloatAsState(
+                    targetValue = when {
+                        isPressed -> 0.95f
+                        isHovered -> 1.05f
+                        item.isSelected -> 1.08f
+                        else -> 1f
+                    },
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessMedium
+                    ),
+                    label = "iconScale"
+                )
+                
+                val iconRotation by animateFloatAsState(
+                    targetValue = when {
+                        isPressed -> 2f
+                        isHovered -> -1f
+                        else -> 0f
+                    },
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessMedium
+                    ),
+                    label = "iconRotation"
+                )
+                
+                Icon(
+                    painter = item.icon,
+                    contentDescription = item.label,
+                    modifier = Modifier
+                        .size(18.dp)
+                        .scale(iconScale)
+                        .rotate(iconRotation),
+                    tint = if (item.isSelected) 
+                        MaterialTheme.colorScheme.onPrimary
+                    else 
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                )
+
+                if (item.hasActiveIndicator) {
+                    ActiveScanIndicator()
+                }
+            }
             
             val textScale by animateFloatAsState(
                 targetValue = when {
@@ -588,9 +625,88 @@ private fun NavigationActions() {
 }
 
 
+@Composable
+private fun ActiveScanIndicator() {
+    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+    
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue = 0.8f,
+        targetValue = 1.2f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = EaseInOutCubic),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulseScale"
+    )
+    
+    val pulseAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.3f,
+        targetValue = 0.8f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = EaseInOutCubic),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulseAlpha"
+    )
+    
+    val rotation by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "rotation"
+    )
+    
+    Box(
+        modifier = Modifier
+            .size(12.dp)
+            .offset(x = 10.dp, y = (-10).dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .scale(pulseScale)
+                .alpha(pulseAlpha)
+                .background(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = CircleShape
+                )
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .rotate(rotation)
+                .background(
+                    brush = androidx.compose.ui.graphics.Brush.radialGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary,
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                        ),
+                        radius = 6f
+                    ),
+                    shape = CircleShape
+                )
+        )
+
+        Box(
+            modifier = Modifier
+                .size(4.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    shape = CircleShape
+                )
+                .align(Alignment.Center)
+        )
+    }
+}
+
 data class NavigationItem(
     val route: Any,
     val icon: Painter,
     val label: String,
-    val isSelected: Boolean
+    val isSelected: Boolean,
+    val hasActiveIndicator: Boolean = false
 )

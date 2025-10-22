@@ -15,8 +15,7 @@ fun ScanTimeStatItem(
     startedAt: LocalDateTime?,
     finishedAt: LocalDateTime?,
     pausedAt: LocalDateTime?,
-    state: TaskState,
-    progress: Long
+    state: TaskState
 ) {
     Column {
         Text(
@@ -48,15 +47,6 @@ fun ScanTimeStatItem(
                     pausedAt.let {
                         DateFormat.format(it)
                     }
-                ),
-                fontSize = 14.sp,
-                letterSpacing = 0.1.sp
-            )
-        } else {
-            Text(
-                text = stringResource(
-                    resource = Res.string.Task_Progress,
-                    progress
                 ),
                 fontSize = 14.sp,
                 letterSpacing = 0.1.sp

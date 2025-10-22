@@ -242,7 +242,7 @@ fun SettingsScreen() {
                     title = stringResource(Res.string.SettingsScreen_Logging)
                 ) {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(32.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(
@@ -276,7 +276,8 @@ fun SettingsScreen() {
                                 text = stringResource(Res.string.SettingsScreen_OpenFolder),
                                 fontSize = 14.sp,
                                 lineHeight = 14.sp,
-                                fontWeight = MaterialTheme.typography.bodyMedium.fontWeight
+                                fontWeight = MaterialTheme.typography.bodyMedium.fontWeight,
+                                textAlign = TextAlign.Center
                             )
                         }
                     }

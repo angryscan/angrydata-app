@@ -5,11 +5,11 @@
 [![Release date](https://img.shields.io/github/release-date/angryscan/angrydata-app?label=release%20date&display_date=published_at&color=orange)](https://github.com/angryscan/angrydata-app/releases/latest)
 
 # A tool with friendly UI to discover sensitive data in 2 clicks
-Angry Data Scanner is a data security and privacy tool that uses pattern matching to automatically discover sensitive data stored in folders, web pages, S3, database. It helps organizations by identifying where sensitive data such as personally identifiable information (PII) and intellectual property is stored. The tool provides visibility where your sensitive data is stored.
+**Angry Data Scanner** is a data security and privacy tool that uses pattern matching to automatically discover sensitive data stored in folders, web pages, S3, database.  
+It helps organizations by identifying where sensitive data such as personally identifiable information (PII) and intellectual property is stored. The tool provides visibility where your sensitive data is stored.  
 Sensitive data (PII, payments cards etc) can be discover with 2 click
-Angry Scanner is just a single file
-No administrator rights required to run Angry Scanner
-No additional software installation required
+No administrator rights required to run Angry Data Scanner  
+No additional software installation required  
 Works on Linux, Mac, and Windows
 
 ## Discovered sensitive data

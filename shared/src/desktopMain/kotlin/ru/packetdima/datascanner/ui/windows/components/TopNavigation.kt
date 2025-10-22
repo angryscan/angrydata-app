@@ -65,7 +65,7 @@ fun TopNavigation(
                 horizontalArrangement = Arrangement.spacedBy(24.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                AppLogo()
+                AppLogo(navController = navController)
                 
                 NavigationTabs(
                     navController = navController,
@@ -87,7 +87,50 @@ fun TopNavigation(
 }
 
 @Composable
-private fun AppLogo() {
+private fun AppLogo(
+    navController: NavController
+) {
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = backStackEntry?.destination
+    val isMainScreen = currentDestination?.hasRoute(AppScreen.Main::class) ?: false
+    
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    var isHovered by remember { mutableStateOf(false) }
+    
+    val scale by animateFloatAsState(
+        targetValue = when {
+            isPressed -> 0.95f
+            isHovered -> 1.05f
+            else -> 1f
+        },
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessMedium
+        ),
+        label = "scale"
+    )
+    
+    val alpha by animateFloatAsState(
+        targetValue = when {
+            isPressed -> 0.8f
+            isHovered -> 0.95f
+            else -> 1f
+        },
+        animationSpec = tween(150, easing = EaseInOutCubic),
+        label = "alpha"
+    )
+    
+    val elevation by animateFloatAsState(
+        targetValue = when {
+            isPressed -> 4f
+            isHovered -> 12f
+            else -> 8f
+        },
+        animationSpec = tween(200, easing = EaseInOutCubic),
+        label = "elevation"
+    )
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -117,10 +160,32 @@ private fun AppLogo() {
                     shape = RoundedCornerShape(18.dp)
                 )
                 .shadow(
-                    elevation = 8.dp,
+                    elevation = elevation.dp,
                     shape = RoundedCornerShape(18.dp),
                     ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
                     spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                )
+                .scale(scale)
+                .alpha(alpha)
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = ripple(
+                        bounded = true,
+                        radius = 200.dp
+                    ),
+                    onClick = {
+                        try {
+                            if (!isMainScreen) {
+                                println("Logo clicked - navigating to Main")
+                                navController.navigate(AppScreen.Main)
+                                println("Navigation to Main successful")
+                            } else {
+                                println("Already on Main screen - no navigation needed")
+                            }
+                        } catch (e: Exception) {
+                            println("Navigation error: ${e.message}")
+                        }
+                    }
                 )
                 .padding(12.dp),
             contentAlignment = Alignment.Center

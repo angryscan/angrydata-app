@@ -70,6 +70,8 @@
     <string name="SideMenu-ScanListPage">Список сканирований</string>
     <string name="SideMenu-SettingsPage">Параметры</string>
     <string name="SideMenu-AboutPage">О программе</string>
+    <string name="About-Description">Описание</string>
+    <string name="About-License">Лицензия</string>
 
     <string name="UpperMenu-Tooltip-FileShare">Сканирование файловых систем</string>
     <string name="UpperMenu-Tooltip-S3">Сканирование хранилища S3</string>

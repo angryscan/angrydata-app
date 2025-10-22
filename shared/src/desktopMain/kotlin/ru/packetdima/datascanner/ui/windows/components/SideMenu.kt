@@ -135,18 +135,6 @@ fun SideMenu(navController: NavController) {
                 )
             }
 
-            DescriptionTooltip(
-                description = stringResource(Res.string.SideMenu_AboutPage),
-                delay = 1000
-            ) {
-                SideMenuItem(
-                    isSelected = destination?.hasRoute(AppScreen.About::class) ?: false,
-                    expanded = expanded,
-                    icon = painterResource(Res.drawable.SideMenu_IconAbout),
-                    text = stringResource(Res.string.SideMenu_AboutPage),
-                    onClick = { navController.navigate(AppScreen.About) },
-                )
-            }
         }
     }
 }

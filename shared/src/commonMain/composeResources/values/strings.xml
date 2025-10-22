@@ -72,6 +72,8 @@
     <string name="SideMenu-ScanListPage">Scans</string>
     <string name="SideMenu-SettingsPage">Settings</string>
     <string name="SideMenu-AboutPage">About</string>
+    <string name="About-Description">Description</string>
+    <string name="About-License">License</string>
 
     <string name="UpperMenu-Tooltip-FileShare">File share scanning</string>
     <string name="UpperMenu-Tooltip-S3">S3 storage scanning</string>

@@ -28,7 +28,7 @@ import ru.packetdima.datascanner.scan.common.files.FileType
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsBoxExtensionsSelection(scanSettings: ScanSettings) {
-    var expanded by remember { scanSettings.extensionsExpanded }
+    var expanded by remember { scanSettings.extensionsSettingsExpanded }
 
 
     SettingsBoxSpan(
@@ -60,7 +60,11 @@ fun SettingsBoxExtensionsSelection(scanSettings: ScanSettings) {
                         checked = scanSettings.extensions.containsAll(fileTypeEntries),
                         onCheckedChange = { checked ->
                             if (checked) {
-                                scanSettings.extensions.addAll(fileTypeEntries.filter { !scanSettings.extensions.contains(it) })
+                                scanSettings.extensions.addAll(fileTypeEntries.filter {
+                                    !scanSettings.extensions.contains(
+                                        it
+                                    )
+                                })
                             } else {
                                 scanSettings.extensions.clear()
                             }
@@ -72,8 +76,12 @@ fun SettingsBoxExtensionsSelection(scanSettings: ScanSettings) {
                             text = stringResource(Res.string.ScanSettings_SelectAll),
                             fontSize = 14.sp,
                             modifier = Modifier.clickable {
-                                if(!scanSettings.extensions.containsAll(fileTypeEntries))
-                                    scanSettings.extensions.addAll(fileTypeEntries.filter { !scanSettings.extensions.contains(it) })
+                                if (!scanSettings.extensions.containsAll(fileTypeEntries))
+                                    scanSettings.extensions.addAll(fileTypeEntries.filter {
+                                        !scanSettings.extensions.contains(
+                                            it
+                                        )
+                                    })
                                 else
                                     scanSettings.extensions.clear()
                                 scanSettings.save()
@@ -103,7 +111,7 @@ fun SettingsBoxExtensionsSelection(scanSettings: ScanSettings) {
                             text = extension.name,
                             fontSize = 14.sp,
                             modifier = Modifier.clickable {
-                                if(scanSettings.extensions.contains(extension))
+                                if (scanSettings.extensions.contains(extension))
                                     scanSettings.extensions.remove(extension)
                                 else
                                     scanSettings.extensions.add(extension)

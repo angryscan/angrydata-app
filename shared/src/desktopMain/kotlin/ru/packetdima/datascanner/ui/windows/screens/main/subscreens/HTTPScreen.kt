@@ -128,20 +128,20 @@ fun HTTPScreen(
                                 if (scanSettings.detectCert.value)
                                     extensions.add(FileType.CERT)
 
-                                val detectFunctions =
-                                    (scanSettings.detectFunctions + scanSettings.userSignatures)
+                                val matchers =
+                                    (scanSettings.matchers + scanSettings.userSignatures)
                                         .toMutableList()
                                 if (scanSettings.detectCert.value)
-                                    detectFunctions.add(CertDetectFun)
+                                    matchers.add(CertDetectFun)
                                 if (scanSettings.detectCode.value)
-                                    detectFunctions.add(CodeDetectFun)
-                                if(scanSettings.detectBlockedDomains.value)
-                                    detectFunctions.add(RKNDomainDetectFun)
+                                    matchers.add(CodeDetectFun)
+                                if (scanSettings.detectBlockedDomains.value)
+                                    matchers.add(RKNDomainDetectFun)
 
                                 val task = scanService.createTask(
                                     path = path,
                                     extensions = scanSettings.extensions,
-                                    detectFunctions = detectFunctions,
+                                    matchers = matchers,
                                     fastScan = scanSettings.fastScan.value,
                                     connector = ConnectorHTTP()
                                 )

@@ -33,10 +33,6 @@ fun SettingsBox(
 
     var fastScan by remember { scanSettings.fastScan }
 
-    LaunchedEffect(fastScan) {
-        scanSettings.save()
-    }
-
     val scrollState = rememberScrollState()
 
     AnimatedVisibility(
@@ -73,7 +69,10 @@ fun SettingsBox(
                     ) {
                         Checkbox(
                             checked = fastScan,
-                            onCheckedChange = { fastScan = it }
+                            onCheckedChange = {
+                                fastScan = it
+                                scanSettings.save()
+                            }
                         )
                         CompositionLocalProvider(LocalRippleConfiguration provides null) {
                             Text(
@@ -101,7 +100,7 @@ fun SettingsBox(
                 SettingsBoxExtensionsSelection(scanSettings)
 
                 // Detect functions selection
-                SettingsBoxDetectFunctions(scanSettings)
+                SettingsBoxMatchers(scanSettings)
 
                 // User signatures selection
                 SettingsBoxUserSignature(scanSettings)

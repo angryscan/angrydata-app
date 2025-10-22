@@ -1,14 +1,13 @@
 package ru.packetdima.datascanner.scan.functions
 
-import info.downdetector.bigdatascanner.common.IDetectFunction
-import info.downdetector.bigdatascanner.common.extensions.MatchWithContext
 import kotlinx.serialization.Serializable
+import org.angryscan.common.engine.Match
+import org.angryscan.common.engine.custom.ICustomMatcher
 
 @Serializable
-object CodeDetectFun: IDetectFunction {
-    override val name: String = "CodeDetectFunction"
-    override val writeName: String = "CodeDetectFunction"
+object CodeDetectFun: ICustomMatcher {
+    override val name: String = "Code Detect"
+    override fun check(value: String) = true
 
-    override fun scan(text: String, withContext: Boolean): Sequence<MatchWithContext> = sequenceOf()
-
+    override fun scan(text: String): List<Match>  = listOf()
 }

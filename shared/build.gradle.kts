@@ -36,7 +36,7 @@ kotlin {
                 api(libs.exposed.datetime)
                 implementation(libs.exposed.migration)
 
-                api(libs.datascanner)
+                api(libs.angryscan.core)
 
                 implementation(libs.files.pdfbox)
                 implementation(libs.files.fastexcel)

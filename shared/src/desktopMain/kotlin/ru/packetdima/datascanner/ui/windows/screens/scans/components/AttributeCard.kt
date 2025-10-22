@@ -11,14 +11,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import info.downdetector.bigdatascanner.common.IDetectFunction
+import org.angryscan.common.engine.IMatcher
 import ru.packetdima.datascanner.ui.strings.composableName
-import ru.packetdima.datascanner.ui.windows.components.DetectFunctionTooltip
+import ru.packetdima.datascanner.ui.windows.components.MatcherTooltip
 
 @Composable
-fun AttributeCard(attribute: IDetectFunction) {
-    DetectFunctionTooltip(
-        detectFunction = attribute
+fun AttributeCard(attribute: IMatcher) {
+    MatcherTooltip(
+        matcher = attribute
     ) {
         Box(
             modifier = Modifier
@@ -40,9 +40,9 @@ fun AttributeCard(attribute: IDetectFunction) {
 }
 
 @Composable
-fun AttributeCard(attribute: IDetectFunction, onClick: () -> Unit, enabled: Boolean) {
-    DetectFunctionTooltip(
-        detectFunction = attribute
+fun AttributeCard(attribute: IMatcher, onClick: () -> Unit, enabled: Boolean) {
+    MatcherTooltip(
+        matcher = attribute
     ) {
         Box(
             modifier = Modifier

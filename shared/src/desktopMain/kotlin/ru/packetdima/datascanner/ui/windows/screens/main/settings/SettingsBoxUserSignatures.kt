@@ -26,14 +26,14 @@ import ru.packetdima.datascanner.common.ScanSettings
 import ru.packetdima.datascanner.common.UserSignatureSettings
 import ru.packetdima.datascanner.resources.*
 import ru.packetdima.datascanner.scan.common.files.FileType
-import ru.packetdima.datascanner.scan.functions.UserSignature
+import org.angryscan.common.matchers.UserSignature
 import javax.swing.JOptionPane
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsBoxUserSignature(scanSettings: ScanSettings) {
 
-    var expanded by remember { scanSettings.userSignatureExpanded }
+    var expanded by remember { scanSettings.userSignatureSettingsExpanded }
 
     val userSignatureSettings = koinInject<UserSignatureSettings>()
 
@@ -51,26 +51,27 @@ fun SettingsBoxUserSignature(scanSettings: ScanSettings) {
                 userSignatureEditorVisibility = false
             },
             onSaveRequest = { signature ->
-                if(scanSettings.userSignatures.any { it.name == signature.name } && editedUserSignature == null) {
+                if (scanSettings.userSignatures.any { it.name == signature.name } && editedUserSignature == null) {
                     coroutineScope.launch {
                         JOptionPane.showConfirmDialog(
                             null,
-                            getString(Res.string.Signature_ErrorMessage),
-                            getString(Res.string.Signature_Title),
+                            getString(Res.string.Matcher_UserSignature_ErrorMessage),
+                            getString(Res.string.Matcher_UserSignature_Title),
                             JOptionPane.YES_OPTION,
                             JOptionPane.ERROR_MESSAGE
                         )
                     }
                 } else {
-                    if(editedUserSignature != null) {
+                    if (editedUserSignature != null) {
                         val selected = editedUserSignature in scanSettings.userSignatures
                         scanSettings.userSignatures.remove(editedUserSignature)
                         scanSettings.userSignatures.removeIf { it.name == signature.name }
 
-                        val index = userSignatureSettings.userSignatures.mapIndexed{ index, us -> us to index}.first { it.first.name == signature.name }.second
+                        val index = userSignatureSettings.userSignatures.mapIndexed { index, us -> us to index }
+                            .first { it.first.name == signature.name }.second
                         userSignatureSettings.userSignatures[index] = signature
 
-                        if(selected)
+                        if (selected)
                             scanSettings.userSignatures.add(signature)
                     } else {
                         userSignatureSettings.userSignatures.add(signature)

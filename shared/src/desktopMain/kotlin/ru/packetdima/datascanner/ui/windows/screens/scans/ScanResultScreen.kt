@@ -18,7 +18,6 @@ import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import info.downdetector.bigdatascanner.common.IDetectFunction
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.dialogs.compose.rememberFileSaverLauncher
 import io.github.vinceglb.filekit.path
@@ -29,6 +28,7 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toInstant
+import org.angryscan.common.engine.IMatcher
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -47,7 +47,7 @@ import ru.packetdima.datascanner.ui.dialogs.DesktopAlertDialog
 import ru.packetdima.datascanner.ui.extensions.color
 import ru.packetdima.datascanner.ui.extensions.icon
 import ru.packetdima.datascanner.ui.strings.composableName
-import ru.packetdima.datascanner.ui.windows.components.DetectFunctionTooltip
+import ru.packetdima.datascanner.ui.windows.components.MatcherTooltip
 import ru.packetdima.datascanner.ui.windows.screens.scans.components.AttributeFilterChip
 import ru.packetdima.datascanner.ui.windows.screens.scans.components.ResultTable
 import ru.packetdima.datascanner.ui.windows.screens.scans.components.ScanStat
@@ -102,9 +102,9 @@ fun ScanResultScreen(
 
     val busy by task.busy.collectAsState()
 
-    val attributesOnOpen = remember { mutableStateListOf<IDetectFunction>() }
+    val attributesOnOpen = remember { mutableStateListOf<IMatcher>() }
 
-    val selectedAttributes = remember { mutableStateListOf<IDetectFunction>() }
+    val selectedAttributes = remember { mutableStateListOf<IMatcher>() }
 
 
     val pausedAtInstant = pausedAt?.toInstant(TimeZone.currentSystemDefault())
@@ -523,8 +523,8 @@ fun ScanResultScreen(
                             }
                         )
                         attributesOnOpen.forEach { attr ->
-                            DetectFunctionTooltip(
-                                detectFunction = attr
+                            MatcherTooltip(
+                                matcher = attr
                             ) {
                                 AttributeFilterChip(
                                     text = attr.composableName(),

@@ -22,7 +22,7 @@ object Tasks : IntIdTable() {
     val pauseDate = datetime("pause_date").nullable()
     val lastFileDate = datetime("last_file_date").nullable()
     val delta = long("delta").nullable()
-    val connector = json<IConnector>("function", PolymorphicFormatter)
+    val connector = json<IConnector>("matcher", PolymorphicFormatter)
         .default(ConnectorFileShare())
 }
 
@@ -44,5 +44,5 @@ class Task(id: EntityID<Int>) : IntEntity(id) {
 
     val files by TaskFile referrersOn TaskFiles.task
     val extensions by TaskFileExtension referrersOn TaskFileExtensions.task
-    val detectFunctions by TaskDetectFunction referrersOn TaskDetectFunctions.task
+    val matchers by TaskMatcher referrersOn TaskMatchers.task
 }

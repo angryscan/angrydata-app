@@ -1,20 +1,21 @@
 package ru.packetdima.datascanner.scan.functions
 
-import info.downdetector.bigdatascanner.common.IDetectFunction
-import info.downdetector.bigdatascanner.common.extensions.MatchWithContext
 import kotlinx.serialization.Serializable
+import org.angryscan.common.engine.ExpressionOption
+import org.angryscan.common.engine.hyperscan.IHyperMatcher
+import org.angryscan.common.engine.kotlin.IKotlinMatcher
 
 @Serializable
-object CertDetectFun : IDetectFunction {
-    override val name: String = "CertDetectFunction"
-    override val writeName: String = "CertDetectFunction"
+object CertDetectFun : IKotlinMatcher, IHyperMatcher {
+    override val name: String = "Cert Detect"
+    override fun check(value: String) = true
 
-    private val regex = """(---BEGIN CERTIFICATE)|(---BEGIN PKCS7)|(---BEGIN.*?KEY)"""
-        .toRegex(RegexOption.MULTILINE)
-
-    override fun scan(text: String, withContext: Boolean): Sequence<MatchWithContext> {
-        return regex
-            .findAll(text)
-            .map { MatchWithContext(it.value) }
-    }
+    override val javaPatterns = listOf(
+        """(---BEGIN CERTIFICATE)|(---BEGIN PKCS7)|(---BEGIN.*?KEY)"""
+    )
+    override val regexOptions: Set<RegexOption> = setOf()
+    override val hyperPatterns = listOf(
+        """(---BEGIN CERTIFICATE)|(---BEGIN PKCS7)|(---BEGIN.*?KEY)"""
+    )
+    override val expressionOptions: Set<ExpressionOption> = setOf()
 }

@@ -9,14 +9,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import info.downdetector.bigdatascanner.common.IDetectFunction
+import org.angryscan.common.engine.IMatcher
 import ru.packetdima.datascanner.ui.strings.description
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun DetectFunctionTooltip(detectFunction: IDetectFunction, block: @Composable () -> Unit) {
+fun MatcherTooltip(matcher: IMatcher, block: @Composable () -> Unit) {
     DescriptionTooltip(
-        description = detectFunction.description(),
+        description = matcher.description(),
         block = block
     )
 }

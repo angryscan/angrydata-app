@@ -1,7 +1,7 @@
 package ru.packetdima.datascanner.searcher
 
-import info.downdetector.bigdatascanner.common.DetectFunction
-import info.downdetector.bigdatascanner.common.IDetectFunction
+import org.angryscan.common.engine.IMatcher
+import org.angryscan.common.extensions.Matchers
 import java.io.File
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -12,49 +12,54 @@ class Matrix {
         private val matrix = readMatrix("/common/Matrix.txt")
         private val matrixFastscan = readMatrix("/common/MatrixFastscan.txt")
 
-        private fun readMatrix(file: String) : Map<String, Array<Int>?>{
+        private fun readMatrix(file: String) : Map<String, Map<String, Int>?>{
             val path = Matrix::class.java.getResource(file)
             assertNotNull(path)
             val f = File(path.file)
             assertTrue(f.exists())
 
-            val m = mutableMapOf<String, Array<Int>?>()
+            val m = mutableMapOf<String, Map<String, Int>?>()
 
-            f.readLines()
-                .filterNot { str ->
-                    str.startsWith(" ") || str.startsWith("\t")
-                }
-                .map { str ->
+            val lines = f.readLines()
+            val headers = lines[0].trim().split("\\s+".toRegex())
+
+            lines
+                .drop(1)
+                .forEach { str ->
                     val array = str.trim().split("\\s+".toRegex())
-                    m[array[0]] = array.drop(1).map { it.toInt() }.toTypedArray()
+                    m[array[0]] = array.drop(1).map { it.toInt() }.mapIndexed { i, v ->
+                        headers[i] to v
+                    }.toMap()
                 }
             return m
         }
 
-        fun getMap(file: String, isFastscan: Boolean = false): Map<IDetectFunction, Int>? {
+        fun getMap(file: String, isFastScan: Boolean = false): Map<IMatcher, Int>? {
             val filename = file.replace('\\', '/')
-            val res = mutableMapOf<DetectFunction, Int>()
+            val res = mutableMapOf<IMatcher, Int>()
             if (matrix[filename] == null)
                 return null
-            if (isFastscan)
-                matrixFastscan[filename]?.mapIndexed { id, value ->
-                    if (value > 0)
-                        res[getFnById(id)] = value
+            if (isFastScan)
+                matrixFastscan[filename]?.forEach { row ->
+                    if(row.value > 0) {
+                        val matcher = getFunByName(row.key)
+                        if(matcher != null)
+                            res[matcher] = row.value
+                    }
                 }
             else
-                matrix[filename]?.mapIndexed { id, value ->
-                    if (value > 0)
-                        res[getFnById(id)] = value
+                matrix[filename]?.forEach { row ->
+                    if(row.value > 0) {
+                        val matcher = getFunByName(row.key)
+                        if(matcher != null)
+                            res[matcher] = row.value
+                    }
                 }
             return res.toMap()
         }
 
-        fun getFnByName(name: String): DetectFunction? {
-            return DetectFunction.entries.firstOrNull { it.writeName == name }
-        }
-
-        private fun getFnById(id: Int): DetectFunction {
-            return DetectFunction.entries.toList()[id]
+        fun getFunByName(name: String): IMatcher? {
+            return Matchers.firstOrNull { it.name.replace(" ", "").equals(name, ignoreCase = true) }
         }
 
         fun contains(name: String): Boolean {

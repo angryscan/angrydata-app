@@ -2,14 +2,14 @@
 
 package ru.packetdima.datascanner.scan.common
 
-import info.downdetector.bigdatascanner.common.IDetectFunction
+import org.angryscan.common.engine.IMatcher
 
 class Document(val size: Long, val path: String) {
 /* This is main struct in this library - searcher.Document. All texts represent as searcher.Document finally */
 
     private var skipped = false
 
-    private var documentFields: MutableMap<IDetectFunction, Int> = mutableMapOf()
+    private var documentFields: MutableMap<IMatcher, Int> = mutableMapOf()
 
     fun skip(): Document {
         skipped = true
@@ -19,7 +19,7 @@ class Document(val size: Long, val path: String) {
     fun skipped() = skipped
 
     // update document value
-    fun updateDocument(field: IDetectFunction, value: Int) {
+    fun updateDocument(field: IMatcher, value: Int) {
         if(value > 0)
             documentFields[field] = (documentFields[field] ?: 0) + value
     }
@@ -33,17 +33,17 @@ class Document(val size: Long, val path: String) {
     fun length(): Int = this.documentFields.size
 
     // getValue document
-    fun getDocumentFields(): Map<IDetectFunction, Int> {
+    fun getDocumentFields(): Map<IMatcher, Int> {
         return documentFields.toMap()
     }
 
-    operator fun plus(other: Map<IDetectFunction, Int>): Document {
+    operator fun plus(other: Map<IMatcher, Int>): Document {
         other.forEach { (f, v) ->
             updateDocument(f, v)
         }
         return this
     }
-    operator fun plus(other: Pair<IDetectFunction, Int>): Document {
+    operator fun plus(other: Pair<IMatcher, Int>): Document {
         updateDocument(other.first, other.second)
         return this
     }

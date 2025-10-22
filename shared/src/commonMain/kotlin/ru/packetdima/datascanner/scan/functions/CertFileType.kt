@@ -1,8 +1,8 @@
 package ru.packetdima.datascanner.scan.functions
 
-import info.downdetector.bigdatascanner.common.IDetectFunction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.angryscan.common.engine.IScanEngine
 import org.bouncycastle.asn1.pkcs.ContentInfo
 import org.bouncycastle.asn1.pkcs.SignedData
 import ru.packetdima.datascanner.scan.common.Document
@@ -21,24 +21,24 @@ enum class CertFileType(val extensions: List<String>) {
     suspend fun scanFile(
         file: File,
         context: CoroutineContext,
-        detectFunctions: List<IDetectFunction>,
+        engines: List<IScanEngine>,
         fastScan: Boolean
     ): Document = when (this) {
-        ASCII -> scanASCII(file, context, detectFunctions, fastScan)
-        PKCS -> scanPKCS(file, context, detectFunctions, fastScan)
+        ASCII -> scanASCII(file, context, engines, fastScan)
+        PKCS -> scanPKCS(file, context, engines, fastScan)
         KEYSTORE -> scanKeyStore(file)
     }
 
     private suspend fun scanASCII(
         file: File,
         context: CoroutineContext,
-        detectFunctions: List<IDetectFunction>,
+        engines: List<IScanEngine>,
         fastScan: Boolean
     ): Document {
         return FileType.Text.scanFile(
             file,
             context,
-            detectFunctions.filter { it is CertDetectFun },
+            engines,
             fastScan
         )
     }
@@ -50,7 +50,7 @@ enum class CertFileType(val extensions: List<String>) {
     private suspend fun scanPKCS(
         file: File,
         context: CoroutineContext,
-        detectFunctions: List<IDetectFunction>,
+        engines: List<IScanEngine>,
         fastScan: Boolean
     ): Document {
         val factory = CertificateFactory.getInstance("X.509")
@@ -79,7 +79,7 @@ enum class CertFileType(val extensions: List<String>) {
                     res + scanASCII(
                         file,
                         context,
-                        detectFunctions,
+                        engines,
                         fastScan
                     ).getDocumentFields()
                 }
@@ -88,7 +88,7 @@ enum class CertFileType(val extensions: List<String>) {
             res + scanASCII(
                 file,
                 context,
-                detectFunctions,
+                engines,
                 fastScan
             ).getDocumentFields()
             return res

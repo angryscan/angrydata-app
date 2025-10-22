@@ -1,10 +1,11 @@
 package ru.packetdima.datascanner.searcher
 
 import org.apache.poi.openxml4j.util.ZipSecureFile
-import info.downdetector.bigdatascanner.common.Cleaner
-import info.downdetector.bigdatascanner.common.DetectFunction
-import info.downdetector.bigdatascanner.common.IDetectFunction
 import kotlinx.coroutines.*
+import org.angryscan.common.engine.IMatcher
+import org.angryscan.common.engine.hyperscan.HyperScanEngine
+import org.angryscan.common.engine.kotlin.KotlinEngine
+import org.angryscan.common.extensions.Matchers
 import org.junit.Rule
 import org.koin.dsl.module
 import org.koin.test.KoinTestRule
@@ -14,6 +15,8 @@ import ru.packetdima.datascanner.common.UserSignatureSettings
 import ru.packetdima.datascanner.db.DatabaseSettings
 import ru.packetdima.datascanner.di.scanModule
 import ru.packetdima.datascanner.scan.common.files.FileType
+import ru.packetdima.datascanner.scan.engine.toHyperScanMatchers
+import ru.packetdima.datascanner.scan.engine.toKotlinMatchers
 import java.io.File
 import java.io.FileWriter
 import kotlin.test.*
@@ -32,14 +35,20 @@ internal class FileTypeTest() {
 
             },
             module {
-                single { javaClass.getResource("common/UserSignatures.json")
-                    ?.let { it1 -> UserSignatureSettings.SettingsFile(it1.path) } }
+                single {
+                    javaClass.getResource("common/UserSignatures.json")
+                        ?.let { it1 -> UserSignatureSettings.SettingsFile(it1.path) }
+                }
                 single { UserSignatureSettings() }
-                single { javaClass.getResource("common/AppSettings.json")
-                    ?.let { it1 -> AppSettings.AppSettingsFile(it1.path) } }
+                single {
+                    javaClass.getResource("common/AppSettings.json")
+                        ?.let { it1 -> AppSettings.AppSettingsFile(it1.path) }
+                }
                 single { AppSettings() }
-                single { javaClass.getResource("common/ScanSettings.json")
-                    ?.let { it1 -> ScanSettings.SettingsFile(it1.path) } }
+                single {
+                    javaClass.getResource("common/ScanSettings.json")
+                        ?.let { it1 -> ScanSettings.SettingsFile(it1.path) }
+                }
                 single { ScanSettings() }
             },
             scanModule
@@ -59,22 +68,22 @@ internal class FileTypeTest() {
             "TestText.txt",
             "5.csv",
             "small.xls",
-            "first.doc",
-            "first.xls",
-            "first.docx",
-            "first.xlsx",
-            "first.odt",
-            "first.odp",
-            "first.otp",
-            "first.pptx",
-            "first.potx",
-            "first.ppsx",
-            "first.pptm",
-            "first.ppt",
-            "first.pps",
-            "first.pot",
-            "first.ods",
-            "first.pdf",
+            "first/first.doc",
+            "first/first.xls",
+            "first/first.docx",
+            "first/first.xlsx",
+            "first/first.odt",
+            "first/first.odp",
+            "first/first.otp",
+            "first/first.pptx",
+            "first/first.potx",
+            "first/first.ppsx",
+            "first/first.pptm",
+            "first/first.ppt",
+            "first/first.pps",
+            "first/first.pot",
+            "first/first.ods",
+            "first/first.pdf",
             "very_short.xlsx",
             "ipv6.txt"
         )
@@ -87,7 +96,12 @@ internal class FileTypeTest() {
                         assertNotNull(path)
                         val f = File(path.file)
                         val enumType: FileType? = f.let { FileType.getFileType(it) }
-                        enumType?.scanFile(f, currentCoroutineContext(), DetectFunction.entries, false).let { doc ->
+                        enumType?.scanFile(
+                            f,
+                            currentCoroutineContext(),
+                            listOf(HyperScanEngine(Matchers.toHyperScanMatchers())),
+                            false
+                        ).let { doc ->
                             Matrix.getMap(filename)
                                 ?.let { m -> assertEquals(m, doc?.getDocumentFields(), "File: $filename") }
                                 ?: println("Нет данных для $filename")
@@ -104,40 +118,36 @@ internal class FileTypeTest() {
     @Test
     fun `Check fast and full scan`() {
         val filelist = listOf(
-            "very_long.log",
-            "very_long.xlsx",
-            "very_long.docx",
-            "very_long.txt",
-            "very_long.csv",
-            "very_long.xml",
-            "very_long.json",
-            "very_long.doc",
-            "very_long.xls",
-            "very_long.pdf"
+            "veryLong/very_long.log",
+            "veryLong/very_long.xlsx",
+            "veryLong/very_long.docx",
+            "veryLong/very_long.txt",
+            "veryLong/very_long.csv",
+            "veryLong/very_long.xml",
+            "veryLong/very_long.json",
+            "veryLong/very_long.doc",
+            "veryLong/very_long.xls",
+            "veryLong/very_long.pdf"
         )
-            .map { filename -> "veryLong/$filename" }
 
-        fun checkScan(filename: String, map: Map<IDetectFunction, Int>?, isFastScan: Boolean = false) {
+        fun checkScan(filename: String, map: Map<IMatcher, Int>?, isFastScan: Boolean = false) {
 
             val path = javaClass.getResource("/files/$filename")
             assertNotNull(path)
             val f = File(path.file)
             val enumType: FileType? = f.let { FileType.getFileType(it) }
 
+            val engines = listOf(
+                KotlinEngine(Matchers.toKotlinMatchers())
+            )
+
             runBlocking {
-                enumType?.scanFile(f, currentCoroutineContext(), DetectFunction.entries, isFastScan).let {
+                enumType?.scanFile(f, currentCoroutineContext(), engines, isFastScan).let {
                     assertNotNull(it)
                     assertEquals(map, it.getDocumentFields())
                 }
             }
         }
-
-        val f = javaClass.getResource("/files/veryLong/very_long.log")?.file
-        val text = f?.let { File(it).readText() }?.let { Cleaner.cleanText(it) }
-        if (text != null) {
-            println(text.slice(0..100))
-        }
-        println(text?.let { DetectFunction.IPv6.scan(it) })
 
         println("Checking fast scan")
         filelist.forEach { filename ->
@@ -157,10 +167,13 @@ internal class FileTypeTest() {
     fun `Check FileNotFoundException`() {
         val f = File("notExist.txt")
         assertFalse(f.exists())
+        val engines = listOf(
+            KotlinEngine(Matchers.toKotlinMatchers())
+        )
         runBlocking {
             try {
                 val enumType: FileType? = FileType.getFileType(f)
-                enumType?.scanFile(f, currentCoroutineContext(), DetectFunction.entries, false).let {
+                enumType?.scanFile(f, currentCoroutineContext(), engines, false).let {
                     assertEquals(mapOf(), it?.getDocumentFields())
                     assertTrue(it?.skipped() == true)
                 }
@@ -181,9 +194,13 @@ internal class FileTypeTest() {
         writer.close()
         assertTrue(f.exists())
 
+        val engines = listOf(
+            KotlinEngine(Matchers.toKotlinMatchers())
+        )
+
         runBlocking {
             try {
-                FileType.DOC.scanFile(f, currentCoroutineContext(), DetectFunction.entries, false).let {
+                FileType.DOC.scanFile(f, currentCoroutineContext(), engines, false).let {
                     assertEquals(0, it.length())
                     assertEquals(mapOf(), it.getDocumentFields())
                 }

@@ -1,6 +1,5 @@
 package ru.packetdima.datascanner.scan.common.writer
 
-import info.downdetector.bigdatascanner.common.DetectFunction
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -25,7 +24,8 @@ object ResultWriter {
     enum class FileExtensions(val extension: String) {
         CSV("csv"),
         XLSX("xlsx"),
-//        PDF("pdf"),
+
+        //        PDF("pdf"),
         XML("xml"),
     }
 
@@ -76,7 +76,7 @@ object ResultWriter {
                 writer.append(
                     listOf(
                         fileRow.path,
-                        fileRow.foundAttributes.map { attr -> if (attr is DetectFunction) attr.readableName() else attr.writeName }
+                        fileRow.foundAttributes.map { attr -> attr.readableName() }
                             .joinToString(", "),
                         fileRow.score.toString(),
                         fileRow.count.toString(),
@@ -113,7 +113,7 @@ object ResultWriter {
                     sheet.value(
                         index + 1,
                         1,
-                        fileRow.foundAttributes.map { attr -> if (attr is DetectFunction) attr.readableName() else attr.writeName }
+                        fileRow.foundAttributes.map { attr -> attr.readableName() }
                             .joinToString(", "))
                     sheet.value(index + 1, 2, fileRow.score.toString())
                     sheet.value(index + 1, 3, fileRow.count.toString())
@@ -158,7 +158,7 @@ object ResultWriter {
 
             fileRow.foundAttributes.forEach { attr ->
                 val attrElement = doc.createElement("attribute")
-                attrElement.appendChild(doc.createTextNode(if(attr is DetectFunction) attr.readableName() else attr.writeName))
+                attrElement.appendChild(doc.createTextNode(attr.readableName()))
                 attributesElement.appendChild(attrElement)
             }
 

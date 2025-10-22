@@ -1,11 +1,11 @@
 package ru.packetdima.datascanner.scan.common.files
 
 import com.github.junrar.Archive
-import info.downdetector.bigdatascanner.common.Cleaner
-import info.downdetector.bigdatascanner.common.IDetectFunction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
+import org.angryscan.common.engine.IMatcher
+import org.angryscan.common.engine.IScanEngine
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.text.PDFTextStripper
 import org.koin.core.component.KoinComponent
@@ -36,63 +36,63 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
         override suspend fun scanFile(
             file: File,
             context: CoroutineContext,
-            detectFunctions: List<IDetectFunction>,
+            engines: List<IScanEngine>,
             fastScan: Boolean
-        ): Document = XLSXType.scanFile(file, context, detectFunctions, fastScan)
+        ): Document = XLSXType.scanFile(file, context, engines, fastScan)
     },
     DOCX(listOf("docx")) {
         override suspend fun scanFile(
             file: File,
             context: CoroutineContext,
-            detectFunctions: List<IDetectFunction>,
+            engines: List<IScanEngine>,
             fastScan: Boolean
-        ): Document = DOCXType.scanFile(file, context, detectFunctions, fastScan)
+        ): Document = DOCXType.scanFile(file, context, engines, fastScan)
     },
     PPTX(listOf("pptx", "potx", "ppsx", "pptm")) {
         override suspend fun scanFile(
             file: File,
             context: CoroutineContext,
-            detectFunctions: List<IDetectFunction>,
+            engines: List<IScanEngine>,
             fastScan: Boolean
-        ): Document = PPTXType.scanFile(file, context, detectFunctions, fastScan)
+        ): Document = PPTXType.scanFile(file, context, engines, fastScan)
     },
     PPT(listOf("ppt", "pps", "pot")) {
         override suspend fun scanFile(
             file: File,
             context: CoroutineContext,
-            detectFunctions: List<IDetectFunction>,
+            engines: List<IScanEngine>,
             fastScan: Boolean
-        ): Document = PPTType.scanFile(file, context, detectFunctions, fastScan)
+        ): Document = PPTType.scanFile(file, context, engines, fastScan)
     },
     Text((1..999).map { it.toString().padStart(3, '0') } + listOf("txt", "csv", "xml", "json", "log")) {
         override suspend fun scanFile(
             file: File,
             context: CoroutineContext,
-            detectFunctions: List<IDetectFunction>,
+            engines: List<IScanEngine>,
             fastScan: Boolean
-        ): Document = TextType.scanFile(file, context, detectFunctions, fastScan)
+        ): Document = TextType.scanFile(file, context, engines, fastScan)
     },
     DOC(listOf("doc")) {
         override suspend fun scanFile(
             file: File,
             context: CoroutineContext,
-            detectFunctions: List<IDetectFunction>,
+            engines: List<IScanEngine>,
             fastScan: Boolean
-        ): Document = DOCType.scanFile(file, context, detectFunctions, fastScan)
+        ): Document = DOCType.scanFile(file, context, engines, fastScan)
     },
     XLS(listOf("xls")) {
         override suspend fun scanFile(
             file: File,
             context: CoroutineContext,
-            detectFunctions: List<IDetectFunction>,
+            engines: List<IScanEngine>,
             fastScan: Boolean
-        ) = XLSType.scanFile(file, context, detectFunctions, fastScan)
+        ) = XLSType.scanFile(file, context, engines, fastScan)
     },
     PDF(listOf("pdf")) {
         override suspend fun scanFile(
             file: File,
             context: CoroutineContext,
-            detectFunctions: List<IDetectFunction>,
+            engines: List<IScanEngine>,
             fastScan: Boolean
         ): Document {
             val str = StringBuilder()
@@ -104,7 +104,9 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                         PDFTextStripper().getText(document).forEach { c ->
                             str.append(c)
                             if (str.length >= scanSettings.sampleLength || !isActive) {
-                                res + withContext(context) { scan(str.toString(), detectFunctions) }
+                                engines.forEach { engine ->
+                                    res + withContext(context) { scan(str.toString(), engine) }
+                                }
                                 str.clear()
                                 sample++
                                 if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
@@ -117,7 +119,9 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                 return res
             }
             if (str.isNotEmpty() && !isSampleOverload(sample, fastScan)) {
-                res + withContext(context) { scan(str.toString(), detectFunctions) }
+                engines.forEach { engine ->
+                    res + withContext(context) { scan(str.toString(), engine) }
+                }
             }
             return res
         }
@@ -126,7 +130,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
         override suspend fun scanFile(
             file: File,
             context: CoroutineContext,
-            detectFunctions: List<IDetectFunction>,
+            engines: List<IScanEngine>,
             fastScan: Boolean
         ): Document {
             val str = StringBuilder()
@@ -143,7 +147,9 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                                     if (item.textContent.isNotEmpty()) {
                                         str.append(item.textContent).append("\n")
                                         if (str.length >= scanSettings.sampleLength || !isActive) {
-                                            res + withContext(context) { scan(str.toString(), detectFunctions) }
+                                            engines.forEach { engine ->
+                                                res + withContext(context) { scan(str.toString(), engine) }
+                                            }
                                             str.clear()
                                             sample++
                                             if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
@@ -163,11 +169,13 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                                                                 if (text.isNotEmpty()) {
                                                                     str.append(text).append("\n")
                                                                     if (str.length >= scanSettings.sampleLength || !isActive) {
-                                                                        res + withContext(context) {
-                                                                            scan(
-                                                                                str.toString(),
-                                                                                detectFunctions
-                                                                            )
+                                                                        engines.forEach { engine ->
+                                                                            res + withContext(context) {
+                                                                                scan(
+                                                                                    str.toString(),
+                                                                                    engine
+                                                                                )
+                                                                            }
                                                                         }
                                                                         str.clear()
                                                                         sample++
@@ -195,7 +203,9 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                 return res
             }
             if (str.isNotEmpty() && !isSampleOverload(sample, fastScan)) {
-                res + withContext(context) { scan(str.toString(), detectFunctions) }
+                engines.forEach { engine ->
+                    res + withContext(context) { scan(str.toString(), engine) }
+                }
             }
 
             return res
@@ -205,7 +215,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
         override suspend fun scanFile(
             file: File,
             context: CoroutineContext,
-            detectFunctions: List<IDetectFunction>,
+            engines: List<IScanEngine>,
             fastScan: Boolean
         ): Document {
             val str = StringBuilder()
@@ -225,7 +235,9 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                                     for (i in 0..r.cellCount - 1) {
                                         str.append(r.getCellByIndex(i).displayText).append("\n")
                                         if (str.length >= scanSettings.sampleLength || !isActive) {
-                                            res + withContext(context) { scan(str.toString(), detectFunctions) }
+                                            engines.forEach { engine ->
+                                                res + withContext(context) { scan(str.toString(), engine) }
+                                            }
                                             str.clear()
                                             sample++
                                             if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
@@ -241,7 +253,9 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                                 list.items.forEach {
                                     str.append(it.textContent).append("\n")
                                     if (str.length >= scanSettings.sampleLength || !isActive) {
-                                        res + withContext(context) { scan(str.toString(), detectFunctions) }
+                                        engines.forEach { engine ->
+                                            res + withContext(context) { scan(str.toString(), engine) }
+                                        }
                                         str.clear()
                                         sample++
                                         if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
@@ -253,7 +267,9 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                                 val textbox = textboxIterator.next()
                                 str.append(textbox.textContent).append("\n")
                                 if (str.length >= scanSettings.sampleLength || !isActive) {
-                                    res + withContext(context) { scan(str.toString(), detectFunctions) }
+                                    engines.forEach { engine ->
+                                        res + withContext(context) { scan(str.toString(), engine) }
+                                    }
                                     str.clear()
                                     sample++
                                     if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
@@ -266,7 +282,9 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                                     noteList.items.forEach {
                                         str.append(it.textContent).append("\n")
                                         if (str.length >= scanSettings.sampleLength || !isActive) {
-                                            res + withContext(context) { scan(str.toString(), detectFunctions) }
+                                            engines.forEach { engine ->
+                                                res + withContext(context) { scan(str.toString(), engine) }
+                                            }
                                             str.clear()
                                             sample++
                                             if (isSampleOverload(sample, fastScan) || !isActive) return@withContext
@@ -282,7 +300,9 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                 return res
             }
             if (str.isNotEmpty() && !isSampleOverload(sample, fastScan)) {
-                res + withContext(context) { scan(str.toString(), detectFunctions) }
+                engines.forEach { engine ->
+                    res + withContext(context) { scan(str.toString(), engine) }
+                }
             }
 
             return res
@@ -292,7 +312,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
         override suspend fun scanFile(
             file: File,
             context: CoroutineContext,
-            detectFunctions: List<IDetectFunction>,
+            engines: List<IScanEngine>,
             fastScan: Boolean
         ): Document {
             val str = StringBuilder()
@@ -312,11 +332,13 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                                                     if (text.isNotEmpty()) {
                                                         str.append(text).append("\n")
                                                         if (str.length >= scanSettings.sampleLength || !isActive) {
-                                                            res + withContext(context) {
-                                                                scan(
-                                                                    str.toString(),
-                                                                    detectFunctions
-                                                                )
+                                                            engines.forEach { engine ->
+                                                                res + withContext(context) {
+                                                                    scan(
+                                                                        str.toString(),
+                                                                        engine
+                                                                    )
+                                                                }
                                                             }
                                                             str.clear()
                                                             sample++
@@ -341,7 +363,9 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                 return res
             }
             if (str.isNotEmpty() && !isSampleOverload(sample, fastScan)) {
-                res + withContext(context) { scan(str.toString(), detectFunctions) }
+                engines.forEach { engine ->
+                    res + withContext(context) { scan(str.toString(), engine) }
+                }
             }
             return res
         }
@@ -350,7 +374,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
         override suspend fun scanFile(
             file: File,
             context: CoroutineContext,
-            detectFunctions: List<IDetectFunction>,
+            engines: List<IScanEngine>,
             fastScan: Boolean
         ): Document {
             val res = Document(file.length(), file.absolutePath)
@@ -399,7 +423,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                                                 bufferedOutputStream.flush()
                                             }
                                         }
-                                        getFileType(tmpFile)?.scanFile(tmpFile, context, detectFunctions, fastScan)
+                                        getFileType(tmpFile)?.scanFile(tmpFile, context, engines, fastScan)
                                             ?.also { doc ->
                                                 if (!doc.skipped()) {
                                                     res + doc.getDocumentFields()
@@ -434,7 +458,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
         override suspend fun scanFile(
             file: File,
             context: CoroutineContext,
-            detectFunctions: List<IDetectFunction>,
+            engines: List<IScanEngine>,
             fastScan: Boolean
         ): Document {
             val res = Document(file.length(), file.absolutePath)
@@ -456,7 +480,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
 
                         try {
                             archive.extractFile(fileHeader, tmpFile.outputStream())
-                            getFileType(tmpFile)?.scanFile(tmpFile, context, detectFunctions, fastScan)?.also { doc ->
+                            getFileType(tmpFile)?.scanFile(tmpFile, context, engines, fastScan)?.also { doc ->
                                 if (!doc.skipped()) {
                                     res + doc.getDocumentFields()
                                 } else {
@@ -486,7 +510,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
         override suspend fun scanFile(
             file: File,
             context: CoroutineContext,
-            detectFunctions: List<IDetectFunction>,
+            engines: List<IScanEngine>,
             fastScan: Boolean
         ): Document {
             return CertFileType
@@ -494,7 +518,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
                 ?.scanFile(
                     file,
                     context,
-                    detectFunctions,
+                    engines,
                     fastScan
                 ) ?: Document(file.length(), file.absolutePath)
                 .also {
@@ -506,7 +530,7 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
         override suspend fun scanFile(
             file: File,
             context: CoroutineContext,
-            detectFunctions: List<IDetectFunction>,
+            engines: List<IScanEngine>,
             fastScan: Boolean
         ): Document {
             return CodeFileType.scanFile(
@@ -518,19 +542,16 @@ enum class FileType(val extensions: List<String>) : KoinComponent {
     abstract suspend fun scanFile(
         file: File,
         context: CoroutineContext,
-        detectFunctions: List<IDetectFunction>,
+        engines: List<IScanEngine>,
         fastScan: Boolean
     ): Document
 
-    protected fun scan(text: String, detectFunctions: List<IDetectFunction>): Map<IDetectFunction, Int> {
-        val cleanText = Cleaner.cleanText(text)
-        return detectFunctions.mapNotNull { f ->
-            f.scan(cleanText).count().takeIf { it > 0 }
-                .let {
-                    if(it != null) f to it
-                    else null
-                }
-        }.toMap()
+    protected fun scan(text: String, engine: IScanEngine): Map<IMatcher, Int> {
+        return engine
+            .scan(text)
+            .groupBy { it.matcher }
+            .map { it.key to it.value.size }
+            .toMap()
     }
 
     companion object : KoinComponent {

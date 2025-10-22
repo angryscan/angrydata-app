@@ -56,7 +56,8 @@ fun SettingsScreen() {
 
     Box(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .padding(top = 32.dp),
         contentAlignment = Alignment.TopCenter
     ) {
         Surface(

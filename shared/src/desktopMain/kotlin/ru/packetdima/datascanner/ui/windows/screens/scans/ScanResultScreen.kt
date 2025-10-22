@@ -488,8 +488,7 @@ fun ScanResultScreen(
                     startedAt = startedAt,
                     finishedAt = finishedAt,
                     pausedAt = pausedAt,
-                    state = state,
-                    progress = progress
+                    state = state
                 )
 
                 VerticalDivider(

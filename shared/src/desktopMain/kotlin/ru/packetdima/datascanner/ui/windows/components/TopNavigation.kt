@@ -1,12 +1,14 @@
 package ru.packetdima.datascanner.ui.windows.components
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.material3.ripple
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -27,8 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.currentBackStackEntryAsState
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import ru.packetdima.datascanner.navigation.AppScreen
@@ -172,6 +172,7 @@ private fun NavigationTabs(
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .background(
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
@@ -205,59 +206,88 @@ private fun NavigationTab(
     item: NavigationItem,
     onClick: () -> Unit
 ) {
-    var isPressed by remember { mutableStateOf(false) }
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
     var isHovered by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     
     val scale by animateFloatAsState(
         targetValue = when {
             isPressed -> 0.92f
-            isHovered -> 1.02f
-            item.isSelected -> 1.05f
+            isHovered -> 1.05f
+            item.isSelected -> 1.08f
             else -> 1f
         },
-        animationSpec = tween(200, easing = FastOutSlowInEasing),
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessMedium
+        ),
         label = "scale"
     )
     
     val alpha by animateFloatAsState(
         targetValue = when {
             isPressed -> 0.8f
-            isHovered -> 0.9f
+            isHovered -> 0.98f
             else -> 1f
         },
-        animationSpec = tween(150),
+        animationSpec = tween(150, easing = EaseInOutCubic),
         label = "alpha"
+    )
+    
+    val elevation by animateFloatAsState(
+        targetValue = when {
+            isPressed -> 1f
+            isHovered -> 6f
+            item.isSelected -> 8f
+            else -> 0f
+        },
+        animationSpec = tween(200, easing = EaseInOutCubic),
+        label = "elevation"
+    )
+    
+    val rotation by animateFloatAsState(
+        targetValue = when {
+            isPressed -> 1f
+            isHovered -> -0.5f
+            else -> 0f
+        },
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessMedium
+        ),
+        label = "rotation"
     )
 
     Box(
         modifier = Modifier
             .scale(scale)
             .alpha(alpha)
+            .rotate(rotation)
             .clip(RoundedCornerShape(12.dp))
             .background(
                 color = if (item.isSelected) 
                     MaterialTheme.colorScheme.primary
                 else if (isHovered)
-                    MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                 else 
                     Color.Transparent
             )
             .shadow(
-                elevation = if (isPressed) 2.dp else if (isHovered) 4.dp else 0.dp,
+                elevation = elevation.dp,
                 shape = RoundedCornerShape(12.dp),
-                ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
             )
             .clickable(
                 enabled = true,
+                interactionSource = interactionSource,
+                indication = ripple(
+                    bounded = true,
+                    radius = 200.dp
+                ),
                 onClick = {
-                    isPressed = true
                     onClick()
-                    coroutineScope.launch {
-                        delay(120)
-                        isPressed = false
-                    }
                 }
             )
             .padding(horizontal = 20.dp, vertical = 14.dp),
@@ -267,14 +297,58 @@ private fun NavigationTab(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val iconScale by animateFloatAsState(
+                targetValue = when {
+                    isPressed -> 0.95f
+                    isHovered -> 1.05f
+                    item.isSelected -> 1.08f
+                    else -> 1f
+                },
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioNoBouncy,
+                    stiffness = Spring.StiffnessMedium
+                ),
+                label = "iconScale"
+            )
+            
+            val iconRotation by animateFloatAsState(
+                targetValue = when {
+                    isPressed -> 2f
+                    isHovered -> -1f
+                    else -> 0f
+                },
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioNoBouncy,
+                    stiffness = Spring.StiffnessMedium
+                ),
+                label = "iconRotation"
+            )
+            
             Icon(
                 painter = item.icon,
                 contentDescription = item.label,
-                modifier = Modifier.size(18.dp),
+                modifier = Modifier
+                    .size(18.dp)
+                    .scale(iconScale)
+                    .rotate(iconRotation),
                 tint = if (item.isSelected) 
                     MaterialTheme.colorScheme.onPrimary
                 else 
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+            )
+            
+            val textScale by animateFloatAsState(
+                targetValue = when {
+                    isPressed -> 0.98f
+                    isHovered -> 1.02f
+                    item.isSelected -> 1.05f
+                    else -> 1f
+                },
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioNoBouncy,
+                    stiffness = Spring.StiffnessMedium
+                ),
+                label = "textScale"
             )
             
             Text(
@@ -284,7 +358,8 @@ private fun NavigationTab(
                 color = if (item.isSelected) 
                     MaterialTheme.colorScheme.onPrimary
                 else 
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
+                modifier = Modifier.scale(textScale)
             )
         }
     }
@@ -338,34 +413,55 @@ private fun WindowControlButton(
     contentDescription: String,
     backgroundColor: Color
 ) {
-    var isPressed by remember { mutableStateOf(false) }
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
     var isHovered by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     
     val scale by animateFloatAsState(
         targetValue = when {
-            isPressed -> 0.85f
+            isPressed -> 0.9f
             isHovered -> 1.05f
             else -> 1f
         },
-        animationSpec = tween(150, easing = FastOutSlowInEasing),
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessMedium
+        ),
         label = "scale"
     )
     
     val alpha by animateFloatAsState(
         targetValue = when {
-            isPressed -> 0.7f
-            isHovered -> 0.9f
+            isPressed -> 0.8f
+            isHovered -> 0.98f
             else -> 1f
         },
-        animationSpec = tween(120),
+        animationSpec = tween(150, easing = EaseInOutCubic),
         label = "alpha"
     )
     
     val rotation by animateFloatAsState(
-        targetValue = if (isPressed) 5f else 0f,
-        animationSpec = tween(100),
+        targetValue = when {
+            isPressed -> 2f
+            isHovered -> -1f
+            else -> 0f
+        },
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessMedium
+        ),
         label = "rotation"
+    )
+    
+    val elevation by animateFloatAsState(
+        targetValue = when {
+            isPressed -> 2f
+            isHovered -> 8f
+            else -> 0f
+        },
+        animationSpec = tween(200, easing = EaseInOutCubic),
+        label = "elevation"
     )
 
     Box(
@@ -376,39 +472,48 @@ private fun WindowControlButton(
             .size(36.dp)
             .background(
                 color = if (isHovered) 
-                    backgroundColor.copy(alpha = 0.8f)
+                    backgroundColor.copy(alpha = 0.9f)
                 else 
                     backgroundColor,
                 shape = RoundedCornerShape(8.dp)
             )
             .shadow(
-                elevation = if (isPressed) 2.dp else if (isHovered) 6.dp else 0.dp,
+                elevation = elevation.dp,
                 shape = RoundedCornerShape(8.dp),
-                ambientColor = backgroundColor.copy(alpha = 0.3f),
-                spotColor = backgroundColor.copy(alpha = 0.3f)
+                ambientColor = backgroundColor.copy(alpha = 0.4f),
+                spotColor = backgroundColor.copy(alpha = 0.5f)
             )
             .clickable(
+                interactionSource = interactionSource,
+                indication = ripple(
+                    bounded = true,
+                    radius = 50.dp
+                ),
                 onClick = {
-                    isPressed = true
                     onClick()
-                    coroutineScope.launch {
-                        delay(150)
-                        isPressed = false
-                    }
                 }
             ),
         contentAlignment = Alignment.Center
     ) {
+        val iconScale by animateFloatAsState(
+            targetValue = if (isPressed) 0.85f else 1f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessHigh
+            ),
+            label = "iconScale"
+        )
+        
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
             modifier = Modifier
                 .size(16.dp)
-                .scale(if (isPressed) 0.9f else 1f),
+                .scale(iconScale),
             tint = if (isHovered)
-                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f)
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.95f)
             else
-                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
         )
     }
 }
@@ -416,6 +521,7 @@ private fun WindowControlButton(
 @Composable
 private fun NavigationActions() {
 }
+
 
 data class NavigationItem(
     val route: Any,

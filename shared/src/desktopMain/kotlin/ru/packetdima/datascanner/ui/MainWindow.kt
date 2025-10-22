@@ -1,11 +1,13 @@
 package ru.packetdima.datascanner.ui
 
-import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.*
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -166,28 +168,84 @@ fun MainWindow(
                             .weight(1f)
                             .fillMaxWidth(),
                         enterTransition = {
-                            slideInVertically(
-                                initialOffsetY = { it },
-                                animationSpec = tween(durationMillis = 700, easing = LinearOutSlowInEasing)
-                            ) + fadeIn(tween(700))
+                            slideInHorizontally(
+                                initialOffsetX = { fullWidth -> (fullWidth * 0.3f).toInt() },
+                                animationSpec = tween(
+                                    durationMillis = 400,
+                                    easing = FastOutSlowInEasing
+                                )
+                            ) + fadeIn(
+                                animationSpec = tween(
+                                    durationMillis = 350,
+                                    easing = LinearOutSlowInEasing
+                                )
+                            ) + scaleIn(
+                                initialScale = 0.95f,
+                                animationSpec = tween(
+                                    durationMillis = 350,
+                                    easing = FastOutSlowInEasing
+                                )
+                            )
                         },
                         exitTransition = {
-                            slideOutVertically(
-                                targetOffsetY = { -it * 3 / 2 },
-                                animationSpec = tween(durationMillis = 700, easing = LinearOutSlowInEasing)
-                            ) + fadeOut(tween(700))
+                            slideOutHorizontally(
+                                targetOffsetX = { fullWidth -> (-fullWidth * 0.3f).toInt() },
+                                animationSpec = tween(
+                                    durationMillis = 300,
+                                    easing = FastOutSlowInEasing
+                                )
+                            ) + fadeOut(
+                                animationSpec = tween(
+                                    durationMillis = 250,
+                                    easing = LinearOutSlowInEasing
+                                )
+                            ) + scaleOut(
+                                targetScale = 1.02f,
+                                animationSpec = tween(
+                                    durationMillis = 250,
+                                    easing = FastOutSlowInEasing
+                                )
+                            )
                         },
                         popEnterTransition = {
-                            slideInVertically(
-                                initialOffsetY = { -it * 3 / 2 },
-                                animationSpec = tween(durationMillis = 700, easing = LinearOutSlowInEasing)
-                            ) + fadeIn(tween(700))
+                            slideInHorizontally(
+                                initialOffsetX = { fullWidth -> (-fullWidth * 0.3f).toInt() },
+                                animationSpec = tween(
+                                    durationMillis = 400,
+                                    easing = FastOutSlowInEasing
+                                )
+                            ) + fadeIn(
+                                animationSpec = tween(
+                                    durationMillis = 350,
+                                    easing = LinearOutSlowInEasing
+                                )
+                            ) + scaleIn(
+                                initialScale = 0.95f,
+                                animationSpec = tween(
+                                    durationMillis = 350,
+                                    easing = FastOutSlowInEasing
+                                )
+                            )
                         },
                         popExitTransition = {
-                            slideOutVertically(
-                                targetOffsetY = { it },
-                                animationSpec = tween(durationMillis = 700, easing = LinearOutSlowInEasing)
-                            ) + fadeOut(tween(700))
+                            slideOutHorizontally(
+                                targetOffsetX = { fullWidth -> (fullWidth * 0.3f).toInt() },
+                                animationSpec = tween(
+                                    durationMillis = 300,
+                                    easing = FastOutSlowInEasing
+                                )
+                            ) + fadeOut(
+                                animationSpec = tween(
+                                    durationMillis = 250,
+                                    easing = LinearOutSlowInEasing
+                                )
+                            ) + scaleOut(
+                                targetScale = 1.02f,
+                                animationSpec = tween(
+                                    durationMillis = 250,
+                                    easing = FastOutSlowInEasing
+                                )
+                            )
                         }
                     ) {
                             composable<AppScreen.Main> {

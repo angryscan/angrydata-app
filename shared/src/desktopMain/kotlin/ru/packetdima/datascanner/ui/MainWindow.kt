@@ -43,7 +43,6 @@ import ru.packetdima.datascanner.ui.theme.AppTheme
 import ru.packetdima.datascanner.ui.windows.components.DesktopWindowShapes
 import ru.packetdima.datascanner.ui.windows.components.MainWindowTitleBar
 import ru.packetdima.datascanner.ui.windows.components.SideMenu
-import ru.packetdima.datascanner.ui.windows.screens.about.AboutScreen
 import ru.packetdima.datascanner.ui.windows.screens.main.MainScreen
 import ru.packetdima.datascanner.ui.windows.screens.scans.ScanResultScreen
 import ru.packetdima.datascanner.ui.windows.screens.scans.ScansScreen
@@ -216,9 +215,6 @@ fun MainWindow(
                             }
                             composable<AppScreen.Settings> {
                                 SettingsScreen()
-                            }
-                            composable<AppScreen.About> {
-                                AboutScreen()
                             }
                         }
                     }

@@ -16,7 +16,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.DialogState
 import androidx.compose.ui.window.rememberDialogState
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -52,7 +51,7 @@ fun SettingsScreen() {
     val descriptionDialogState = rememberDialogState(width = 600.dp, height = 450.dp)
     
     var showLicenseDialog by remember { mutableStateOf(false) }
-    val licenseDialogState = rememberDialogState(width = 600.dp, height = 600.dp)
+    val licenseDialogState = rememberDialogState(width = 600.dp, height = 580.dp)
 
     Box(
         modifier = Modifier

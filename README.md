@@ -6,10 +6,15 @@
 
 # A tool with friendly UI to discover sensitive data in 2 clicks
 **Angry Data Scanner** is a data security and privacy tool that uses pattern matching to automatically discover sensitive data stored in folders, web pages, S3, database.  
-It helps organizations by identifying where sensitive data such as personally identifiable information (PII) and intellectual property is stored. The tool provides visibility where your sensitive data is stored.  
+It helps organizations by identifying where sensitive data such as personally identifiable information (PII) and intellectual property is stored.   
+The tool provides visibility where your sensitive data is stored.  
+
 Sensitive data (PII, payments cards etc) can be discover with 2 click
+
 No administrator rights required to run Angry Data Scanner  
+
 No additional software installation required  
+
 Works on Linux, Mac, and Windows
 
 ## Discovered sensitive data
@@ -57,6 +62,7 @@ The scanner is intended to be a universal tool for scanning everything. Currentl
 
 ## Use cases
 We share some practical use cases how Angry Data Scanner is used in real world.
+
 - Leak Hunting team need to scan a network folder and ensure that it does not contain a source code
 - An employee scans the network file resource and deletes files containing card numbers to ensure compliance with PCI DSS requirements
 - A banking employee scans network file resource to ensure that it does not contain personal data of VIP clients

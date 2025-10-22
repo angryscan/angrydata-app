@@ -58,7 +58,6 @@ fun TopNavigation(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Левая часть: Логотип и навигация
             Row(
                 horizontalArrangement = Arrangement.spacedBy(24.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -70,8 +69,7 @@ fun TopNavigation(
                     currentDestination = destination
                 )
             }
-            
-            // Правая часть: Кнопки управления окном
+
             if (onMinimizeClick != null && onExpandClick != null && onCloseClick != null) {
                 WindowControlButtons(
                     windowPlacement = windowPlacement,
@@ -91,7 +89,6 @@ private fun AppLogo() {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Иконка с красивым градиентным фоном и эффектами
         Box(
             modifier = Modifier
                 .size(52.dp)
@@ -133,8 +130,7 @@ private fun AppLogo() {
                     .scale(1.15f)
             )
         }
-        
-        // Название приложения
+
         Text(
             text = stringResource(Res.string.appName),
             style = MaterialTheme.typography.titleLarge,
@@ -288,7 +284,6 @@ private fun WindowControlButtons(
             )
             .padding(4.dp)
     ) {
-        // Кнопка сворачивания
         WindowControlButton(
             onClick = onMinimizeClick,
             icon = Icons.Outlined.Minimize,
@@ -296,7 +291,6 @@ private fun WindowControlButtons(
             backgroundColor = MaterialTheme.colorScheme.surfaceVariant
         )
 
-        // Кнопка развертывания/сворачивания
         WindowControlButton(
             onClick = onExpandClick,
             icon = if (expanded) Icons.Outlined.CloseFullscreen else Icons.Outlined.OpenInFull,
@@ -304,7 +298,6 @@ private fun WindowControlButtons(
             backgroundColor = MaterialTheme.colorScheme.surfaceVariant
         )
 
-        // Кнопка закрытия
         WindowControlButton(
             onClick = onCloseClick,
             icon = Icons.Outlined.Close,

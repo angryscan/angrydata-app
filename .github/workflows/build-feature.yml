@@ -96,15 +96,15 @@ jobs:
           if (dmgFiles.length > 0) {
             const comment = `🎉 **Сборка завершена успешно!**
             
-📦 Найденные .dmg файлы:
-${dmgFiles.map(file => `- \`${file}\``).join('\n')}
-
-Артефакты доступны в разделе Actions.`;
-            
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
-          }
+          📦 Найденные .dmg файлы:
+          ${dmgFiles.map(file => `- \`${file}\``).join('\n')}
+          
+          Артефакты доступны в разделе Actions.`;
+                      
+                      github.rest.issues.createComment({
+                        issue_number: context.issue.number,
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        body: comment
+                      });
+                    }

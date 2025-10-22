@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
@@ -45,29 +46,32 @@ fun TopNavigation(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .height(80.dp),
+            .height(72.dp),
         color = MaterialTheme.colorScheme.surface,
-        shadowElevation = 4.dp,
-        tonalElevation = 2.dp
+        shadowElevation = 6.dp,
+        tonalElevation = 3.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 24.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                .padding(horizontal = 20.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AppLogo()
+            // Левая часть: Логотип и навигация
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(24.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                AppLogo()
+                
+                NavigationTabs(
+                    navController = navController,
+                    currentDestination = destination
+                )
+            }
             
-            Spacer(modifier = Modifier.width(32.dp))
-
-            NavigationTabs(
-                navController = navController,
-                currentDestination = destination
-            )
-            
-            Spacer(modifier = Modifier.weight(1f))
-
+            // Правая часть: Кнопки управления окном
             if (onMinimizeClick != null && onExpandClick != null && onCloseClick != null) {
                 WindowControlButtons(
                     windowPlacement = windowPlacement,
@@ -85,19 +89,57 @@ fun TopNavigation(
 private fun AppLogo() {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Image(
-            painter = painterResource(Res.drawable.icon),
-            contentDescription = stringResource(Res.string.appName),
-            modifier = Modifier.size(40.dp)
-        )
+        // Иконка с красивым градиентным фоном и эффектами
+        Box(
+            modifier = Modifier
+                .size(52.dp)
+                .background(
+                    brush = androidx.compose.ui.graphics.Brush.radialGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary,
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
+                        ),
+                        radius = 50f
+                    ),
+                    shape = RoundedCornerShape(18.dp)
+                )
+                .border(
+                    width = 1.5.dp,
+                    brush = androidx.compose.ui.graphics.Brush.linearGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                        )
+                    ),
+                    shape = RoundedCornerShape(18.dp)
+                )
+                .shadow(
+                    elevation = 8.dp,
+                    shape = RoundedCornerShape(18.dp),
+                    ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                    spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                )
+                .padding(12.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painterResource(Res.drawable.icon),
+                contentDescription = stringResource(Res.string.appName),
+                modifier = Modifier
+                    .size(28.dp)
+                    .scale(1.15f)
+            )
+        }
         
+        // Название приложения
         Text(
             text = stringResource(Res.string.appName),
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
@@ -130,7 +172,13 @@ private fun NavigationTabs(
     )
 
     Row(
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .background(
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                shape = RoundedCornerShape(16.dp)
+            )
+            .padding(4.dp)
     ) {
         navigationItems.forEach { item ->
             NavigationTab(
@@ -177,14 +225,9 @@ private fun NavigationTab(
             .clip(RoundedCornerShape(12.dp))
             .background(
                 color = if (item.isSelected) 
-                    MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                    MaterialTheme.colorScheme.primary
                 else 
                     Color.Transparent
-            )
-            .border(
-                width = if (item.isSelected) 1.dp else 0.dp,
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                shape = RoundedCornerShape(12.dp)
             )
             .clickable(
                 enabled = true,
@@ -197,19 +240,19 @@ private fun NavigationTab(
                     }
                 }
             )
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 20.dp, vertical = 14.dp),
         contentAlignment = Alignment.Center
     ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 painter = item.icon,
                 contentDescription = item.label,
-                modifier = Modifier.size(20.dp),
+                modifier = Modifier.size(18.dp),
                 tint = if (item.isSelected) 
-                    MaterialTheme.colorScheme.primary 
+                    MaterialTheme.colorScheme.onPrimary
                 else 
                     MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )
@@ -217,9 +260,9 @@ private fun NavigationTab(
             Text(
                 text = item.label,
                 style = MaterialTheme.typography.bodyMedium,
-                fontWeight = if (item.isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                fontWeight = if (item.isSelected) FontWeight.SemiBold else FontWeight.Medium,
                 color = if (item.isSelected) 
-                    MaterialTheme.colorScheme.primary 
+                    MaterialTheme.colorScheme.onPrimary
                 else 
                     MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
             )
@@ -236,44 +279,83 @@ private fun WindowControlButtons(
     onCloseClick: () -> Unit
 ) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        verticalAlignment = Alignment.CenterVertically
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .background(
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(12.dp)
+            )
+            .padding(4.dp)
     ) {
-        IconButton(
+        // Кнопка сворачивания
+        WindowControlButton(
             onClick = onMinimizeClick,
-            modifier = Modifier.size(32.dp)
-        ) {
-            Icon(
-                Icons.Outlined.Minimize,
-                contentDescription = "Minimize",
-                modifier = Modifier.size(16.dp),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-            )
-        }
+            icon = Icons.Outlined.Minimize,
+            contentDescription = "Minimize",
+            backgroundColor = MaterialTheme.colorScheme.surfaceVariant
+        )
 
-        IconButton(
+        // Кнопка развертывания/сворачивания
+        WindowControlButton(
             onClick = onExpandClick,
-            modifier = Modifier.size(32.dp)
-        ) {
-            Icon(
-                imageVector = if (expanded) Icons.Outlined.CloseFullscreen else Icons.Outlined.OpenInFull,
-                contentDescription = if (expanded) "Restore" else "Maximize",
-                modifier = Modifier.size(16.dp),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-            )
-        }
+            icon = if (expanded) Icons.Outlined.CloseFullscreen else Icons.Outlined.OpenInFull,
+            contentDescription = if (expanded) "Restore" else "Maximize",
+            backgroundColor = MaterialTheme.colorScheme.surfaceVariant
+        )
 
-        IconButton(
+        // Кнопка закрытия
+        WindowControlButton(
             onClick = onCloseClick,
-            modifier = Modifier.size(32.dp)
-        ) {
-            Icon(
-                Icons.Outlined.Close,
-                contentDescription = "Close",
-                modifier = Modifier.size(16.dp),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            icon = Icons.Outlined.Close,
+            contentDescription = "Close",
+            backgroundColor = MaterialTheme.colorScheme.errorContainer
+        )
+    }
+}
+
+@Composable
+private fun WindowControlButton(
+    onClick: () -> Unit,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    contentDescription: String,
+    backgroundColor: Color
+) {
+    var isPressed by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+    
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.9f else 1f,
+        animationSpec = tween(100),
+        label = "scale"
+    )
+
+    Box(
+        modifier = Modifier
+            .scale(scale)
+            .size(36.dp)
+            .background(
+                color = backgroundColor,
+                shape = RoundedCornerShape(8.dp)
             )
-        }
+            .clickable(
+                onClick = {
+                    isPressed = true
+                    onClick()
+                    coroutineScope.launch {
+                        delay(100)
+                        isPressed = false
+                    }
+                }
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            modifier = Modifier.size(16.dp),
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+        )
     }
 }
 

@@ -52,13 +52,11 @@ fun SideMenu(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Row(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
-                    .padding(start = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    .height(56.dp),
+                contentAlignment = Alignment.Center
             ) {
                 Image(
                     painter = painterResource(Res.drawable.icon),
@@ -67,37 +65,43 @@ fun SideMenu(navController: NavController) {
                         .size(56.dp)
                         .clip(MaterialTheme.shapes.medium)
                         .clickable {
-                            navController.navigate(AppScreen.Main)
+                            if (!(destination?.hasRoute(AppScreen.Main::class) ?: false)) {
+                                navController.navigate(AppScreen.Main)
+                            }
                         },
                 )
-                AnimatedVisibility(expanded) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.appName),
-                            fontSize = 20.sp,
-                        )
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(MaterialTheme.shapes.medium)
-                                .background(MaterialTheme.colorScheme.secondaryContainer)
-                                .clickable {
+            }
+            
+            AnimatedVisibility(expanded) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                ) {
+                    Text(
+                        text = stringResource(Res.string.appName),
+                        fontSize = 20.sp,
+                    )
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(MaterialTheme.shapes.medium)
+                            .background(MaterialTheme.colorScheme.secondaryContainer)
+                            .clickable {
+                                if (!(destination?.hasRoute(AppScreen.Main::class) ?: false)) {
                                     navController.navigate(AppScreen.Main)
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.ArrowBackIosNew,
-                                contentDescription = null,
-                            )
-                        }
+                                }
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.ArrowBackIosNew,
+                            contentDescription = null,
+                        )
                     }
                 }
-
             }
             Spacer(modifier = Modifier.height(18.dp))
 

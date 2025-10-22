@@ -67,7 +67,7 @@ fun SideMenu(navController: NavController) {
                         .size(56.dp)
                         .clip(MaterialTheme.shapes.medium)
                         .clickable {
-                            expanded = !expanded
+                            navController.navigate(AppScreen.Main)
                         },
                 )
                 AnimatedVisibility(expanded) {
@@ -86,7 +86,7 @@ fun SideMenu(navController: NavController) {
                                 .clip(MaterialTheme.shapes.medium)
                                 .background(MaterialTheme.colorScheme.secondaryContainer)
                                 .clickable {
-                                    expanded = !expanded
+                                    navController.navigate(AppScreen.Main)
                                 },
                             contentAlignment = Alignment.Center
                         ) {
@@ -101,18 +101,6 @@ fun SideMenu(navController: NavController) {
             }
             Spacer(modifier = Modifier.height(18.dp))
 
-            DescriptionTooltip(
-                description = stringResource(Res.string.SideMenu_MainPage),
-                delay = 1000
-            ){
-                SideMenuItem(
-                    isSelected = destination?.hasRoute(AppScreen.Main::class) ?: false,
-                    expanded = expanded,
-                    icon = painterResource(Res.drawable.SideMenu_IconMainPage),
-                    text = stringResource(Res.string.SideMenu_MainPage),
-                    onClick = { navController.navigate(AppScreen.Main) },
-                )
-            }
 
             DescriptionTooltip(
                 description = stringResource(Res.string.SideMenu_ScanListPage),

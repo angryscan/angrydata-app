@@ -2,6 +2,7 @@ package ru.packetdima.datascanner.ui.windows.components
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -14,7 +15,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -203,27 +206,48 @@ private fun NavigationTab(
     onClick: () -> Unit
 ) {
     var isPressed by remember { mutableStateOf(false) }
+    var isHovered by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     
     val scale by animateFloatAsState(
         targetValue = when {
-            isPressed -> 0.95f
+            isPressed -> 0.92f
+            isHovered -> 1.02f
             item.isSelected -> 1.05f
             else -> 1f
         },
-        animationSpec = tween(150),
+        animationSpec = tween(200, easing = FastOutSlowInEasing),
         label = "scale"
+    )
+    
+    val alpha by animateFloatAsState(
+        targetValue = when {
+            isPressed -> 0.8f
+            isHovered -> 0.9f
+            else -> 1f
+        },
+        animationSpec = tween(150),
+        label = "alpha"
     )
 
     Box(
         modifier = Modifier
             .scale(scale)
+            .alpha(alpha)
             .clip(RoundedCornerShape(12.dp))
             .background(
                 color = if (item.isSelected) 
                     MaterialTheme.colorScheme.primary
+                else if (isHovered)
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
                 else 
                     Color.Transparent
+            )
+            .shadow(
+                elevation = if (isPressed) 2.dp else if (isHovered) 4.dp else 0.dp,
+                shape = RoundedCornerShape(12.dp),
+                ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
             )
             .clickable(
                 enabled = true,
@@ -231,7 +255,7 @@ private fun NavigationTab(
                     isPressed = true
                     onClick()
                     coroutineScope.launch {
-                        delay(100)
+                        delay(120)
                         isPressed = false
                     }
                 }
@@ -315,28 +339,60 @@ private fun WindowControlButton(
     backgroundColor: Color
 ) {
     var isPressed by remember { mutableStateOf(false) }
+    var isHovered by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     
     val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.9f else 1f,
-        animationSpec = tween(100),
+        targetValue = when {
+            isPressed -> 0.85f
+            isHovered -> 1.05f
+            else -> 1f
+        },
+        animationSpec = tween(150, easing = FastOutSlowInEasing),
         label = "scale"
+    )
+    
+    val alpha by animateFloatAsState(
+        targetValue = when {
+            isPressed -> 0.7f
+            isHovered -> 0.9f
+            else -> 1f
+        },
+        animationSpec = tween(120),
+        label = "alpha"
+    )
+    
+    val rotation by animateFloatAsState(
+        targetValue = if (isPressed) 5f else 0f,
+        animationSpec = tween(100),
+        label = "rotation"
     )
 
     Box(
         modifier = Modifier
             .scale(scale)
+            .alpha(alpha)
+            .rotate(rotation)
             .size(36.dp)
             .background(
-                color = backgroundColor,
+                color = if (isHovered) 
+                    backgroundColor.copy(alpha = 0.8f)
+                else 
+                    backgroundColor,
                 shape = RoundedCornerShape(8.dp)
+            )
+            .shadow(
+                elevation = if (isPressed) 2.dp else if (isHovered) 6.dp else 0.dp,
+                shape = RoundedCornerShape(8.dp),
+                ambientColor = backgroundColor.copy(alpha = 0.3f),
+                spotColor = backgroundColor.copy(alpha = 0.3f)
             )
             .clickable(
                 onClick = {
                     isPressed = true
                     onClick()
                     coroutineScope.launch {
-                        delay(100)
+                        delay(150)
                         isPressed = false
                     }
                 }
@@ -346,8 +402,13 @@ private fun WindowControlButton(
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            modifier = Modifier.size(16.dp),
-            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+            modifier = Modifier
+                .size(16.dp)
+                .scale(if (isPressed) 0.9f else 1f),
+            tint = if (isHovered)
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f)
+            else
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
         )
     }
 }

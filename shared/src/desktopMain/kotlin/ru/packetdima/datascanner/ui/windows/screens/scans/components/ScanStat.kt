@@ -15,13 +15,18 @@ fun ScanStat(
     foundFiles: Long,
     folderSize: String,
     selectedFilesSize: Long,
+    foundFilesSize: Long,
     scanTime: String,
     scoreSum: Long
 ) {
     // Total files count
     ScanStatItem(
         title = stringResource(Res.string.Task_TotalFiles),
-        text = totalFiles.toString()
+        text = if (totalFiles > 0 && folderSize.isNotEmpty()) {
+            "$totalFiles (${folderSize})"
+        } else {
+            totalFiles.toString()
+        }
     )
 
     VerticalDivider(
@@ -47,7 +52,11 @@ fun ScanStat(
     //Found files count
     ScanStatItem(
         title = stringResource(Res.string.Task_FoundFiles),
-        text = foundFiles.toString()
+        text = if (foundFiles > 0 && foundFilesSize > 0) {
+            "$foundFiles (${foundFilesSize.toHumanReadable()})"
+        } else {
+            foundFiles.toString()
+        }
     )
 
     VerticalDivider(

@@ -7,22 +7,19 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.material3.ripple
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.CloseFullscreen
+import androidx.compose.material.icons.outlined.Minimize
+import androidx.compose.material.icons.outlined.OpenInFull
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
@@ -33,13 +30,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 import org.koin.compose.koinInject
+import ru.packetdima.datascanner.db.models.TaskState
 import ru.packetdima.datascanner.navigation.AppScreen
 import ru.packetdima.datascanner.resources.*
 import ru.packetdima.datascanner.scan.ScanService
-import ru.packetdima.datascanner.db.models.TaskState
 
 @Composable
 fun TopNavigation(
@@ -222,12 +217,13 @@ private fun NavigationTabs(
 ) {
     val scanService = koinInject<ScanService>()
     val allTasks by scanService.tasks.tasks.collectAsState()
-
+    
+    // Принудительно обновляем состояние каждую секунду для корректной работы индикатора
     var currentTime by remember { mutableStateOf(System.currentTimeMillis()) }
     
     LaunchedEffect(Unit) {
         while (true) {
-            delay(1000)
+            delay(1000) // Обновляем каждую секунду
             currentTime = System.currentTimeMillis()
         }
     }
@@ -280,7 +276,15 @@ private fun NavigationTabs(
                 onClick = { 
                     try {
                         println("Navigating to: ${item.route}")
-                        if (!item.isSelected) {
+                        if (item.route == AppScreen.Scans) {
+                            val isOnScansScreen = currentDestination?.hasRoute(AppScreen.Scans::class) ?: false
+                            if (!isOnScansScreen) {
+                                navController.navigate(item.route)
+                                println("Navigation to Scans successful")
+                            } else {
+                                println("Already on Scans screen - no navigation needed")
+                            }
+                        } else if (!item.isSelected) {
                             navController.navigate(item.route)
                             println("Navigation successful")
                         } else {
@@ -433,7 +437,8 @@ private fun NavigationTab(
                     else 
                         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                 )
-
+                
+                // Активный индикатор сканирования
                 if (item.hasActiveIndicator) {
                     ActiveScanIndicator()
                 }
@@ -664,6 +669,7 @@ private fun ActiveScanIndicator() {
             .size(12.dp)
             .offset(x = 10.dp, y = (-10).dp)
     ) {
+        // Внешний пульсирующий круг
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -674,7 +680,8 @@ private fun ActiveScanIndicator() {
                     shape = CircleShape
                 )
         )
-
+        
+        // Внутренний вращающийся индикатор
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -690,7 +697,8 @@ private fun ActiveScanIndicator() {
                     shape = CircleShape
                 )
         )
-
+        
+        // Центральная точка
         Box(
             modifier = Modifier
                 .size(4.dp)

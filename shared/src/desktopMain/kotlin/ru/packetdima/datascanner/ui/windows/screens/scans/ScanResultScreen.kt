@@ -1,7 +1,7 @@
 package ru.packetdima.datascanner.ui.windows.screens.scans
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.unit.dp
@@ -48,12 +49,7 @@ import ru.packetdima.datascanner.ui.extensions.color
 import ru.packetdima.datascanner.ui.extensions.icon
 import ru.packetdima.datascanner.ui.strings.composableName
 import ru.packetdima.datascanner.ui.windows.components.DetectFunctionTooltip
-import ru.packetdima.datascanner.ui.windows.screens.scans.components.AttributeFilterChip
-import ru.packetdima.datascanner.ui.windows.screens.scans.components.ResultTable
-import ru.packetdima.datascanner.ui.windows.screens.scans.components.ScanStat
-import ru.packetdima.datascanner.ui.windows.screens.scans.components.ScanTimeStatItem
-import ru.packetdima.datascanner.ui.windows.screens.scans.components.SortColumn
-import ru.packetdima.datascanner.ui.windows.screens.scans.components.comparator
+import ru.packetdima.datascanner.ui.windows.screens.scans.components.*
 import java.awt.datatransfer.StringSelection
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
@@ -428,6 +424,17 @@ fun ScanResultScreen(
                                 .size(40.dp)
                         )
                     } else {
+                        val infiniteTransition = rememberInfiniteTransition(label = "rotation")
+                        val rotationAngle by infiniteTransition.animateFloat(
+                            initialValue = 0f,
+                            targetValue = 360f,
+                            animationSpec = infiniteRepeatable(
+                                animation = tween(2000, easing = LinearEasing),
+                                repeatMode = RepeatMode.Restart
+                            ),
+                            label = "rotation"
+                        )
+                        
                         Box(
                             modifier = Modifier
                                 .size(40.dp)
@@ -445,6 +452,16 @@ fun ScanResultScreen(
                                 },
                             contentAlignment = Alignment.Center
                         ) {
+                            if (state == TaskState.SCANNING) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .rotate(rotationAngle),
+                                    strokeWidth = 2.dp,
+                                    color = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
+                            
                             Icon(
                                 imageVector = when (state) {
                                     TaskState.SEARCHING, TaskState.SCANNING, TaskState.LOADING -> Icons.Outlined.Pause

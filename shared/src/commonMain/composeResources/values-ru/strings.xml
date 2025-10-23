@@ -137,6 +137,12 @@
     <string name="DetectFunction-Description-Code">Поиск программный кода</string>
     <string name="DetectFunction-Description-Cert">Поиск сертификатов</string>
     <string name="DetectFunction-Description-DetectBlockedDomains">Поиск доменлв из реестра заблокированных РосКомНадзором</string>
+    
+    <!-- Группы детектирования -->
+    <string name="DetectGroup-PersonalDataNumbers">Персональные данные (числа)</string>
+    <string name="DetectGroup-PersonalDataText">Персональные данные (текст)</string>
+    <string name="DetectGroup-BankingSecrecy">Банковская тайна</string>
+    <string name="DetectGroup-ITAssets">IT активы</string>
 
     <string name="SettingsScreen-ThreadsCount">Количество потоков</string>
     <string name="SettingsScreen-ContextMenu">Контекстное меню</string>

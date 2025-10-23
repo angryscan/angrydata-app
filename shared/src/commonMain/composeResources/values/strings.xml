@@ -139,6 +139,12 @@
     <string name="DetectFunction-Description-Code">Program code</string>
     <string name="DetectFunction-Description-Cert">Certificate</string>
     <string name="DetectFunction-Description-DetectBlockedDomains">Domain from registry blocked by RKN</string>
+    
+    <!-- Detection Groups -->
+    <string name="DetectGroup-PersonalDataNumbers">Personal Data (numbers)</string>
+    <string name="DetectGroup-PersonalDataText">Personal Data (text)</string>
+    <string name="DetectGroup-BankingSecrecy">Banking Secrecy</string>
+    <string name="DetectGroup-ITAssets">IT assets</string>
 
     <string name="SettingsScreen-ThreadsCount">Threads count</string>
     <string name="SettingsScreen-ContextMenu">Context menu</string>

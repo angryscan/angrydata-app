@@ -15,6 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.unit.dp
@@ -474,22 +476,75 @@ fun ScanResultScreen(
                     }
                     Column(
                         modifier = Modifier.width(600.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(
-                            text = "$progress% (${scanned + skipped} / $selectedFiles)",
-                            fontSize = 12.sp,
-                            color = androidx.compose.ui.graphics.Color.White
-                        )
-                        LinearProgressIndicator(
-                            progress = {
-                                animatedProgress
-                            },
-                            color = state.color(),
+                        Row(
                             modifier = Modifier.fillMaxWidth(),
-                            strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
-                            trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                        )
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "$progress% (${scanned + skipped} / $selectedFiles)",
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            if (state == TaskState.SCANNING || state == TaskState.SEARCHING) {
+                                Text(
+                                    text = "Сканирование...",
+                                    fontSize = 12.sp,
+                                    color = state.color(),
+                                    style = MaterialTheme.typography.labelMedium
+                                )
+                            }
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp)
+                                .clip(MaterialTheme.shapes.small)
+                                .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                        ) {
+                            // Progress fill with bright gradient
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .fillMaxWidth(animatedProgress)
+                                    .background(state.color())
+                            )
+                            
+                            // Shimmer effect for active scanning
+                            if (state == TaskState.SCANNING) {
+                                val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
+                                val shimmerOffset by infiniteTransition.animateFloat(
+                                    initialValue = -1f,
+                                    targetValue = 1f,
+                                    animationSpec = infiniteRepeatable(
+                                        animation = tween(1500, easing = LinearEasing),
+                                        repeatMode = RepeatMode.Restart
+                                    ),
+                                    label = "shimmer"
+                                )
+                                
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .fillMaxWidth(animatedProgress)
+                                        .background(
+                                            brush = Brush.horizontalGradient(
+                                                colors = listOf(
+                                                    Color.Transparent,
+                                                    Color.White.copy(alpha = 0.4f),
+                                                    Color.Transparent
+                                                ),
+                                                startX = shimmerOffset * 300f,
+                                                endX = (shimmerOffset + 0.3f) * 300f
+                                            )
+                                        )
+                                )
+                            }
+                        }
                     }
                 }
 

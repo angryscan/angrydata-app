@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import info.downdetector.bigdatascanner.common.DetectFunction
@@ -416,46 +417,142 @@ private fun MinimalDetectionGroupCard(
                 enter = expandVertically(animationSpec = tween(250)) + fadeIn(animationSpec = tween(250)),
                 exit = shrinkVertically(animationSpec = tween(250)) + fadeOut(animationSpec = tween(250))
             ) {
+                val allFunctions = group.functions + group.additionalFunctions.map { additionalFunction ->
+                    when (additionalFunction) {
+                        is CodeDetectFun -> null to true
+                        is CertDetectFun -> null to false
+                        is RKNDomainDetectFun -> null to false
+                        else -> null to false
+                    }
+                }
+                
+                val totalItems = group.functions.size + group.additionalFunctions.size
+                
+                val allFunctionNames = mutableListOf<String>()
+                
+                group.functions.forEach { function ->
+                    allFunctionNames.add(function.composableName())
+                }
+                
+                group.additionalFunctions.forEach { additionalFunction ->
+                    val name = when (additionalFunction) {
+                        is CodeDetectFun -> stringResource(Res.string.DetectFunction_Code)
+                        is CertDetectFun -> stringResource(Res.string.DetectFunction_Cert)
+                        is RKNDomainDetectFun -> stringResource(Res.string.DetectFunction_DetectBlockedDomains)
+                        else -> ""
+                    }
+                    allFunctionNames.add(name)
+                }
+                
+                val averageLength = allFunctionNames.map { it.length }.average()
+                val maxLength = allFunctionNames.maxOfOrNull { it.length } ?: 0
+                
+                val textBasedColumns = when {
+                    averageLength < 8 && maxLength < 12 -> 4
+                    averageLength < 12 && maxLength < 16 -> 3
+                    averageLength < 16 && maxLength < 20 -> 2
+                    else -> 1
+                }
+                
+                val idealColumns = when {
+                    group.name.contains("IT") || group.name.contains("IT-активы") -> {
+                        when {
+                            totalItems <= 3 -> 2
+                            totalItems <= 5 -> 3
+                            else -> 4
+                        }
+                    }
+                    
+                    group.name.contains("Банковская") || group.name.contains("Banking") -> {
+                        when {
+                            totalItems <= 3 -> 2
+                            totalItems <= 6 -> 3
+                            else -> 4
+                        }
+                    }
+                    
+                    group.name.contains("Персональные") || group.name.contains("Personal") -> {
+                        when {
+                            totalItems <= 3 -> 2
+                            totalItems <= 6 -> 3
+                            totalItems <= 9 -> 4
+                            else -> 5
+                        }
+                    }
+                    
+                    totalItems <= 2 -> 1
+                    totalItems <= 4 -> 2
+                    totalItems <= 6 -> 3
+                    totalItems <= 9 -> 4
+                    totalItems <= 12 -> 5
+                    else -> 6
+                }
+                
+                val finalColumns = minOf(
+                    idealColumns,
+                    textBasedColumns
+                )
+                
+                val columns = finalColumns.coerceIn(1, 4)
+                
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 8.dp, vertical = 4.dp),
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
-                        group.functions.forEach { detectFunction ->
-                            ModernDetectionFunctionItem(
-                                detectFunction = detectFunction,
-                                scanSettings = scanSettings
-                            )
-                        }
-
-                        group.additionalFunctions.forEach { additionalFunction ->
-                            when (additionalFunction) {
-                                is CodeDetectFun -> {
-                                    ModernDetectionFunctionItem(
-                                        detectFunction = null,
-                                        scanSettings = scanSettings,
-                                        isCode = true
-                                    )
+                    val allItems = mutableListOf<Any>()
+                    allItems.addAll(group.functions)
+                    allItems.addAll(group.additionalFunctions)
+                    
+                    allItems.chunked(columns).forEach { rowItems ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            rowItems.forEach { item ->
+                                Box(
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    when (item) {
+                                        is DetectFunction -> {
+                                            ModernDetectionFunctionItem(
+                                                detectFunction = item,
+                                                scanSettings = scanSettings
+                                            )
+                                        }
+                                        is CodeDetectFun -> {
+                                            ModernDetectionFunctionItem(
+                                                detectFunction = null,
+                                                scanSettings = scanSettings,
+                                                isCode = true
+                                            )
+                                        }
+                                        is CertDetectFun -> {
+                                            ModernDetectionFunctionItem(
+                                                detectFunction = null,
+                                                scanSettings = scanSettings,
+                                                isCert = true
+                                            )
+                                        }
+                                        is RKNDomainDetectFun -> {
+                                            ModernDetectionFunctionItem(
+                                                detectFunction = null,
+                                                scanSettings = scanSettings,
+                                                isDomain = true
+                                            )
+                                        }
+                                    }
                                 }
-                                is CertDetectFun -> {
-                                    ModernDetectionFunctionItem(
-                                        detectFunction = null,
-                                        scanSettings = scanSettings,
-                                        isCert = true
-                                    )
-                                }
-                                is RKNDomainDetectFun -> {
-                                    ModernDetectionFunctionItem(
-                                        detectFunction = null,
-                                        scanSettings = scanSettings,
-                                        isDomain = true
-                                    )
-                                }
+                            }
+                            
+                            repeat(columns - rowItems.size) {
+                                Spacer(modifier = Modifier.weight(1f))
                             }
                         }
                     }
                 }
+            }
             }
         }
     }
@@ -520,22 +617,22 @@ private fun ModernDetectionFunctionItem(
             .hoverable(interactionSource = itemInteractionSource),
         shape = RoundedCornerShape(6.dp),
         color = if (isItemHovered) 
-            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.06f)
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.08f)
         else 
-            Color.Transparent,
-        shadowElevation = if (isItemHovered) 1.dp else 0.dp
+            MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+        shadowElevation = if (isItemHovered) 2.dp else 0.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 4.dp, vertical = 3.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                .padding(horizontal = 6.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Checkbox(
                 checked = isChecked,
                 onCheckedChange = onCheckedChange,
-                modifier = Modifier.size(16.dp),
+                modifier = Modifier.size(14.dp),
                 colors = CheckboxDefaults.colors(
                     checkedColor = MaterialTheme.colorScheme.primary,
                     uncheckedColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)
@@ -548,25 +645,29 @@ private fun ModernDetectionFunctionItem(
                 ) {
                     Text(
                         text = functionName,
-                        fontSize = 14.sp,
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
                         color = if (isItemHovered) 
                             MaterialTheme.colorScheme.primary
                         else 
                             MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             } else {
                 Text(
                     text = functionName,
-                    fontSize = 14.sp,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
                     color = if (isItemHovered) 
                         MaterialTheme.colorScheme.primary
                     else 
                         MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }

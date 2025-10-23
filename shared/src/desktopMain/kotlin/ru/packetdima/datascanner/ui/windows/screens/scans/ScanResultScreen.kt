@@ -475,7 +475,7 @@ fun ScanResultScreen(
                         }
                     }
                     Column(
-                        modifier = Modifier.width(600.dp),
+                        modifier = Modifier.width(800.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Row(
@@ -489,14 +489,6 @@ fun ScanResultScreen(
                                 color = MaterialTheme.colorScheme.onSurface,
                                 style = MaterialTheme.typography.bodyMedium
                             )
-                            if (state == TaskState.SCANNING || state == TaskState.SEARCHING) {
-                                Text(
-                                    text = "Сканирование...",
-                                    fontSize = 12.sp,
-                                    color = state.color(),
-                                    style = MaterialTheme.typography.labelMedium
-                                )
-                            }
                         }
 
                         Box(

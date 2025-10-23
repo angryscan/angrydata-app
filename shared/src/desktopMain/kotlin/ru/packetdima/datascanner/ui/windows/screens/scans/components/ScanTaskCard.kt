@@ -186,29 +186,25 @@ fun ScanTaskCard(
                     )
                 }
 
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(14.dp),
-                    modifier = Modifier
-                        .height(IntrinsicSize.Min)
-                        .width(200.dp)
-                ) {
-                    VerticalDivider(
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-
-                    ScanTimeStatItem(
-                        startedAt = startedAt,
-                        finishedAt = finishedAt,
-                        pausedAt = pausedAt,
-                        state = state
-                    )
-                }
             }
 
             Row(
-                horizontalArrangement = Arrangement.spacedBy(30.dp)
+                modifier = Modifier
+                    .height(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
+                ScanTimeStatItem(
+                    startedAt = startedAt,
+                    finishedAt = finishedAt,
+                    pausedAt = pausedAt,
+                    state = state
+                )
+
+                VerticalDivider(
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
                 ScanStat(
                     totalFiles = totalFiles,
                     selectedFiles = selectedFiles,

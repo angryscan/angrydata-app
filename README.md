@@ -17,19 +17,63 @@ The tool provides visibility where your sensitive data is stored.
 ## Discovered sensitive data
 The scanner detects the following types of data:
 
-| Data types                  | Internal types                                                             |
-|-----------------------------|----------------------------------------------------------------------------|
-| Personal data (text)        | `full name`, `address`, `e-mail`                                           |
-| Personal data (numbers)     | `passport number`, `phone number`, `car licence`, `social security number` |
-| Banking secrecy             | `account number`                                                           |
-| Payment cards               | `card number`, `CVV/CVV2`                                                  |
-| IP-adresses                 | `IPv4`, `IPv6`                                                             |
-| Custom signatures           | `Possible to create custom signatures`                                     |
-| TLS-certificates            | `TLS-certificates`                                                         |
-| Passwords                   | `work in progress`                                                         |
-| Source code                 | `Source code`                                                              |
-| AI-models, embeded in files | `work in progress`                                                         |
-| Synthetic data              | `work in progress`                                                         |
+### Personal Data (numbers)
+
+| Data type           | Country | Example                    |
+|---------------------|---------|----------------------------|
+| Phone number        | RU      | +7 926 123456             |
+| Passport number     | RU      | 4505 857555               |
+| Taxpayers number    | RU      | 123456789012              |
+| Car number          | RU      | A120AA23                  |
+| SNILS              | RU      | 123-456-789 00            |
+| OMS                | RU      | 1234567890123456          |
+
+### Personal Data (text)
+
+| Data type | Country | Example                    |
+|-----------|---------|----------------------------|
+| Full name | RU      | Иван Иванович Иванов       |
+| Full name | US      | John Fitzgerald Kennedy    |
+| Address   | RU      | Москва, ул. Ленина, д. 1   |
+| Address   | US      | Work in progress           |
+| E-mail    | International | captainbull@gmail.com |
+| Login     | -       | username, user123          |
+| Password  | -       | password123, secret        |
+| Valuable info | -   | Custom keywords search     |
+
+### Banking Secrecy
+
+| Data type                        | Example                    |
+|---------------------------------|----------------------------|
+| Payment card number             | 4400 5678 1234 5678       |
+| CVV                             | 123, 1234                 |
+| Account number                  | 40 817 810 099 910 000 000|
+| Cryptocurrency wallet number    | Work in progress           |
+| Cryptocurrency recovery-codes   | Work in progress           |
+
+### IT Assets
+
+| Data type        | Example                    |
+|------------------|----------------------------|
+| Source code files | Finds files with source-code. Source code should be placed in git repository. If source code just lies somewhere is files, this could be a security issue. |
+| Passwords       | Finds files with passwords, secrets, API-keys |
+| TLS certificates| Finds folders with the most amount of TLS certificates |
+| Synthetic data  | Work in progress. General idea if to identity that the data is synthetic. For examples, an excel is generated via Faker. |
+| AI-models       | Work in progress. Finds AI-models embedded in files. Goal is to identify hidden AI in your infrastructure. |
+
+### Network & Infrastructure
+
+| Data type        | Example                    |
+|------------------|----------------------------|
+| IPv4             | 192.168.1.1               |
+| IPv6             | 2001:db8::1               |
+| Blocked domains  | example.ru                |
+
+### Custom Signatures
+
+| Data type           | Example                    |
+|---------------------|----------------------------|
+| User-defined patterns| Custom patterns            |
 
 ## Supported file types
 The scanner supports the following file formats:

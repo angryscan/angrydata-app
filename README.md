@@ -23,7 +23,7 @@ The scanner detects the following types of data:
 | Personal data (numbers)     | `passport number`, `phone number`, `car licence`, `social security number` |
 | Banking secrecy             | `account number`                                                           |
 | Payment cards               | `card number`, `CVV/CVV2`                                                  |
-| IP-адреса                   | `IPv4`, `IPv6`                                                             |
+| IP-adresses                 | `IPv4`, `IPv6`                                                             |
 | Custom signatures           | `Possible to create custom signatures`                                     |
 | TLS-certificates            | `TLS-certificates`                                                         |
 | Passwords                   | `work in progress`                                                         |

@@ -1,14 +1,21 @@
 package ru.packetdima.datascanner.ui.windows.screens.main.settings
 
 import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -112,13 +119,13 @@ fun SettingsBoxDetectFunctionsGrouped(
         }
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
-            // Минималистичная кнопка "Выбрать все"
+            // Современная кнопка "Выбрать все"
             MinimalSelectAllButton(scanSettings = scanSettings)
 
-            // Компактные группы функций
+            // Современные группы функций
             detectionGroups.forEach { group ->
                 MinimalDetectionGroupCard(
                     group = group,
@@ -138,9 +145,20 @@ private fun MinimalSelectAllButton(
             && scanSettings.detectCode.value
             && scanSettings.detectBlockedDomains.value
 
-    Row(
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+
+    Card(
         modifier = Modifier
             .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                color = if (isAllSelected) 
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                else 
+                    MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                shape = RoundedCornerShape(12.dp)
+            )
             .clickable {
                 if (isAllSelected) {
                     scanSettings.detectFunctions.clear()
@@ -157,34 +175,40 @@ private fun MinimalSelectAllButton(
                 }
                 scanSettings.save()
             }
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .hoverable(interactionSource = interactionSource),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isHovered) 
+                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+            else 
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+        shape = RoundedCornerShape(12.dp)
     ) {
-        Checkbox(
-            checked = isAllSelected,
-            onCheckedChange = { checked ->
-                if (checked) {
-                    scanSettings.detectFunctions.addAll(DetectFunction.entries.filter {
-                        !scanSettings.detectFunctions.contains(it)
-                    })
-                    scanSettings.detectCert.value = true
-                    scanSettings.detectCode.value = true
-                    scanSettings.detectBlockedDomains.value = true
-                } else {
-                    scanSettings.detectFunctions.clear()
-                    scanSettings.detectCert.value = false
-                    scanSettings.detectCode.value = false
-                    scanSettings.detectBlockedDomains.value = false
-                }
-                scanSettings.save()
-            }
-        )
-        Text(
-            text = stringResource(Res.string.ScanSettings_SelectAll),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = if (isAllSelected) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
+                contentDescription = null,
+                tint = if (isAllSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                modifier = Modifier.size(18.dp)
+            )
+            
+            // Отступ для визуального разделения
+            Spacer(modifier = Modifier.width(4.dp))
+            
+            Text(
+                text = stringResource(Res.string.ScanSettings_SelectAll),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
     }
 }
 
@@ -249,142 +273,280 @@ private fun MinimalDetectionGroupCard(
         else -> Icons.Default.Category
     }
 
-    Column(
-        modifier = Modifier.fillMaxWidth()
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    
+    val isFullySelected = isGroupFullySelected(group, scanSettings)
+    val isPartiallySelected = isGroupPartiallySelected(group, scanSettings)
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .hoverable(interactionSource = interactionSource),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isHovered) 
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+            else 
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = if (isHovered) 4.dp else 2.dp
+        ),
+        shape = RoundedCornerShape(16.dp)
     ) {
-        // Компактный заголовок группы с чекбоксом
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            // Современный заголовок группы
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { groupExpanded = !groupExpanded },
+                color = Color.Transparent
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Современный чекбокс с анимацией
+                    Checkbox(
+                        checked = isFullySelected,
+                        onCheckedChange = { checked ->
+                            if (checked) {
+                                // Выбираем все функции группы
+                                group.functions.forEach { function ->
+                                    if (!scanSettings.detectFunctions.contains(function)) {
+                                        scanSettings.detectFunctions.add(function)
+                                    }
+                                }
+                                // Выбираем дополнительные функции группы
+                                group.additionalFunctions.forEach { additionalFunction ->
+                                    when (additionalFunction) {
+                                        is CodeDetectFun -> scanSettings.detectCode.value = true
+                                        is CertDetectFun -> scanSettings.detectCert.value = true
+                                        is RKNDomainDetectFun -> scanSettings.detectBlockedDomains.value = true
+                                    }
+                                }
+                            } else {
+                                // Снимаем выбор со всех функций группы
+                                group.functions.forEach { function ->
+                                    scanSettings.detectFunctions.remove(function)
+                                }
+                                // Снимаем выбор с дополнительных функций группы
+                                group.additionalFunctions.forEach { additionalFunction ->
+                                    when (additionalFunction) {
+                                        is CodeDetectFun -> scanSettings.detectCode.value = false
+                                        is CertDetectFun -> scanSettings.detectCert.value = false
+                                        is RKNDomainDetectFun -> scanSettings.detectBlockedDomains.value = false
+                                    }
+                                }
+                            }
+                            scanSettings.save()
+                        },
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = MaterialTheme.colorScheme.primary,
+                            uncheckedColor = if (isPartiallySelected) 
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                            else 
+                                MaterialTheme.colorScheme.outline
+                        )
+                    )
+                    
+                    // Отступ для визуального разделения
+                    Spacer(modifier = Modifier.width(4.dp))
+                    
+                    // Простая иконка группы
+                    Icon(
+                        imageVector = groupIcon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    
+                    // Название группы с улучшенной типографикой
+                    Text(
+                        text = group.name,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f)
+                    )
+                    
+                    // Простая кнопка разворачивания
+                    Icon(
+                        imageVector = if (groupExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                        modifier = Modifier
+                            .size(18.dp)
+                            .clickable { groupExpanded = !groupExpanded }
+                    )
+                }
+            }
+
+            // Анимированное содержимое группы
+            AnimatedVisibility(
+                visible = groupExpanded,
+                enter = expandVertically(animationSpec = tween(300)) + fadeIn(animationSpec = tween(300)),
+                exit = shrinkVertically(animationSpec = tween(300)) + fadeOut(animationSpec = tween(300))
+            ) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        // Обычные функции детектирования
+                        group.functions.forEach { detectFunction ->
+                            ModernDetectionFunctionItem(
+                                detectFunction = detectFunction,
+                                scanSettings = scanSettings
+                            )
+                        }
+                        
+                        // Дополнительные функции
+                        group.additionalFunctions.forEach { additionalFunction ->
+                            when (additionalFunction) {
+                                is CodeDetectFun -> {
+                                    ModernDetectionFunctionItem(
+                                        detectFunction = null,
+                                        scanSettings = scanSettings,
+                                        isCode = true
+                                    )
+                                }
+                                is CertDetectFun -> {
+                                    ModernDetectionFunctionItem(
+                                        detectFunction = null,
+                                        scanSettings = scanSettings,
+                                        isCert = true
+                                    )
+                                }
+                                is RKNDomainDetectFun -> {
+                                    ModernDetectionFunctionItem(
+                                        detectFunction = null,
+                                        scanSettings = scanSettings,
+                                        isDomain = true
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ModernDetectionFunctionItem(
+    detectFunction: DetectFunction?,
+    scanSettings: ru.packetdima.datascanner.common.ScanSettings,
+    isCode: Boolean = false,
+    isCert: Boolean = false,
+    isDomain: Boolean = false
+) {
+    val isChecked = when {
+        detectFunction != null -> scanSettings.detectFunctions.contains(detectFunction)
+        isCode -> scanSettings.detectCode.value
+        isCert -> scanSettings.detectCert.value
+        isDomain -> scanSettings.detectBlockedDomains.value
+        else -> false
+    }
+
+    val onCheckedChange = { checked: Boolean ->
+        when {
+            detectFunction != null -> {
+                if (checked && !scanSettings.detectFunctions.contains(detectFunction))
+                    scanSettings.detectFunctions.add(detectFunction)
+                else if (!checked)
+                    scanSettings.detectFunctions.remove(detectFunction)
+            }
+            isCode -> scanSettings.detectCode.value = checked
+            isCert -> scanSettings.detectCert.value = checked
+            isDomain -> scanSettings.detectBlockedDomains.value = checked
+        }
+        scanSettings.save()
+    }
+
+    val functionName = when {
+        detectFunction != null -> detectFunction.composableName()
+        isCode -> stringResource(Res.string.DetectFunction_Code)
+        isCert -> stringResource(Res.string.DetectFunction_Cert)
+        isDomain -> stringResource(Res.string.DetectFunction_DetectBlockedDomains)
+        else -> ""
+    }
+
+    val functionForTooltip = when {
+        detectFunction != null -> detectFunction
+        isCode -> CodeDetectFun
+        isCert -> CertDetectFun
+        isDomain -> RKNDomainDetectFun
+        else -> null
+    }
+
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onCheckedChange(!isChecked) }
+            .hoverable(interactionSource = interactionSource),
+        shape = RoundedCornerShape(8.dp),
+        color = if (isHovered) 
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)
+        else 
+            Color.Transparent
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                .padding(horizontal = 6.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Чекбокс для выбора всей группы с поддержкой частичного выбора
-            val isFullySelected = isGroupFullySelected(group, scanSettings)
-            val isPartiallySelected = isGroupPartiallySelected(group, scanSettings)
-            
+            // Современный чекбокс
             Checkbox(
-                checked = isFullySelected,
-                onCheckedChange = { checked ->
-                    if (checked) {
-                        // Выбираем все функции группы
-                        group.functions.forEach { function ->
-                            if (!scanSettings.detectFunctions.contains(function)) {
-                                scanSettings.detectFunctions.add(function)
-                            }
-                        }
-                        // Выбираем дополнительные функции группы
-                        group.additionalFunctions.forEach { additionalFunction ->
-                            when (additionalFunction) {
-                                is CodeDetectFun -> scanSettings.detectCode.value = true
-                                is CertDetectFun -> scanSettings.detectCert.value = true
-                                is RKNDomainDetectFun -> scanSettings.detectBlockedDomains.value = true
-                            }
-                        }
-                    } else {
-                        // Снимаем выбор со всех функций группы
-                        group.functions.forEach { function ->
-                            scanSettings.detectFunctions.remove(function)
-                        }
-                        // Снимаем выбор с дополнительных функций группы
-                        group.additionalFunctions.forEach { additionalFunction ->
-                            when (additionalFunction) {
-                                is CodeDetectFun -> scanSettings.detectCode.value = false
-                                is CertDetectFun -> scanSettings.detectCert.value = false
-                                is RKNDomainDetectFun -> scanSettings.detectBlockedDomains.value = false
-                            }
-                        }
-                    }
-                    scanSettings.save()
-                },
+                checked = isChecked,
+                onCheckedChange = onCheckedChange,
                 modifier = Modifier.size(16.dp),
                 colors = CheckboxDefaults.colors(
-                    checkedColor = if (isFullySelected) 
-                        MaterialTheme.colorScheme.primary 
-                    else 
-                        MaterialTheme.colorScheme.outline,
-                    uncheckedColor = if (isPartiallySelected) 
-                        MaterialTheme.colorScheme.outline 
-                    else 
-                        MaterialTheme.colorScheme.outline
+                    checkedColor = MaterialTheme.colorScheme.primary,
+                    uncheckedColor = MaterialTheme.colorScheme.outline
                 )
             )
             
-            Icon(
-                imageVector = groupIcon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(18.dp)
-            )
-            Text(
-                text = group.name,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable { groupExpanded = !groupExpanded }
-                    .padding(vertical = 4.dp)
-            )
+            // Отступ для визуального разделения
+            Spacer(modifier = Modifier.width(4.dp))
             
-            // Кнопка сворачивания/разворачивания (шире для удобства)
-            Text(
-                text = if (groupExpanded) "▼" else "▶",
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                modifier = Modifier
-                    .clickable { groupExpanded = !groupExpanded }
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
-            )
-        }
-
-        // Компактное содержимое группы
-        AnimatedVisibility(
-            visible = groupExpanded,
-            enter = expandVertically() + fadeIn(),
-            exit = shrinkVertically() + fadeOut()
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 26.dp, top = 4.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                // Обычные функции детектирования
-                group.functions.forEach { detectFunction ->
-                    MinimalDetectionFunctionItem(
-                        detectFunction = detectFunction,
-                        scanSettings = scanSettings
+            // Название функции с улучшенной типографикой
+            if (functionForTooltip != null) {
+                DetectFunctionTooltip(
+                    detectFunction = functionForTooltip
+                ) {
+                    Text(
+                        text = functionName,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f)
                     )
                 }
-                
-                // Дополнительные функции
-                group.additionalFunctions.forEach { additionalFunction ->
-                    when (additionalFunction) {
-                        is CodeDetectFun -> {
-                            MinimalDetectionFunctionItem(
-                                detectFunction = null,
-                                scanSettings = scanSettings,
-                                isCode = true
-                            )
-                        }
-                        is CertDetectFun -> {
-                            MinimalDetectionFunctionItem(
-                                detectFunction = null,
-                                scanSettings = scanSettings,
-                                isCert = true
-                            )
-                        }
-                        is RKNDomainDetectFun -> {
-                            MinimalDetectionFunctionItem(
-                                detectFunction = null,
-                                scanSettings = scanSettings,
-                                isDomain = true
-                            )
-                        }
-                    }
-                }
+            } else {
+                Text(
+                    text = functionName,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
     }

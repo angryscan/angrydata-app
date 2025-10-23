@@ -96,6 +96,7 @@ fun ScanResultScreen(
 
     val folderSize by task.folderSize.collectAsState()
     val selectedFilesSize by task.selectedFilesSize.collectAsState()
+    val foundFilesSize by task.foundFilesSize.collectAsState()
 
     val foundAttributes by task.foundAttributes.collectAsState()
 
@@ -566,6 +567,7 @@ fun ScanResultScreen(
                     foundFiles = foundFiles,
                     folderSize = folderSize,
                     selectedFilesSize = selectedFilesSize,
+                    foundFilesSize = foundFilesSize,
                     scanTime = scanTime,
                     scoreSum = scoreSum
                 )

@@ -110,6 +110,10 @@ class TaskEntityViewModel(
     val selectedFilesSize
         get() = _selectedFilesSize.asStateFlow()
 
+    private var _foundFilesSize = MutableStateFlow(0L)
+    val foundFilesSize
+        get() = _foundFilesSize.asStateFlow()
+
     init {
         if (_state.value == TaskState.LOADING) {
             taskScope.launch {
@@ -208,6 +212,14 @@ class TaskEntityViewModel(
                         TaskFiles.task.eq(dbTask.id) and TaskFiles.state.eq(TaskState.COMPLETED)
                     }
                     .count()
+
+                // Calculate found files size (files that have scan results)
+                _foundFilesSize.value = TaskFiles
+                    .innerJoin(TaskFileScanResults)
+                    .select(TaskFiles.size)
+                    .where { TaskFiles.task.eq(dbTask.id) }
+                    .withDistinct()
+                    .sumOf { it[TaskFiles.size] }
 
                 if (_selectedFiles.value == _scannedFiles.value + _skippedFiles.value) {
                     if (_state.value != TaskState.COMPLETED) {

@@ -1,5 +1,6 @@
 package ru.packetdima.datascanner.ui.windows.screens.main.tasks
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Instant
@@ -128,6 +130,17 @@ fun MainScreenTaskCard(taskEntity: TaskEntityViewModel, currentTime: Instant) {
                                 .size(40.dp)
                         )
                     } else {
+                        val infiniteTransition = rememberInfiniteTransition(label = "rotation")
+                        val rotationAngle by infiniteTransition.animateFloat(
+                            initialValue = 0f,
+                            targetValue = 360f,
+                            animationSpec = infiniteRepeatable(
+                                animation = tween(2000, easing = LinearEasing),
+                                repeatMode = RepeatMode.Restart
+                            ),
+                            label = "rotation"
+                        )
+                        
                         Box(
                             modifier = Modifier
                                 .size(40.dp)
@@ -145,6 +158,16 @@ fun MainScreenTaskCard(taskEntity: TaskEntityViewModel, currentTime: Instant) {
                                 },
                             contentAlignment = Alignment.Center
                         ) {
+                            if (state == TaskState.SCANNING) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .rotate(rotationAngle),
+                                    strokeWidth = 2.dp,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                            
                             Icon(
                                 imageVector = when (state) {
                                     TaskState.SEARCHING, TaskState.SCANNING, TaskState.LOADING -> Icons.Outlined.Pause

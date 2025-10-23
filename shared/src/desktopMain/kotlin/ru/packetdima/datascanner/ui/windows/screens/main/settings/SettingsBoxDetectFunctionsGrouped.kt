@@ -49,13 +49,11 @@ fun SettingsBoxDetectFunctionsGrouped(
         scanSettings.save()
     }
 
-    // Получаем строки для названий групп
     val personalDataNumbersName = stringResource(Res.string.DetectGroup_PersonalDataNumbers)
     val personalDataTextName = stringResource(Res.string.DetectGroup_PersonalDataText)
     val bankingSecrecyName = stringResource(Res.string.DetectGroup_BankingSecrecy)
     val itAssetsName = stringResource(Res.string.DetectGroup_ITAssets)
 
-    // Группировка функций детектирования
     val detectionGroups = remember(
         personalDataNumbersName,
         personalDataTextName,
@@ -67,14 +65,11 @@ fun SettingsBoxDetectFunctionsGrouped(
                 name = personalDataNumbersName,
                 functions = listOf(
                     DetectFunction.Phones,
-                    DetectFunction.CardNumbers,
                     DetectFunction.CarNumber,
                     DetectFunction.SNILS,
                     DetectFunction.Passport,
                     DetectFunction.OMS,
-                    DetectFunction.INN,
-                    DetectFunction.AccountNumber,
-                    DetectFunction.CVV
+                    DetectFunction.INN
                 )
             ),
             DetectionGroup(
@@ -122,10 +117,8 @@ fun SettingsBoxDetectFunctionsGrouped(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
-            // Современная кнопка "Выбрать все"
             MinimalSelectAllButton(scanSettings = scanSettings)
 
-            // Современные группы функций
             detectionGroups.forEach { group ->
                 MinimalDetectionGroupCard(
                     group = group,
@@ -198,8 +191,7 @@ private fun MinimalSelectAllButton(
                 tint = if (isAllSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
                 modifier = Modifier.size(18.dp)
             )
-            
-            // Отступ для визуального разделения
+
             Spacer(modifier = Modifier.width(4.dp))
             
             Text(
@@ -217,12 +209,10 @@ private fun isGroupFullySelected(
     group: DetectionGroup,
     scanSettings: ru.packetdima.datascanner.common.ScanSettings
 ): Boolean {
-    // Проверяем, выбраны ли все обычные функции группы
     val allFunctionsSelected = group.functions.all { function ->
         scanSettings.detectFunctions.contains(function)
     }
-    
-    // Проверяем, выбраны ли все дополнительные функции группы
+
     val allAdditionalFunctionsSelected = group.additionalFunctions.all { additionalFunction ->
         when (additionalFunction) {
             is CodeDetectFun -> scanSettings.detectCode.value
@@ -231,7 +221,7 @@ private fun isGroupFullySelected(
             else -> false
         }
     }
-    
+
     return allFunctionsSelected && allAdditionalFunctionsSelected
 }
 
@@ -240,12 +230,10 @@ private fun isGroupPartiallySelected(
     group: DetectionGroup,
     scanSettings: ru.packetdima.datascanner.common.ScanSettings
 ): Boolean {
-    // Проверяем, выбрана ли хотя бы одна обычная функция группы
     val anyFunctionSelected = group.functions.any { function ->
         scanSettings.detectFunctions.contains(function)
     }
-    
-    // Проверяем, выбрана ли хотя бы одна дополнительная функция группы
+
     val anyAdditionalFunctionSelected = group.additionalFunctions.any { additionalFunction ->
         when (additionalFunction) {
             is CodeDetectFun -> scanSettings.detectCode.value
@@ -254,8 +242,9 @@ private fun isGroupPartiallySelected(
             else -> false
         }
     }
-    
-    return anyFunctionSelected || anyAdditionalFunctionSelected
+
+    val isFullySelected = isGroupFullySelected(group, scanSettings)
+    return (anyFunctionSelected || anyAdditionalFunctionSelected) && !isFullySelected
 }
 
 @Composable
@@ -297,7 +286,6 @@ private fun MinimalDetectionGroupCard(
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
-            // Современный заголовок группы
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -311,18 +299,15 @@ private fun MinimalDetectionGroupCard(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Современный чекбокс с анимацией
                     Checkbox(
                         checked = isFullySelected,
                         onCheckedChange = { checked ->
                             if (checked) {
-                                // Выбираем все функции группы
                                 group.functions.forEach { function ->
                                     if (!scanSettings.detectFunctions.contains(function)) {
                                         scanSettings.detectFunctions.add(function)
                                     }
                                 }
-                                // Выбираем дополнительные функции группы
                                 group.additionalFunctions.forEach { additionalFunction ->
                                     when (additionalFunction) {
                                         is CodeDetectFun -> scanSettings.detectCode.value = true
@@ -331,11 +316,10 @@ private fun MinimalDetectionGroupCard(
                                     }
                                 }
                             } else {
-                                // Снимаем выбор со всех функций группы
                                 group.functions.forEach { function ->
                                     scanSettings.detectFunctions.remove(function)
                                 }
-                                // Снимаем выбор с дополнительных функций группы
+                                
                                 group.additionalFunctions.forEach { additionalFunction ->
                                     when (additionalFunction) {
                                         is CodeDetectFun -> scanSettings.detectCode.value = false
@@ -354,19 +338,16 @@ private fun MinimalDetectionGroupCard(
                                 MaterialTheme.colorScheme.outline
                         )
                     )
-                    
-                    // Отступ для визуального разделения
+
                     Spacer(modifier = Modifier.width(4.dp))
-                    
-                    // Простая иконка группы
+
                     Icon(
                         imageVector = groupIcon,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(16.dp)
                     )
-                    
-                    // Название группы с улучшенной типографикой
+
                     Text(
                         text = group.name,
                         fontSize = 14.sp,
@@ -374,8 +355,7 @@ private fun MinimalDetectionGroupCard(
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.weight(1f)
                     )
-                    
-                    // Простая кнопка разворачивания
+
                     Icon(
                         imageVector = if (groupExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                         contentDescription = null,
@@ -387,7 +367,6 @@ private fun MinimalDetectionGroupCard(
                 }
             }
 
-            // Анимированное содержимое группы
             AnimatedVisibility(
                 visible = groupExpanded,
                 enter = expandVertically(animationSpec = tween(300)) + fadeIn(animationSpec = tween(300)),
@@ -403,15 +382,13 @@ private fun MinimalDetectionGroupCard(
                             .padding(horizontal = 12.dp, vertical = 6.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        // Обычные функции детектирования
                         group.functions.forEach { detectFunction ->
                             ModernDetectionFunctionItem(
                                 detectFunction = detectFunction,
                                 scanSettings = scanSettings
                             )
                         }
-                        
-                        // Дополнительные функции
+
                         group.additionalFunctions.forEach { additionalFunction ->
                             when (additionalFunction) {
                                 is CodeDetectFun -> {
@@ -512,7 +489,6 @@ private fun ModernDetectionFunctionItem(
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Современный чекбокс
             Checkbox(
                 checked = isChecked,
                 onCheckedChange = onCheckedChange,
@@ -522,11 +498,9 @@ private fun ModernDetectionFunctionItem(
                     uncheckedColor = MaterialTheme.colorScheme.outline
                 )
             )
-            
-            // Отступ для визуального разделения
+
             Spacer(modifier = Modifier.width(4.dp))
-            
-            // Название функции с улучшенной типографикой
+
             if (functionForTooltip != null) {
                 DetectFunctionTooltip(
                     detectFunction = functionForTooltip
@@ -548,87 +522,6 @@ private fun ModernDetectionFunctionItem(
                     modifier = Modifier.weight(1f)
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun MinimalDetectionFunctionItem(
-    detectFunction: DetectFunction?,
-    scanSettings: ru.packetdima.datascanner.common.ScanSettings,
-    isCode: Boolean = false,
-    isCert: Boolean = false,
-    isDomain: Boolean = false
-) {
-    val isChecked = when {
-        detectFunction != null -> scanSettings.detectFunctions.contains(detectFunction)
-        isCode -> scanSettings.detectCode.value
-        isCert -> scanSettings.detectCert.value
-        isDomain -> scanSettings.detectBlockedDomains.value
-        else -> false
-    }
-
-    val onCheckedChange = { checked: Boolean ->
-        when {
-            detectFunction != null -> {
-                if (checked && !scanSettings.detectFunctions.contains(detectFunction))
-                    scanSettings.detectFunctions.add(detectFunction)
-                else if (!checked)
-                    scanSettings.detectFunctions.remove(detectFunction)
-            }
-            isCode -> scanSettings.detectCode.value = checked
-            isCert -> scanSettings.detectCert.value = checked
-            isDomain -> scanSettings.detectBlockedDomains.value = checked
-        }
-        scanSettings.save()
-    }
-
-    val functionName = when {
-        detectFunction != null -> detectFunction.composableName()
-        isCode -> stringResource(Res.string.DetectFunction_Code)
-        isCert -> stringResource(Res.string.DetectFunction_Cert)
-        isDomain -> stringResource(Res.string.DetectFunction_DetectBlockedDomains)
-        else -> ""
-    }
-
-    val functionForTooltip = when {
-        detectFunction != null -> detectFunction
-        isCode -> CodeDetectFun
-        isCert -> CertDetectFun
-        isDomain -> RKNDomainDetectFun
-        else -> null
-    }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onCheckedChange(!isChecked) }
-            .padding(vertical = 2.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Checkbox(
-            checked = isChecked,
-            onCheckedChange = onCheckedChange,
-            modifier = Modifier.size(16.dp)
-        )
-        
-        if (functionForTooltip != null) {
-            DetectFunctionTooltip(
-                detectFunction = functionForTooltip
-            ) {
-                Text(
-                    text = functionName,
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-        } else {
-            Text(
-                text = functionName,
-                fontSize = 13.sp,
-                color = MaterialTheme.colorScheme.onSurface
-            )
         }
     }
 }

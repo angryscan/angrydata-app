@@ -9,13 +9,10 @@
 It helps organizations by identifying where sensitive data such as personally identifiable information (PII) and intellectual property is stored.   
 The tool provides visibility where your sensitive data is stored.  
 
-Sensitive data (PII, payments cards etc) can be discover with 2 click
-
-No administrator rights required to run Angry Data Scanner  
-
-No additional software installation required  
-
-Works on Linux, Mac, and Windows
+- Sensitive data (PII, payments cards etc) can be discover with 2 click
+- No administrator rights required to run Angry Data Scanner  
+- No additional software installation required  
+- Works on Linux, Mac, and Windows
 
 ## Discovered sensitive data
 The scanner detects the following types of data:

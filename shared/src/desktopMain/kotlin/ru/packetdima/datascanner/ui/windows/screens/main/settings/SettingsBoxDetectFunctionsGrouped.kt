@@ -15,8 +15,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import info.downdetector.bigdatascanner.common.DetectFunction
@@ -31,8 +33,15 @@ import ru.packetdima.datascanner.ui.windows.components.DetectFunctionTooltip
 data class DetectionGroup(
     val name: String,
     val functions: List<DetectFunction>,
-    val additionalFunctions: List<Any> = emptyList()
+    val additionalFunctions: List<Any> = emptyList(),
+    val testFunctions: List<TestFunction> = emptyList()
 )
+
+data class TestFunction(
+    val name: String,
+    val description: String = ""
+)
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -426,7 +435,7 @@ private fun MinimalDetectionGroupCard(
                     }
                 }
                 
-                val totalItems = group.functions.size + group.additionalFunctions.size
+                val totalItems = group.functions.size + group.additionalFunctions.size + group.testFunctions.size
                 
                 val allFunctionNames = mutableListOf<String>()
                 
@@ -444,66 +453,77 @@ private fun MinimalDetectionGroupCard(
                     allFunctionNames.add(name)
                 }
                 
+                group.testFunctions.forEach { testFunction ->
+                    allFunctionNames.add(testFunction.name)
+                }
+                
+                var containerWidth by remember { mutableStateOf<Dp?>(null) }
                 val averageLength = allFunctionNames.map { it.length }.average()
                 val maxLength = allFunctionNames.maxOfOrNull { it.length } ?: 0
                 
-                val textBasedColumns = when {
-                    averageLength < 8 && maxLength < 12 -> 4
-                    averageLength < 12 && maxLength < 16 -> 3
-                    averageLength < 16 && maxLength < 20 -> 2
-                    else -> 1
+                val columns = remember(containerWidth, allFunctionNames, totalItems, group.name) {
+                    when {
+                        averageLength < 6 && maxLength < 10 -> {
+                            when {
+                                totalItems <= 2 -> 2
+                                totalItems <= 4 -> 3
+                                totalItems <= 6 -> 4
+                                totalItems <= 8 -> 5
+                                else -> 6
+                            }
+                        }
+                        averageLength < 10 && maxLength < 15 -> {
+                            when {
+                                totalItems <= 2 -> 2
+                                totalItems <= 4 -> 3
+                                totalItems <= 6 -> 4
+                                totalItems <= 8 -> 5
+                                else -> 4
+                            }
+                        }
+                        averageLength < 15 && maxLength < 25 -> {
+                            when {
+                                totalItems <= 2 -> 2
+                                totalItems <= 4 -> 3
+                                totalItems <= 6 -> 3
+                                totalItems <= 8 -> 4
+                                else -> 3
+                            }
+                        }
+                        averageLength < 25 && maxLength < 40 -> {
+                            when {
+                                totalItems <= 2 -> 2
+                                totalItems <= 4 -> 2
+                                totalItems <= 6 -> 3
+                                totalItems <= 8 -> 3
+                                else -> 2
+                            }
+                        }
+                        else -> {
+                            when {
+                                totalItems <= 2 -> 1
+                                totalItems <= 4 -> 2
+                                totalItems <= 6 -> 2
+                                totalItems <= 8 -> 2
+                                else -> 1
+                            }
+                        }
+                    }.coerceIn(1, 6)
                 }
-                
-                val idealColumns = when {
-                    group.name.contains("IT") || group.name.contains("IT-активы") -> {
-                        when {
-                            totalItems <= 3 -> 2
-                            totalItems <= 5 -> 3
-                            else -> 4
-                        }
-                    }
-                    
-                    group.name.contains("Банковская") || group.name.contains("Banking") -> {
-                        when {
-                            totalItems <= 3 -> 2
-                            totalItems <= 6 -> 3
-                            else -> 4
-                        }
-                    }
-                    
-                    group.name.contains("Персональные") || group.name.contains("Personal") -> {
-                        when {
-                            totalItems <= 3 -> 2
-                            totalItems <= 6 -> 3
-                            totalItems <= 9 -> 4
-                            else -> 5
-                        }
-                    }
-                    
-                    totalItems <= 2 -> 1
-                    totalItems <= 4 -> 2
-                    totalItems <= 6 -> 3
-                    totalItems <= 9 -> 4
-                    totalItems <= 12 -> 5
-                    else -> 6
-                }
-                
-                val finalColumns = minOf(
-                    idealColumns,
-                    textBasedColumns
-                )
-                
-                val columns = finalColumns.coerceIn(1, 4)
                 
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .onSizeChanged { size ->
+                            containerWidth = size.width.dp
+                        },
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     val allItems = mutableListOf<Any>()
                     allItems.addAll(group.functions)
                     allItems.addAll(group.additionalFunctions)
+                    allItems.addAll(group.testFunctions)
                     
                     allItems.chunked(columns).forEach { rowItems ->
                         Row(
@@ -540,6 +560,12 @@ private fun MinimalDetectionGroupCard(
                                                 detectFunction = null,
                                                 scanSettings = scanSettings,
                                                 isDomain = true
+                                            )
+                                        }
+                                        is TestFunction -> {
+                                            TestFunctionItem(
+                                                testFunction = item,
+                                                scanSettings = scanSettings
                                             )
                                         }
                                     }
@@ -670,6 +696,58 @@ private fun ModernDetectionFunctionItem(
                     overflow = TextOverflow.Ellipsis
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun TestFunctionItem(
+    testFunction: TestFunction,
+    scanSettings: ru.packetdima.datascanner.common.ScanSettings
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { },
+        shape = RoundedCornerShape(6.dp),
+        color = if (isHovered) 
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.08f)
+        else 
+            MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+        shadowElevation = if (isHovered) 2.dp else 0.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 6.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(
+                checked = false,
+                onCheckedChange = { },
+                modifier = Modifier.size(14.dp),
+                colors = CheckboxDefaults.colors(
+                    checkedColor = MaterialTheme.colorScheme.primary,
+                    uncheckedColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)
+                )
+            )
+
+            Text(
+                text = testFunction.name,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                color = if (isHovered) 
+                    MaterialTheme.colorScheme.primary
+                else 
+                    MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }

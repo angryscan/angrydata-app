@@ -2,7 +2,6 @@ package ru.packetdima.datascanner.ui.windows.screens.main.settings
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -114,7 +113,7 @@ fun SettingsBoxDetectFunctionsGrouped(
         }
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
             MinimalSelectAllButton(scanSettings = scanSettings)
@@ -141,17 +140,9 @@ private fun MinimalSelectAllButton(
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
 
-    Card(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .border(
-                width = 1.dp,
-                color = if (isAllSelected) 
-                    MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                else 
-                    MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                shape = RoundedCornerShape(12.dp)
-            )
             .clickable {
                 if (isAllSelected) {
                     scanSettings.detectFunctions.clear()
@@ -167,38 +158,63 @@ private fun MinimalSelectAllButton(
                     scanSettings.detectBlockedDomains.value = true
                 }
                 scanSettings.save()
-            }
-            .hoverable(interactionSource = interactionSource),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isHovered) 
-                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
-            else 
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
-        shape = RoundedCornerShape(12.dp)
+            },
+        shape = RoundedCornerShape(8.dp),
+        color = if (isHovered) 
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)
+        else 
+            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+        shadowElevation = if (isHovered) 4.dp else 1.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = if (isAllSelected) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
-                contentDescription = null,
-                tint = if (isAllSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
-                modifier = Modifier.size(18.dp)
-            )
-
-            Spacer(modifier = Modifier.width(4.dp))
+            Surface(
+                shape = RoundedCornerShape(6.dp),
+                color = if (isHovered) 
+                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
+                else 
+                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f),
+                modifier = Modifier.size(24.dp)
+            ) {
+                Checkbox(
+                    checked = isAllSelected,
+                    onCheckedChange = { checked ->
+                        if (checked) {
+                            scanSettings.detectFunctions.addAll(DetectFunction.entries.filter {
+                                !scanSettings.detectFunctions.contains(it)
+                            })
+                            scanSettings.detectCert.value = true
+                            scanSettings.detectCode.value = true
+                            scanSettings.detectBlockedDomains.value = true
+                        } else {
+                            scanSettings.detectFunctions.clear()
+                            scanSettings.detectCert.value = false
+                            scanSettings.detectCode.value = false
+                            scanSettings.detectBlockedDomains.value = false
+                        }
+                        scanSettings.save()
+                    },
+                    modifier = Modifier.size(18.dp),
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = MaterialTheme.colorScheme.primary,
+                        uncheckedColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)
+                    )
+                )
+            }
             
             Text(
                 text = stringResource(Res.string.ScanSettings_SelectAll),
                 fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
+                fontWeight = FontWeight.SemiBold,
+                color = if (isHovered) 
+                    MaterialTheme.colorScheme.primary
+                else 
+                    MaterialTheme.colorScheme.onSurface
             )
         }
     }
@@ -255,10 +271,10 @@ private fun MinimalDetectionGroupCard(
     var groupExpanded by remember { mutableStateOf(false) }
     
     val groupIcon = when (group.name) {
-        stringResource(Res.string.DetectGroup_PersonalDataNumbers) -> Icons.Default.Numbers
-        stringResource(Res.string.DetectGroup_PersonalDataText) -> Icons.Default.TextFields
-        stringResource(Res.string.DetectGroup_BankingSecrecy) -> Icons.Default.AccountBalance
-        stringResource(Res.string.DetectGroup_ITAssets) -> Icons.Default.Computer
+        stringResource(Res.string.DetectGroup_PersonalDataNumbers) -> Icons.Default.Person
+        stringResource(Res.string.DetectGroup_PersonalDataText) -> Icons.Default.Description
+        stringResource(Res.string.DetectGroup_BankingSecrecy) -> Icons.Default.Security
+        stringResource(Res.string.DetectGroup_ITAssets) -> Icons.Default.Storage
         else -> Icons.Default.Category
     }
 
@@ -268,20 +284,16 @@ private fun MinimalDetectionGroupCard(
     val isFullySelected = isGroupFullySelected(group, scanSettings)
     val isPartiallySelected = isGroupPartiallySelected(group, scanSettings)
 
-    Card(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
             .hoverable(interactionSource = interactionSource),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isHovered) 
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
-            else 
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = if (isHovered) 4.dp else 2.dp
-        ),
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(10.dp),
+        color = if (isHovered) 
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.08f)
+        else 
+            MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+        shadowElevation = if (isHovered) 3.dp else 1.dp
     ) {
         Column(
             modifier = Modifier.fillMaxWidth()
@@ -290,78 +302,110 @@ private fun MinimalDetectionGroupCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { groupExpanded = !groupExpanded },
-                color = Color.Transparent
+                color = if (isHovered) 
+                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.12f)
+                else 
+                    Color.Transparent,
+                shape = RoundedCornerShape(8.dp)
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Checkbox(
-                        checked = isFullySelected,
-                        onCheckedChange = { checked ->
-                            if (checked) {
-                                group.functions.forEach { function ->
-                                    if (!scanSettings.detectFunctions.contains(function)) {
-                                        scanSettings.detectFunctions.add(function)
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = if (isHovered) 
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
+                        else 
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f),
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Checkbox(
+                            checked = isFullySelected,
+                            onCheckedChange = { checked ->
+                                if (checked) {
+                                    group.functions.forEach { function ->
+                                        if (!scanSettings.detectFunctions.contains(function)) {
+                                            scanSettings.detectFunctions.add(function)
+                                        }
+                                    }
+                                    group.additionalFunctions.forEach { additionalFunction ->
+                                        when (additionalFunction) {
+                                            is CodeDetectFun -> scanSettings.detectCode.value = true
+                                            is CertDetectFun -> scanSettings.detectCert.value = true
+                                            is RKNDomainDetectFun -> scanSettings.detectBlockedDomains.value = true
+                                        }
+                                    }
+                                } else {
+                                    group.functions.forEach { function ->
+                                        scanSettings.detectFunctions.remove(function)
+                                    }
+                                    
+                                    group.additionalFunctions.forEach { additionalFunction ->
+                                        when (additionalFunction) {
+                                            is CodeDetectFun -> scanSettings.detectCode.value = false
+                                            is CertDetectFun -> scanSettings.detectCert.value = false
+                                            is RKNDomainDetectFun -> scanSettings.detectBlockedDomains.value = false
+                                        }
                                     }
                                 }
-                                group.additionalFunctions.forEach { additionalFunction ->
-                                    when (additionalFunction) {
-                                        is CodeDetectFun -> scanSettings.detectCode.value = true
-                                        is CertDetectFun -> scanSettings.detectCert.value = true
-                                        is RKNDomainDetectFun -> scanSettings.detectBlockedDomains.value = true
-                                    }
-                                }
-                            } else {
-                                group.functions.forEach { function ->
-                                    scanSettings.detectFunctions.remove(function)
-                                }
-                                
-                                group.additionalFunctions.forEach { additionalFunction ->
-                                    when (additionalFunction) {
-                                        is CodeDetectFun -> scanSettings.detectCode.value = false
-                                        is CertDetectFun -> scanSettings.detectCert.value = false
-                                        is RKNDomainDetectFun -> scanSettings.detectBlockedDomains.value = false
-                                    }
-                                }
-                            }
-                            scanSettings.save()
-                        },
-                        colors = CheckboxDefaults.colors(
-                            checkedColor = MaterialTheme.colorScheme.primary,
-                            uncheckedColor = if (isPartiallySelected) 
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                            else 
-                                MaterialTheme.colorScheme.outline
+                                scanSettings.save()
+                            },
+                            modifier = Modifier.size(18.dp),
+                            colors = CheckboxDefaults.colors(
+                                checkedColor = MaterialTheme.colorScheme.primary,
+                                uncheckedColor = if (isPartiallySelected) 
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                                else 
+                                    MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
+                            )
                         )
-                    )
+                    }
 
-                    Spacer(modifier = Modifier.width(4.dp))
-
-                    Icon(
-                        imageVector = groupIcon,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(16.dp)
-                    )
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = if (isHovered) 
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                        else 
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f),
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = groupIcon,
+                            contentDescription = null,
+                            tint = if (isHovered) 
+                                MaterialTheme.colorScheme.primary
+                            else 
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                            modifier = Modifier
+                                .size(16.dp)
+                                .padding(4.dp)
+                        )
+                    }
 
                     Text(
                         text = group.name,
                         fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.SemiBold,
+                        color = if (isHovered) 
+                            MaterialTheme.colorScheme.primary
+                        else 
+                            MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.weight(1f)
                     )
 
                     Icon(
                         imageVector = if (groupExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                        tint = if (isHovered) 
+                            MaterialTheme.colorScheme.primary
+                        else 
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                         modifier = Modifier
-                            .size(18.dp)
+                            .size(16.dp)
                             .clickable { groupExpanded = !groupExpanded }
                     )
                 }
@@ -369,19 +413,15 @@ private fun MinimalDetectionGroupCard(
 
             AnimatedVisibility(
                 visible = groupExpanded,
-                enter = expandVertically(animationSpec = tween(300)) + fadeIn(animationSpec = tween(300)),
-                exit = shrinkVertically(animationSpec = tween(300)) + fadeOut(animationSpec = tween(300))
+                enter = expandVertically(animationSpec = tween(250)) + fadeIn(animationSpec = tween(250)),
+                exit = shrinkVertically(animationSpec = tween(250)) + fadeOut(animationSpec = tween(250))
             ) {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 6.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
                         group.functions.forEach { detectFunction ->
                             ModernDetectionFunctionItem(
                                 detectFunction = detectFunction,
@@ -419,7 +459,6 @@ private fun MinimalDetectionGroupCard(
             }
         }
     }
-}
 
 @Composable
 private fun ModernDetectionFunctionItem(
@@ -471,22 +510,26 @@ private fun ModernDetectionFunctionItem(
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
 
+    val itemInteractionSource = remember { MutableInteractionSource() }
+    val isItemHovered by itemInteractionSource.collectIsHoveredAsState()
+
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onCheckedChange(!isChecked) }
-            .hoverable(interactionSource = interactionSource),
-        shape = RoundedCornerShape(8.dp),
-        color = if (isHovered) 
-            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)
+            .hoverable(interactionSource = itemInteractionSource),
+        shape = RoundedCornerShape(6.dp),
+        color = if (isItemHovered) 
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.06f)
         else 
-            Color.Transparent
+            Color.Transparent,
+        shadowElevation = if (isItemHovered) 1.dp else 0.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 6.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                .padding(horizontal = 4.dp, vertical = 3.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Checkbox(
@@ -495,11 +538,9 @@ private fun ModernDetectionFunctionItem(
                 modifier = Modifier.size(16.dp),
                 colors = CheckboxDefaults.colors(
                     checkedColor = MaterialTheme.colorScheme.primary,
-                    uncheckedColor = MaterialTheme.colorScheme.outline
+                    uncheckedColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)
                 )
             )
-
-            Spacer(modifier = Modifier.width(4.dp))
 
             if (functionForTooltip != null) {
                 DetectFunctionTooltip(
@@ -507,18 +548,24 @@ private fun ModernDetectionFunctionItem(
                 ) {
                     Text(
                         text = functionName,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Normal,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = if (isItemHovered) 
+                            MaterialTheme.colorScheme.primary
+                        else 
+                            MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.weight(1f)
                     )
                 }
             } else {
                 Text(
                     text = functionName,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = if (isItemHovered) 
+                        MaterialTheme.colorScheme.primary
+                    else 
+                        MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f)
                 )
             }

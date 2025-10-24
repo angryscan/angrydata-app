@@ -6,11 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowDropDown
-import androidx.compose.material.icons.outlined.DocumentScanner
-import androidx.compose.material.icons.outlined.FileOpen
-import androidx.compose.material.icons.outlined.FolderOpen
-import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -46,6 +42,7 @@ import java.io.File
 
 @Composable
 fun FileShareScreen(
+    navController: androidx.navigation.NavController,
     settingsExpanded: Boolean,
     expandSettings: () -> Unit,
     hideSettings: () -> Unit,
@@ -133,11 +130,17 @@ fun FileShareScreen(
         }
     }
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = if (settingsExpanded) 0.dp else 150.dp),
+        contentAlignment = Alignment.TopCenter
     ) {
-        OutlinedTextField(
+        Column(
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            OutlinedTextField(
             modifier = Modifier
                 .height(80.dp)
                 .width(700.dp),
@@ -273,10 +276,9 @@ fun FileShareScreen(
                 }
             }
         )
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Row {
+        
+        // Кнопка сканирования под полем пути
+        Row {
                 Button(
                     onClick = {
                         if (path
@@ -348,11 +350,11 @@ fun FileShareScreen(
                     }
                 )
             }
-            SettingsBox(
-                transition = settingsBoxTransition,
-                height = 384.dp
-            )
+        
+        SettingsBox(
+            transition = settingsBoxTransition,
+            height = 384.dp
+        )
         }
-
     }
 }

@@ -50,7 +50,7 @@ fun SettingsBox(
                 .background(MaterialTheme.colorScheme.surface)
                 .height(height)
                 .padding(6.dp)
-                .fillMaxWidth()
+                .width(700.dp)
         ) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp),

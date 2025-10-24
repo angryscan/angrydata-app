@@ -122,18 +122,15 @@ We share some practical use cases how Angry Data Scanner is used in real world.
 - You can move files with sensitive data into specified folder
 - You can configure a number of CPU cores used for scanning
 
+### Console Mode
+
+AngryData can also be launched in [console mode](./CONSOLE.md), which is convenient for automation and running tasks without a graphical interface.
 
 ## System Requirements
 `Windows`, `Linux `
 `400MB HDD` `4GB RAM` `1.3Ghz CPU`
 
-### Console Mode
-
-AngryData can also be launched in [console mode](./CONSOLE.md), which is convenient for automation and running tasks without a graphical interface.
-
 ## Direct Download
-
-| OS | Download                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 |             |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 |-------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|

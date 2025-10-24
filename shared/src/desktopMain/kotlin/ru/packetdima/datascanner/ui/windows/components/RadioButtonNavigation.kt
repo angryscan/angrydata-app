@@ -10,6 +10,11 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.Http
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,6 +24,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
@@ -26,6 +33,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.currentBackStackEntryAsState
+import org.jetbrains.compose.resources.painterResource
+import ru.packetdima.datascanner.resources.Res
+import ru.packetdima.datascanner.resources.aws_s3
 import ru.packetdima.datascanner.ui.windows.screens.main.components.MainScreenConnector
 
 @Composable
@@ -51,13 +61,23 @@ fun RadioButtonNavigation(
     
     Row(
         modifier = modifier
-            .padding(8.dp),
-        horizontalArrangement = Arrangement.Start,
+            .background(
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                shape = RoundedCornerShape(16.dp)
+            )
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         routes.forEach { route ->
             RadioButtonNavigationItem(
                 isSelected = selectedRoute == route,
+                icon = when (route) {
+                    MainScreenConnector.FileShare -> rememberVectorPainter(Icons.Outlined.Folder)
+                    MainScreenConnector.S3 -> painterResource(Res.drawable.aws_s3)
+                    MainScreenConnector.HTTP -> rememberVectorPainter(Icons.Outlined.Http)
+                    else -> rememberVectorPainter(Icons.Outlined.Folder)
+                },
                 text = when (route) {
                     MainScreenConnector.FileShare -> "File Share"
                     MainScreenConnector.S3 -> "AWS S3"
@@ -77,6 +97,7 @@ fun RadioButtonNavigation(
 @Composable
 private fun RadioButtonNavigationItem(
     isSelected: Boolean,
+    icon: Painter,
     text: String,
     onClick: () -> Unit
 ) {
@@ -116,9 +137,9 @@ private fun RadioButtonNavigationItem(
                 indication = null
             )
             .pointerHoverIcon(PointerIcon.Hand)
-            .padding(vertical = 4.dp, horizontal = 8.dp),
+            .padding(vertical = 8.dp, horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         // Radio button
         Box(
@@ -146,11 +167,21 @@ private fun RadioButtonNavigationItem(
             }
         }
         
+        // Icon
+        Icon(
+            painter = icon,
+            contentDescription = text,
+            modifier = Modifier.size(20.dp),
+            tint = if (isSelected) 
+                MaterialTheme.colorScheme.primary 
+            else 
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+        )
         
         // Text
         Text(
             text = text,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.bodyMedium,
             fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
             color = if (isSelected) 
                 MaterialTheme.colorScheme.primary 

@@ -33,6 +33,7 @@ import ru.packetdima.datascanner.scan.common.files.FileType
 import ru.packetdima.datascanner.scan.functions.CertDetectFun
 import ru.packetdima.datascanner.scan.functions.CodeDetectFun
 import ru.packetdima.datascanner.scan.functions.RKNDomainDetectFun
+import ru.packetdima.datascanner.ui.windows.components.RadioButtonNavigation
 import ru.packetdima.datascanner.ui.windows.screens.main.components.S3FileChooser
 import ru.packetdima.datascanner.ui.windows.screens.main.settings.SettingsBox
 import ru.packetdima.datascanner.ui.windows.screens.main.settings.SettingsButton
@@ -286,6 +287,12 @@ fun S3Screen(
                 isError = secretKeyError
             )
         }
+        
+        // Radio button навигация после полей ввода
+        RadioButtonNavigation(
+            navController = navController,
+            modifier = Modifier.padding(vertical = 10.dp)
+        )
 
         // Кнопка сканирования под полем пути
         Row {

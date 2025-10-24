@@ -124,7 +124,7 @@ We share some practical use cases how Angry Data Scanner is used in real world.
 
 ### Console Mode
 
-AngryData can also be launched in [console mode](./CONSOLE.md), which is convenient for automation and running tasks without a graphical interface.
+AngryData can also be launched in [console mode](https://github.com/angryscan/angrydata-app/blob/main/doc/CONSOLE.md), which is convenient for automation and running tasks without a graphical interface.
 
 ## System Requirements
 `Windows`, `Linux `

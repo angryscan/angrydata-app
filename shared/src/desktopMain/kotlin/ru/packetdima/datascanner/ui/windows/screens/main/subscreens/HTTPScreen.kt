@@ -79,7 +79,7 @@ fun HTTPScreen(
         contentAlignment = Alignment.TopCenter
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(20.dp),
+            verticalArrangement = Arrangement.spacedBy(0.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             OutlinedTextField(
@@ -117,10 +117,17 @@ fun HTTPScreen(
         )
         
         // Radio button навигация после поля пути
-        RadioButtonNavigation(
-            navController = navController,
-            modifier = Modifier.padding(vertical = 10.dp)
-        )
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            RadioButtonNavigation(
+                navController = navController,
+                modifier = Modifier
+                    .padding(vertical = 0.dp)
+                    .padding(start = 200.dp)
+            )
+        }
 
         // Кнопка сканирования под полем пути
         Row {

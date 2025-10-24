@@ -31,6 +31,7 @@ import ru.packetdima.datascanner.ui.windows.screens.main.settings.SettingsButton
 
 @Composable
 fun HTTPScreen(
+    navController: androidx.navigation.NavController,
     settingsExpanded: Boolean,
     expandSettings: () -> Unit,
     hideSettings: () -> Unit,
@@ -70,11 +71,17 @@ fun HTTPScreen(
         }
     }
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = if (settingsExpanded) 0.dp else 150.dp),
+        contentAlignment = Alignment.TopCenter
     ) {
-        OutlinedTextField(
+        Column(
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            OutlinedTextField(
             modifier = Modifier
                 .height(80.dp)
                 .width(700.dp),
@@ -108,10 +115,8 @@ fun HTTPScreen(
             },
         )
 
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Row {
+        // Кнопка сканирования под полем пути
+        Row {
                 Button(
                     onClick = {
 
@@ -177,11 +182,11 @@ fun HTTPScreen(
                     }
                 )
             }
-            SettingsBox(
-                transition = settingsBoxTransition,
-                height = 384.dp
-            )
-
+        
+        SettingsBox(
+            transition = settingsBoxTransition,
+            height = 384.dp
+        )
         }
     }
 

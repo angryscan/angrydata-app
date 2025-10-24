@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FolderOpen
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -38,6 +39,7 @@ import ru.packetdima.datascanner.ui.windows.screens.main.settings.SettingsButton
 
 @Composable
 fun S3Screen(
+    navController: androidx.navigation.NavController,
     settingsExpanded: Boolean,
     expandSettings: () -> Unit,
     hideSettings: () -> Unit,
@@ -161,13 +163,19 @@ fun S3Screen(
         )
     }
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = if (settingsExpanded) 0.dp else 150.dp),
+        contentAlignment = Alignment.TopCenter
     ) {
-        OutlinedTextField(
+        Column(
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            OutlinedTextField(
             modifier = Modifier
-                .height(60.dp)
+                .height(80.dp)
                 .width(700.dp),
             value = path,
             onValueChange = { path = it },
@@ -175,6 +183,23 @@ fun S3Screen(
             singleLine = true,
             shape = MaterialTheme.shapes.medium,
             isError = selectPathError,
+            leadingIcon = {
+                Box(
+                    modifier = Modifier
+                        .height(48.dp)
+                        .width(64.dp)
+                        .size(48.dp)
+                        .padding(start = 8.dp, top = 4.dp, bottom = 4.dp, end = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        imageVector = Icons.Outlined.Search,
+                        contentDescription = null
+                    )
+                }
+            },
             trailingIcon = {
                 Row {
                     Box(
@@ -262,10 +287,8 @@ fun S3Screen(
             )
         }
 
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Row {
+        // Кнопка сканирования под полем пути
+        Row {
                 Button(
                     onClick = {
                         if (endpoint.isNotEmpty() &&
@@ -334,11 +357,10 @@ fun S3Screen(
                     }
                 )
             }
-            SettingsBox(
-                transition = settingsBoxTransition,
-                height = 280.dp
-            )
+        SettingsBox(
+            transition = settingsBoxTransition,
+            height = 280.dp
+        )
         }
-
     }
 }

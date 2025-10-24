@@ -12,7 +12,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import ru.packetdima.datascanner.ui.windows.components.DataSourceTabs
 import ru.packetdima.datascanner.ui.windows.screens.main.components.MainScreenConnector
 import ru.packetdima.datascanner.ui.windows.screens.main.subscreens.FileShareScreen
 import ru.packetdima.datascanner.ui.windows.screens.main.subscreens.HTTPScreen
@@ -109,13 +108,6 @@ fun MainScreen(
             Spacer(modifier = Modifier.height(76.dp))
         }
         
-        // Вкладки источников данных в правом нижнем углу
-        DataSourceTabs(
-            navController = navController,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .width(IntrinsicSize.Min)
-        )
     }
 }
 

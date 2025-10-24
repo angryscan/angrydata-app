@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import ru.packetdima.datascanner.ui.windows.components.DataSourceTabs
 import ru.packetdima.datascanner.ui.windows.screens.main.components.MainScreenConnector
 import ru.packetdima.datascanner.ui.windows.screens.main.subscreens.FileShareScreen
 import ru.packetdima.datascanner.ui.windows.screens.main.subscreens.HTTPScreen
@@ -20,7 +21,7 @@ import ru.packetdima.datascanner.ui.windows.screens.main.subscreens.S3Screen
 
 @Composable
 fun MainScreen(
-    showScan:(taskID:Int) -> Unit
+    showScan:() -> Unit
 ) {
     var settingsExpanded by remember { mutableStateOf(false) }
 
@@ -70,7 +71,7 @@ fun MainScreen(
                         hideSettings = {
                             settingsExpanded = false
                         },
-                        taskStarted = showScan
+                        expandScanState = showScan
                     )
                 }
                 composable<MainScreenConnector.S3> {
@@ -85,7 +86,7 @@ fun MainScreen(
                         hideSettings = {
                             settingsExpanded = false
                         },
-                        taskStarted = showScan
+                        expandScanState = showScan
                     )
                 }
                 composable<MainScreenConnector.HTTP> {
@@ -100,7 +101,7 @@ fun MainScreen(
                         hideSettings = {
                             settingsExpanded = false
                         },
-                        taskStarted = showScan
+                        expandScanState = showScan
                     )
                 }
             }
@@ -108,6 +109,13 @@ fun MainScreen(
             Spacer(modifier = Modifier.height(76.dp))
         }
         
+        // Вкладки источников данных в правом нижнем углу
+        DataSourceTabs(
+            navController = navController,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .width(IntrinsicSize.Min)
+        )
     }
 }
 

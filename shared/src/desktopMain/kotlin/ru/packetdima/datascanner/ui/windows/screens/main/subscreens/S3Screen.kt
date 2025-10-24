@@ -33,7 +33,6 @@ import ru.packetdima.datascanner.scan.common.files.FileType
 import ru.packetdima.datascanner.scan.functions.CertDetectFun
 import ru.packetdima.datascanner.scan.functions.CodeDetectFun
 import ru.packetdima.datascanner.scan.functions.RKNDomainDetectFun
-import ru.packetdima.datascanner.ui.windows.components.RadioButtonNavigation
 import ru.packetdima.datascanner.ui.windows.screens.main.components.S3FileChooser
 import ru.packetdima.datascanner.ui.windows.screens.main.settings.SettingsBox
 import ru.packetdima.datascanner.ui.windows.screens.main.settings.SettingsButton
@@ -44,7 +43,7 @@ fun S3Screen(
     settingsExpanded: Boolean,
     expandSettings: () -> Unit,
     hideSettings: () -> Unit,
-    taskStarted: (taskId: Int) -> Unit
+    expandScanState: () -> Unit
 ) {
     val scanService = koinInject<ScanService>()
 
@@ -164,13 +163,17 @@ fun S3Screen(
         )
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(top = if (settingsExpanded) 0.dp else 150.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        contentAlignment = Alignment.TopCenter
     ) {
-        OutlinedTextField(
+        Column(
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            OutlinedTextField(
             modifier = Modifier
                 .height(80.dp)
                 .width(700.dp),
@@ -283,19 +286,7 @@ fun S3Screen(
                 isError = secretKeyError
             )
         }
-        
-        // Radio button навигация после полей ввода
-        Box(
-            modifier = Modifier
-                .width(700.dp)
-                .padding(vertical = 0.dp),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            RadioButtonNavigation(
-                navController = navController
-            )
-        }
-        
+
         // Кнопка сканирования под полем пути
         Row {
                 Button(
@@ -335,7 +326,7 @@ fun S3Screen(
                                     )
                                 )
                                 scanService.startTask(task)
-                                taskStarted(task.dbTask.id.value)
+                                expandScanState()
 
                             }
                         } else {
@@ -366,15 +357,10 @@ fun S3Screen(
                     }
                 )
             }
-        
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .padding(bottom = 16.dp)
-        ) {
-            SettingsBox(
-                transition = settingsBoxTransition
-            )
+        SettingsBox(
+            transition = settingsBoxTransition,
+            height = 280.dp
+        )
         }
     }
 }

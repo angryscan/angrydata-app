@@ -36,7 +36,6 @@ import ru.packetdima.datascanner.scan.functions.CertDetectFun
 import ru.packetdima.datascanner.scan.functions.CodeDetectFun
 import ru.packetdima.datascanner.scan.functions.RKNDomainDetectFun
 import ru.packetdima.datascanner.ui.components.SelectionTypes
-import ru.packetdima.datascanner.ui.windows.components.RadioButtonNavigation
 import ru.packetdima.datascanner.ui.windows.screens.main.settings.SettingsBox
 import ru.packetdima.datascanner.ui.windows.screens.main.settings.SettingsButton
 import java.io.File
@@ -47,7 +46,7 @@ fun FileShareScreen(
     settingsExpanded: Boolean,
     expandSettings: () -> Unit,
     hideSettings: () -> Unit,
-    taskStarted: (taskID:Int) -> Unit
+    expandScanState: () -> Unit
 ) {
     val scanService = koinInject<ScanService>()
 
@@ -131,13 +130,17 @@ fun FileShareScreen(
         }
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(top = if (settingsExpanded) 0.dp else 150.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        contentAlignment = Alignment.TopCenter
     ) {
-        OutlinedTextField(
+        Column(
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            OutlinedTextField(
             modifier = Modifier
                 .height(80.dp)
                 .width(700.dp),
@@ -274,18 +277,6 @@ fun FileShareScreen(
             }
         )
         
-        // Radio button навигация после поля пути
-        Box(
-            modifier = Modifier
-                .width(700.dp)
-                .padding(vertical = 0.dp),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            RadioButtonNavigation(
-                navController = navController
-            )
-        }
-        
         // Кнопка сканирования под полем пути
         Row {
                 Button(
@@ -328,7 +319,7 @@ fun FileShareScreen(
                                     connector = ConnectorFileShare()
                                 )
                                 scanService.startTask(task)
-                                taskStarted(task.dbTask.id.value)
+                                expandScanState()
 
                             }
                         } else {
@@ -360,14 +351,10 @@ fun FileShareScreen(
                 )
             }
         
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .padding(bottom = 16.dp)
-        ) {
-            SettingsBox(
-                transition = settingsBoxTransition
-            )
+        SettingsBox(
+            transition = settingsBoxTransition,
+            height = 384.dp
+        )
         }
     }
 }

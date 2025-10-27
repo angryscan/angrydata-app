@@ -131,17 +131,13 @@ fun FileShareScreen(
         }
     }
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(top = if (settingsExpanded) 0.dp else 150.dp),
-        contentAlignment = Alignment.TopCenter
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(0.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            OutlinedTextField(
+        OutlinedTextField(
             modifier = Modifier
                 .height(80.dp)
                 .width(700.dp),
@@ -364,10 +360,14 @@ fun FileShareScreen(
                 )
             }
         
-        SettingsBox(
-            transition = settingsBoxTransition,
-            height = 384.dp
-        )
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .padding(bottom = 16.dp)
+        ) {
+            SettingsBox(
+                transition = settingsBoxTransition
+            )
         }
     }
 }

@@ -14,7 +14,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ClipEntry
@@ -427,17 +426,6 @@ fun ScanResultScreen(
                                 .size(40.dp)
                         )
                     } else {
-                        val infiniteTransition = rememberInfiniteTransition(label = "rotation")
-                        val rotationAngle by infiniteTransition.animateFloat(
-                            initialValue = 0f,
-                            targetValue = 360f,
-                            animationSpec = infiniteRepeatable(
-                                animation = tween(2000, easing = LinearEasing),
-                                repeatMode = RepeatMode.Restart
-                            ),
-                            label = "rotation"
-                        )
-                        
                         Box(
                             modifier = Modifier
                                 .size(40.dp)
@@ -455,16 +443,6 @@ fun ScanResultScreen(
                                 },
                             contentAlignment = Alignment.Center
                         ) {
-                            if (state == TaskState.SCANNING) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier
-                                        .size(48.dp)
-                                        .rotate(rotationAngle),
-                                    strokeWidth = 2.dp,
-                                    color = MaterialTheme.colorScheme.onPrimary
-                                )
-                            }
-                            
                             Icon(
                                 imageVector = when (state) {
                                     TaskState.SEARCHING, TaskState.SCANNING, TaskState.LOADING -> Icons.Outlined.Pause

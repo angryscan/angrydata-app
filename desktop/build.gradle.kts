@@ -147,6 +147,89 @@ tasks.register("getOS") {
     }
 }
 
+tasks.register("createDMGFromConveyorZIPLinux") {
+    val packagesDir = layout.buildDirectory.dir("packages").get().asFile
+    val dmgDir = layout.buildDirectory.dir("dmg-output").get().asFile
+    
+    doFirst {
+        dmgDir.mkdirs()
+    }
+    
+    doLast {
+        listOf("amd64", "aarch64").forEach { arch ->
+            val zipFile = packagesDir.resolve("big-data-scanner-${version}-mac-${arch}.zip")
+            if (!zipFile.exists()) {
+                throw GradleException("Conveyor ZIP file not found: ${zipFile.absolutePath}")
+            }
+
+            val extractDir = File(dmgDir, "extract-$arch")
+            extractDir.mkdirs()
+            
+            // Используем ProcessBuilder вместо exec
+            ProcessBuilder("unzip", "-q", zipFile.absolutePath, "-d", extractDir.absolutePath)
+                .redirectErrorStream(true)
+                .start()
+                .waitFor()
+
+            val archSuffix = when(arch) {
+                "amd64" -> "intel"
+                "aarch64" -> "arm64"
+                else -> arch
+            }
+            val dmgFile = File(dmgDir, "big-data-scanner-${version}-mac-${archSuffix}.dmg")
+            val appFile = File(extractDir, "Big Data Scanner.app")
+            
+            if (!appFile.exists()) {
+                throw GradleException("App file not found after extraction: ${appFile.absolutePath}")
+            }
+
+            val dmgSize = 250
+            val tempDmg = File(dmgDir, "temp-$arch.dmg")
+
+            ProcessBuilder("dd", "if=/dev/zero", "of=${tempDmg.absolutePath}", "bs=1M", "count=$dmgSize", "status=none")
+                .redirectErrorStream(true)
+                .start()
+                .waitFor()
+
+            ProcessBuilder("mkfs.hfsplus", "-v", "Big Data Scanner", tempDmg.absolutePath)
+                .redirectErrorStream(true)
+                .start()
+                .waitFor()
+
+            val mountPoint = File(dmgDir, "mnt-$arch")
+            mountPoint.mkdirs()
+            ProcessBuilder("sudo", "mount", "-o", "loop,rw", tempDmg.absolutePath, mountPoint.absolutePath)
+                .redirectErrorStream(true)
+                .start()
+                .waitFor()
+            
+            try {
+                ProcessBuilder("sudo", "cp", "-R", appFile.absolutePath, mountPoint.absolutePath)
+                    .redirectErrorStream(true)
+                    .start()
+                    .waitFor()
+            } finally {
+                ProcessBuilder("sudo", "umount", mountPoint.absolutePath)
+                    .redirectErrorStream(true)
+                    .start()
+                    .waitFor()
+                tempDmg.renameTo(dmgFile)
+            }
+
+            packagesDir.mkdirs()
+            ProcessBuilder("cp", dmgFile.absolutePath, packagesDir.absolutePath)
+                .redirectErrorStream(true)
+                .start()
+                .waitFor()
+            
+            println("DMG created: ${File(packagesDir, dmgFile.name).absolutePath}")
+        }
+    }
+    
+    dependsOn("conveyCI")
+    outputs.dir(dmgDir)
+}
+
 configurations.all {
     attributes {
         // https://github.com/JetBrains/compose-jb/issues/1404#issuecomment-1146894731

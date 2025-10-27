@@ -30,6 +30,9 @@ jobs:
           chmod +x conveyor-18.0/bin/conveyor
           echo "$(pwd)/conveyor-18.0/bin" >> $GITHUB_PATH
 
+      - name: Install hfsprogs for DMG creation
+        run: sudo apt-get update && sudo apt-get install -y hfsprogs
+
       - name: Build and push with conveyor
         uses: coactions/setup-xvfb@v1
         with:
@@ -37,6 +40,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+
+      - name: Create DMG from Conveyor ZIP on Linux
+        run: ./gradlew :desktop:createDMGFromConveyorZIPLinux
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -89,4 +95,12 @@ jobs:
           path: |
             desktop/build/packages/*-mac-aarch64.zip
             desktop/build/packages/*-aarch64.rss
+            LICENSE*
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-dmg
+          path: |
+            desktop/build/packages/*mac*.dmg
             LICENSE*

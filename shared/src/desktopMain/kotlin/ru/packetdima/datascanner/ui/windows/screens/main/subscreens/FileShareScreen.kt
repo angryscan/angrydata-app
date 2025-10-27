@@ -280,14 +280,13 @@ fun FileShareScreen(
         
         // Radio button навигация после поля пути
         Box(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .width(700.dp)
+                .padding(vertical = 0.dp),
             contentAlignment = Alignment.CenterStart
         ) {
             RadioButtonNavigation(
-                navController = navController,
-                modifier = Modifier
-                    .padding(vertical = 0.dp)
-                    .padding(start = 200.dp)
+                navController = navController
             )
         }
         

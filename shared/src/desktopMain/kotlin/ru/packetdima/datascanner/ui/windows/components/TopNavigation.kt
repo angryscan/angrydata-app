@@ -626,11 +626,6 @@ private fun WindowControlButton(
 }
 
 @Composable
-private fun NavigationActions() {
-}
-
-
-@Composable
 private fun ActiveScanIndicator() {
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     

@@ -133,16 +133,18 @@ tasks.register("printVersion") {
 }
 
 tasks.register("getOS") {
-    println(
-        "Current OS: ${
-            when {
-                Os.isFamily(Os.FAMILY_WINDOWS) -> "Windows"
-                Os.isFamily(Os.FAMILY_UNIX) -> "Unix"
-                Os.isFamily(Os.FAMILY_MAC) -> "MacOS"
-                else -> "Unknown"
-            }
-        }"
-    )
+    doLast {
+        println(
+            "Current OS: ${
+                when {
+                    Os.isFamily(Os.FAMILY_WINDOWS) -> "Windows"
+                    Os.isFamily(Os.FAMILY_UNIX) -> "Unix"
+                    Os.isFamily(Os.FAMILY_MAC) -> "MacOS"
+                    else -> "Unknown"
+                }
+            }"
+        )
+    }
 }
 
 configurations.all {

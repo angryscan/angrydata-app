@@ -1,11 +1,13 @@
 package ru.packetdima.datascanner.ui.windows.components
 
-import androidx.compose.runtime.*
-import androidx.navigation.NavController
+import androidx.compose.foundation.window.WindowDraggableArea
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.window.WindowPlacement
+import androidx.compose.ui.window.WindowScope
+import androidx.navigation.NavController
 
 @Composable
-fun NavigationSelector(
+fun WindowScope.NavigationSelector(
     navController: NavController,
     windowPlacement: WindowPlacement? = null,
     expanded: Boolean = false,
@@ -13,13 +15,26 @@ fun NavigationSelector(
     onExpandClick: (() -> Unit)? = null,
     onCloseClick: (() -> Unit)? = null
 ) {
-    TopNavigation(
-        navController = navController,
-        windowPlacement = windowPlacement,
-        expanded = expanded,
-        onMinimizeClick = onMinimizeClick,
-        onExpandClick = onExpandClick,
-        onCloseClick = onCloseClick
-    )
+    if (windowPlacement == WindowPlacement.Floating) {
+        WindowDraggableArea {
+            TopNavigation(
+                navController = navController,
+                windowPlacement = windowPlacement,
+                expanded = expanded,
+                onMinimizeClick = onMinimizeClick,
+                onExpandClick = onExpandClick,
+                onCloseClick = onCloseClick
+            )
+        }
+    } else {
+        TopNavigation(
+            navController = navController,
+            windowPlacement = windowPlacement,
+            expanded = expanded,
+            onMinimizeClick = onMinimizeClick,
+            onExpandClick = onExpandClick,
+            onCloseClick = onCloseClick
+        )
+    }
 }
 

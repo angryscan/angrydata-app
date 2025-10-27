@@ -111,14 +111,14 @@ fun MainScreenTasks(
             Box(
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.surface)
-                    .fillMaxSize()
+                    .fillMaxWidth()
+                    .fillMaxHeight()
                     .padding(14.dp),
                 contentAlignment = Alignment.TopCenter
             ) {
-                val height = activeTasks.size * 60 + activeTasks.size * 10 / 2 + (activeTasks.size % 2)
                 LazyColumn(
                     modifier = Modifier
-                        .height(height.dp)
+                        .fillMaxHeight()
                         .width(640.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {

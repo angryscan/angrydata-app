@@ -290,17 +290,16 @@ fun S3Screen(
         
         // Radio button навигация после полей ввода
         Box(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .width(700.dp)
+                .padding(vertical = 0.dp),
             contentAlignment = Alignment.CenterStart
         ) {
             RadioButtonNavigation(
-                navController = navController,
-                modifier = Modifier
-                    .padding(vertical = 0.dp)
-                    .padding(start = 200.dp)
+                navController = navController
             )
         }
-
+        
         // Кнопка сканирования под полем пути
         Row {
                 Button(
@@ -371,6 +370,7 @@ fun S3Screen(
                     }
                 )
             }
+        
         SettingsBox(
             transition = settingsBoxTransition,
             height = 280.dp

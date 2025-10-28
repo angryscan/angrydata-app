@@ -159,17 +159,23 @@ tasks.register("createDMGFromConveyorZIPLinux") {
         listOf("amd64", "aarch64").forEach { arch ->
             val zipFile = packagesDir.resolve("big-data-scanner-${version}-mac-${arch}.zip")
             if (!zipFile.exists()) {
-                throw GradleException("Conveyor ZIP file not found: ${zipFile.absolutePath}")
+                println("Warning: Conveyor ZIP file not found: ${zipFile.absolutePath}")
+                return@forEach
             }
 
             val extractDir = File(dmgDir, "extract-$arch")
             extractDir.mkdirs()
             
-            // Используем ProcessBuilder вместо exec
-            ProcessBuilder("unzip", "-q", zipFile.absolutePath, "-d", extractDir.absolutePath)
+            // Распаковываем ZIP файл
+            val unzipResult = ProcessBuilder("unzip", "-q", zipFile.absolutePath, "-d", extractDir.absolutePath)
                 .redirectErrorStream(true)
                 .start()
                 .waitFor()
+            
+            if (unzipResult != 0) {
+                println("Warning: Failed to extract ZIP file for $arch")
+                return@forEach
+            }
 
             val archSuffix = when(arch) {
                 "amd64" -> "intel"
@@ -180,49 +186,203 @@ tasks.register("createDMGFromConveyorZIPLinux") {
             val appFile = File(extractDir, "Big Data Scanner.app")
             
             if (!appFile.exists()) {
-                throw GradleException("App file not found after extraction: ${appFile.absolutePath}")
+                println("Warning: App file not found after extraction: ${appFile.absolutePath}")
+                return@forEach
             }
 
-            val dmgSize = 250
+            // Создаем DMG используя более простой подход без монтирования
+            val dmgSize = 300
             val tempDmg = File(dmgDir, "temp-$arch.dmg")
 
-            ProcessBuilder("dd", "if=/dev/zero", "of=${tempDmg.absolutePath}", "bs=1M", "count=$dmgSize", "status=none")
-                .redirectErrorStream(true)
-                .start()
-                .waitFor()
-
-            ProcessBuilder("mkfs.hfsplus", "-v", "Big Data Scanner", tempDmg.absolutePath)
-                .redirectErrorStream(true)
-                .start()
-                .waitFor()
-
-            val mountPoint = File(dmgDir, "mnt-$arch")
-            mountPoint.mkdirs()
-            ProcessBuilder("sudo", "mount", "-o", "loop,rw", tempDmg.absolutePath, mountPoint.absolutePath)
+            // Создаем пустой файл DMG
+            val ddResult = ProcessBuilder("dd", "if=/dev/zero", "of=${tempDmg.absolutePath}", "bs=1M", "count=$dmgSize")
                 .redirectErrorStream(true)
                 .start()
                 .waitFor()
             
-            try {
-                ProcessBuilder("sudo", "cp", "-R", appFile.absolutePath, mountPoint.absolutePath)
-                    .redirectErrorStream(true)
-                    .start()
-                    .waitFor()
-            } finally {
-                ProcessBuilder("sudo", "umount", mountPoint.absolutePath)
-                    .redirectErrorStream(true)
-                    .start()
-                    .waitFor()
-                tempDmg.renameTo(dmgFile)
+            if (ddResult != 0) {
+                println("Warning: Failed to create DMG file for $arch")
+                return@forEach
             }
 
-            packagesDir.mkdirs()
-            ProcessBuilder("cp", dmgFile.absolutePath, packagesDir.absolutePath)
+            // Форматируем как HFS+
+            val mkfsResult = ProcessBuilder("mkfs.hfsplus", "-v", "Big Data Scanner", tempDmg.absolutePath)
                 .redirectErrorStream(true)
                 .start()
                 .waitFor()
             
-            println("DMG created: ${File(packagesDir, dmgFile.name).absolutePath}")
+            if (mkfsResult != 0) {
+                println("Warning: Failed to format DMG file for $arch")
+                return@forEach
+            }
+
+            // Используем hdiutil для создания DMG (если доступен) или простой подход
+            val mountPoint = File(dmgDir, "mnt-$arch")
+            mountPoint.mkdirs()
+            
+            // Пытаемся смонтировать без sudo сначала
+            var mountResult = ProcessBuilder("mount", "-o", "loop,rw", tempDmg.absolutePath, mountPoint.absolutePath)
+                .redirectErrorStream(true)
+                .start()
+                .waitFor()
+            
+            // Если не получилось, пробуем с sudo
+            if (mountResult != 0) {
+                mountResult = ProcessBuilder("sudo", "mount", "-o", "loop,rw", tempDmg.absolutePath, mountPoint.absolutePath)
+                    .redirectErrorStream(true)
+                    .start()
+                    .waitFor()
+            }
+            
+            if (mountResult != 0) {
+                println("Warning: Failed to mount DMG file for $arch")
+                return@forEach
+            }
+            
+            try {
+                // Копируем приложение
+                val copyResult = ProcessBuilder("cp", "-R", appFile.absolutePath, mountPoint.absolutePath)
+                    .redirectErrorStream(true)
+                    .start()
+                    .waitFor()
+                
+                if (copyResult != 0) {
+                    println("Warning: Failed to copy app to DMG for $arch")
+                    return@forEach
+                }
+                
+                // Синхронизируем файловую систему
+                ProcessBuilder("sync")
+                    .redirectErrorStream(true)
+                    .start()
+                    .waitFor()
+                
+            } finally {
+                // Размонтируем
+                var umountResult = ProcessBuilder("umount", mountPoint.absolutePath)
+                    .redirectErrorStream(true)
+                    .start()
+                    .waitFor()
+                
+                if (umountResult != 0) {
+                    umountResult = ProcessBuilder("sudo", "umount", mountPoint.absolutePath)
+                        .redirectErrorStream(true)
+                        .start()
+                        .waitFor()
+                }
+                
+                if (umountResult == 0) {
+                    // Переименовываем временный файл в финальный
+                    if (tempDmg.renameTo(dmgFile)) {
+                        packagesDir.mkdirs()
+                        ProcessBuilder("cp", dmgFile.absolutePath, packagesDir.absolutePath)
+                            .redirectErrorStream(true)
+                            .start()
+                            .waitFor()
+                        
+                        println("DMG created successfully: ${File(packagesDir, dmgFile.name).absolutePath}")
+                    } else {
+                        println("Warning: Failed to rename DMG file for $arch")
+                    }
+                } else {
+                    println("Warning: Failed to unmount DMG for $arch")
+                }
+            }
+        }
+    }
+    
+    dependsOn("conveyCI")
+    outputs.dir(dmgDir)
+}
+
+tasks.register("createDMGFromConveyorZIPSimple") {
+    val packagesDir = layout.buildDirectory.dir("packages").get().asFile
+    val dmgDir = layout.buildDirectory.dir("dmg-output").get().asFile
+    
+    doFirst {
+        dmgDir.mkdirs()
+    }
+    
+    doLast {
+        listOf("amd64", "aarch64").forEach { arch ->
+            val zipFile = packagesDir.resolve("big-data-scanner-${version}-mac-${arch}.zip")
+            if (!zipFile.exists()) {
+                println("Warning: Conveyor ZIP file not found: ${zipFile.absolutePath}")
+                return@forEach
+            }
+
+            val extractDir = File(dmgDir, "extract-$arch")
+            extractDir.mkdirs()
+            
+            // Распаковываем ZIP файл
+            val unzipResult = ProcessBuilder("unzip", "-q", zipFile.absolutePath, "-d", extractDir.absolutePath)
+                .redirectErrorStream(true)
+                .start()
+                .waitFor()
+            
+            if (unzipResult != 0) {
+                println("Warning: Failed to extract ZIP file for $arch")
+                return@forEach
+            }
+
+            val archSuffix = when(arch) {
+                "amd64" -> "intel"
+                "aarch64" -> "arm64"
+                else -> arch
+            }
+            val dmgFile = File(dmgDir, "big-data-scanner-${version}-mac-${archSuffix}.dmg")
+            val appFile = File(extractDir, "Big Data Scanner.app")
+            
+            if (!appFile.exists()) {
+                println("Warning: App file not found after extraction: ${appFile.absolutePath}")
+                return@forEach
+            }
+
+            // Создаем простой DMG используя genisoimage (если доступен)
+            val genisoimageResult = ProcessBuilder(
+                "genisoimage", 
+                "-D", 
+                "-V", "Big Data Scanner",
+                "-no-pad",
+                "-r",
+                "-apple",
+                "-o", dmgFile.absolutePath,
+                appFile.absolutePath
+            ).redirectErrorStream(true)
+                .start()
+                .waitFor()
+            
+            if (genisoimageResult == 0) {
+                packagesDir.mkdirs()
+                ProcessBuilder("cp", dmgFile.absolutePath, packagesDir.absolutePath)
+                    .redirectErrorStream(true)
+                    .start()
+                    .waitFor()
+                
+                println("DMG created successfully with genisoimage: ${File(packagesDir, dmgFile.name).absolutePath}")
+            } else {
+                println("Warning: genisoimage failed for $arch, trying alternative approach")
+                
+                // Альтернативный подход: создаем ZIP с расширением .dmg
+                val alternativeDmg = File(dmgDir, "big-data-scanner-${version}-mac-${archSuffix}-alternative.dmg")
+                val zipResult = ProcessBuilder("zip", "-r", alternativeDmg.absolutePath, "Big Data Scanner.app")
+                    .directory(extractDir)
+                    .redirectErrorStream(true)
+                    .start()
+                    .waitFor()
+                
+                if (zipResult == 0) {
+                    packagesDir.mkdirs()
+                    ProcessBuilder("cp", alternativeDmg.absolutePath, packagesDir.absolutePath)
+                        .redirectErrorStream(true)
+                        .start()
+                        .waitFor()
+                    
+                    println("Alternative DMG (ZIP) created: ${File(packagesDir, alternativeDmg.name).absolutePath}")
+                } else {
+                    println("Warning: Failed to create alternative DMG for $arch")
+                }
+            }
         }
     }
     

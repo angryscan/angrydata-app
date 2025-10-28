@@ -334,7 +334,7 @@ fun ScanResultScreen(
                                         .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
                                         .clickable {
                                             saveLauncher.launch(
-                                                suggestedName = "BDS_${fileDateFormat.format(finishedAt!!)}",
+                                                suggestedName = "ADS_${fileDateFormat.format(finishedAt!!)}",
                                                 extension = reportExtension.extension,
                                                 directory = PlatformFile(AppFiles.UserDirPath)
                                             )

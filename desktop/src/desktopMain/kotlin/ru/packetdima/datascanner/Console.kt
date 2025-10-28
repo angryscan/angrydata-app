@@ -141,7 +141,7 @@ object Console : KoinComponent {
         val time = Calendar.getInstance().time
         val formatter = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss")
         val currentTime = formatter.format(time)
-        val reportFile = reportDir.resolve("BDS_$currentTime.csv")
+        val reportFile = reportDir.resolve("A$currentTime.csv")
 
         return runBlocking {
             try {

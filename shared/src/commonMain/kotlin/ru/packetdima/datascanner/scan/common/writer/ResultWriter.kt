@@ -100,7 +100,7 @@ object ResultWriter {
         }.use { outputStream ->
             Workbook(
                 outputStream,
-                "Big Data Scanner",
+                "Angry Data Scanner",
                 if (AppVersion == "Debug") "0.1" else AppVersion.substringBeforeLast('.')
             ).use { workbook ->
                 val sheet = workbook.newWorksheet(getString(Res.string.Result_SheetName))

@@ -22,7 +22,7 @@ object ContextMenu {
         get() = when (OS.currentOS()) {
             OS.WINDOWS -> {
                 WinRegistry.getWindowsRegistryEntry(
-                    "HKEY_CURRENT_USER\\Software\\Classes\\Directory\\shell\\bds",
+                    "HKEY_CURRENT_USER\\Software\\Classes\\Directory\\shell\\ads",
                     "MUIVerb",
                     type = WinRegistry.REG_TYPE.REG_SZ
                 )?.isNotBlank() ?: false
@@ -67,46 +67,46 @@ object ContextMenu {
                 AppFiles.Icon.writeBytes(icon)
 
                 if (!WinRegistry.setWindowsRegistryEntry(
-                        "HKEY_CURRENT_USER\\Software\\Classes\\Directory\\shell\\bds",
+                        "HKEY_CURRENT_USER\\Software\\Classes\\Directory\\shell\\ads",
                         "MUIVerb",
                         runBlocking { getString(Res.string.contextScanWith) },
                         type = WinRegistry.REG_TYPE.REG_SZ
                     )
-                ) logger.error { "Failed to set registry key Directory\\shell\\bds MUIVerb" }
+                ) logger.error { "Failed to set registry key Directory\\shell\\ads MUIVerb" }
                 if (!WinRegistry.setWindowsRegistryEntry(
-                        "HKEY_CURRENT_USER\\Software\\Classes\\Directory\\shell\\bds",
+                        "HKEY_CURRENT_USER\\Software\\Classes\\Directory\\shell\\ads",
                         "Icon",
                         AppFiles.Icon.absolutePath,
                         type = WinRegistry.REG_TYPE.REG_SZ
                     )
-                ) logger.error { "Failed to set registry key Directory\\shell\\bds Icon" }
+                ) logger.error { "Failed to set registry key Directory\\shell\\ads Icon" }
                 if (!WinRegistry.setWindowsRegistryEntry(
-                        "HKEY_CURRENT_USER\\Software\\Classes\\Directory\\shell\\bds\\command",
-                        "\\\"${System.getProperty("user.dir")}\\Big Data Scanner.exe\\\" \\\"%1\\\"",
+                        "HKEY_CURRENT_USER\\Software\\Classes\\Directory\\shell\\ads\\command",
+                        "\\\"${System.getProperty("user.dir")}\\Angry Data Scanner.exe\\\" \\\"%1\\\"",
                         type = WinRegistry.REG_TYPE.REG_SZ
                     )
-                ) logger.error { "Failed to set registry key Directory\\shell\\bds\\command" }
+                ) logger.error { "Failed to set registry key Directory\\shell\\ads\\command" }
 
                 if (!WinRegistry.setWindowsRegistryEntry(
-                        "HKEY_CURRENT_USER\\Software\\Classes\\*\\shell\\bds",
+                        "HKEY_CURRENT_USER\\Software\\Classes\\*\\shell\\ads",
                         "MUIVerb",
                         runBlocking { getString(Res.string.contextScanWith) },
                         type = WinRegistry.REG_TYPE.REG_SZ
                     )
-                ) logger.error { "Failed to set registry key *\\shell\\bds MUIVerb" }
+                ) logger.error { "Failed to set registry key *\\shell\\ads MUIVerb" }
                 if (!WinRegistry.setWindowsRegistryEntry(
-                        "HKEY_CURRENT_USER\\Software\\Classes\\*\\shell\\bds",
+                        "HKEY_CURRENT_USER\\Software\\Classes\\*\\shell\\ads",
                         "Icon",
                         AppFiles.Icon.absolutePath,
                         type = WinRegistry.REG_TYPE.REG_SZ
                     )
-                ) logger.error { "Failed to set registry key  *\\shell\\bds Icon" }
+                ) logger.error { "Failed to set registry key  *\\shell\\ads Icon" }
                 if (!WinRegistry.setWindowsRegistryEntry(
-                        "HKEY_CURRENT_USER\\Software\\Classes\\*\\shell\\bds\\command",
-                        "\\\"${System.getProperty("user.dir")}\\Big Data Scanner.exe\\\" \\\"%1\\\"",
+                        "HKEY_CURRENT_USER\\Software\\Classes\\*\\shell\\ads\\command",
+                        "\\\"${System.getProperty("user.dir")}\\Angry Data Scanner.exe\\\" \\\"%1\\\"",
                         type = WinRegistry.REG_TYPE.REG_SZ
                     )
-                ) logger.error { "Failed to set registry key   *\\shell\\bds\\command" }
+                ) logger.error { "Failed to set registry key   *\\shell\\ads\\command" }
             }
 
             OS.LINUX -> {
@@ -122,9 +122,9 @@ object ContextMenu {
 
                     val appPath = Path(System.getProperty("user.dir"))
                     val executable = if (appPath.resolve("bin").exists())
-                        appPath.resolve("bin").resolve("Big Data Scanner")
+                        appPath.resolve("bin").resolve("Angry Data Scanner")
                     else
-                        appPath.resolve("Big Data Scanner")
+                        appPath.resolve("Angry Data Scanner")
 
                     file.writeText(
                         "#!/bin/bash \n" +
@@ -155,25 +155,25 @@ object ContextMenu {
         when (OS.currentOS()) {
             OS.WINDOWS -> {
                 if (!WinRegistry.deleteWindowsRegistryKey(
-                        "HKEY_CURRENT_USER\\Software\\Classes\\Directory\\shell\\bds\\command",
+                        "HKEY_CURRENT_USER\\Software\\Classes\\Directory\\shell\\ads\\command",
                         type = WinRegistry.REG_TYPE.REG_SZ
                     )
-                ) logger.error { "Failed to delete registry key Directory\\shell\\bds\\command" }
+                ) logger.error { "Failed to delete registry key Directory\\shell\\ads\\command" }
                 if (!WinRegistry.deleteWindowsRegistryKey(
-                        "HKEY_CURRENT_USER\\Software\\Classes\\Directory\\shell\\bds",
+                        "HKEY_CURRENT_USER\\Software\\Classes\\Directory\\shell\\ads",
                         type = WinRegistry.REG_TYPE.REG_SZ
                     )
-                ) logger.error { "Failed to delete registry key Directory\\shell\\bds" }
+                ) logger.error { "Failed to delete registry key Directory\\shell\\ads" }
                 if (!WinRegistry.deleteWindowsRegistryKey(
-                        "HKEY_CURRENT_USER\\Software\\Classes\\*\\shell\\bds\\command",
+                        "HKEY_CURRENT_USER\\Software\\Classes\\*\\shell\\ads\\command",
                         type = WinRegistry.REG_TYPE.REG_SZ
                     )
-                ) logger.error { "Failed to delete registry key *\\shell\\bds\\command" }
+                ) logger.error { "Failed to delete registry key *\\shell\\ads\\command" }
                 if (!WinRegistry.deleteWindowsRegistryKey(
-                        "HKEY_CURRENT_USER\\Software\\Classes\\*\\shell\\bds",
+                        "HKEY_CURRENT_USER\\Software\\Classes\\*\\shell\\ads",
                         type = WinRegistry.REG_TYPE.REG_SZ
                     )
-                ) logger.error { "Failed to delete registry key *\\shell\\bds" }
+                ) logger.error { "Failed to delete registry key *\\shell\\ads" }
             }
 
             OS.LINUX -> {

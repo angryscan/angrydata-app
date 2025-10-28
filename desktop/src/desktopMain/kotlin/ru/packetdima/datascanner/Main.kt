@@ -57,7 +57,7 @@ suspend fun main(args: Array<String>) {
             else -> "OPENGL"
         }
     )
-    FileKit.init(appId = "Big Data Scanner")
+    FileKit.init(appId = "Angry Data Scanner")
 
     try {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())

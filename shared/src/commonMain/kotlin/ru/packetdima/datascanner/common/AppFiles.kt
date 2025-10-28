@@ -10,7 +10,7 @@ import kotlin.io.path.absolutePathString
 object AppFiles {
     private val WorkDirPath: Path = when (OS.currentOS()) {
         OS.WINDOWS -> Path(System.getenv("APPDATA")).resolve("BigDataScanner")
-        else -> Path(System.getProperty("user.home")).resolve(".bds")
+        else -> Path(System.getProperty("user.home")).resolve(".ads")
     }
 
     val UserDirPath: File = when (OS.currentOS()) {
@@ -35,8 +35,8 @@ object AppFiles {
     val Icon: File = WorkDirPath
         .resolve(
             when (OS.currentOS()) {
-                OS.WINDOWS -> "Big Data Scanner.ico"
-                else -> "Big Data Scanner.png"
+                OS.WINDOWS -> "Angry Data Scanner.ico"
+                else -> "Angry Data Scanner.png"
             }
         )
         .toFile()

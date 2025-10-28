@@ -1,6 +1,6 @@
 <resources>
     <string name="locale">Русский</string>
-    <string name="plannerWindowTitle">BDS Планировщик</string>
+    <string name="plannerWindowTitle">ADS Планировщик</string>
     <string name="uiLanguage">Язык</string>
     <string name="uiTheme">Тема</string>
     <string name="uiThreadCount">Количество потоков</string>
@@ -57,7 +57,7 @@
     <string name="settingsChangedText">Некоторые параметры будут применены при следующем запуске</string>
     <string name="settingsContextMenuTitle">Контекстное меню</string>
     <string name="settingsContextMenuText">Файловый проводник</string>
-    <string name="contextScanWith">Сканировать при помощи BDS</string>
+    <string name="contextScanWith">Сканировать при помощи ADS</string>
     <string name="uiUserSignature">Пользовательские сигнатуры</string>
     <string name="add">Добавить</string>
     <string name="name">Наименование</string>
@@ -187,7 +187,7 @@
 
     <string name="AboutScreen-Version">Версия программы: %1$s</string>
     <string name="AboutScreen-Copyright">Open Source Software, 2025</string>
-    <string name="AboutScreen-Description">Big Data Scanner — персональное программное обеспечение для экспресс-проверки наличия в файлах персональных данных и номеров банковских карт. Big Data Scanner работает со следующими форматами файлов: .xlsx, .docx, .txt, .csv, .xml, .json, .log, .doc, .xls, .pdf, .zip.\nBig Data Scanner не вносит никаких изменений в проверяемые файлы, требуется доступ только для чтения файла.\n\nРезультат работы программы носит рекомендательный характер, может требоваться дополнительная верификация со стороны пользователя.</string>
+    <string name="AboutScreen-Description">Angry Data Scanner — персональное программное обеспечение для экспресс-проверки наличия в файлах персональных данных и номеров банковских карт. Angry Data Scanner работает со следующими форматами файлов: .xlsx, .docx, .txt, .csv, .xml, .json, .log, .doc, .xls, .pdf, .zip.\nAngry Data Scanner не вносит никаких изменений в проверяемые файлы, требуется доступ только для чтения файла.\n\nРезультат работы программы носит рекомендательный характер, может требоваться дополнительная верификация со стороны пользователя.</string>
 
     <string name="MessageBox-Cancel">Отмена</string>
     <string name="MessageBox-OK">ОК</string>

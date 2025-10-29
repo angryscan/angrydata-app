@@ -111,8 +111,7 @@ fun HTTPScreen(
                 }
             },
         )
-        
-        // Radio button навигация после поля пути
+
         Box(
             modifier = Modifier
                 .width(700.dp)
@@ -123,8 +122,7 @@ fun HTTPScreen(
                 navController = navController
             )
         }
-        
-        // Кнопка сканирования под полем пути
+
         Row {
                 Button(
                     onClick = {

@@ -283,8 +283,7 @@ fun S3Screen(
                 isError = secretKeyError
             )
         }
-        
-        // Radio button навигация после полей ввода
+
         Box(
             modifier = Modifier
                 .width(700.dp)
@@ -295,8 +294,7 @@ fun S3Screen(
                 navController = navController
             )
         }
-        
-        // Кнопка сканирования под полем пути
+
         Row {
                 Button(
                     onClick = {

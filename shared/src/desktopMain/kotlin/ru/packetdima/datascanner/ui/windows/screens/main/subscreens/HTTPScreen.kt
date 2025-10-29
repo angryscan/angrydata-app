@@ -36,7 +36,7 @@ fun HTTPScreen(
     settingsExpanded: Boolean,
     expandSettings: () -> Unit,
     hideSettings: () -> Unit,
-    expandScanState: () -> Unit
+    expandScanState: (Int) -> Unit
 ) {
     val scanService = koinInject<ScanService>()
 
@@ -158,7 +158,9 @@ fun HTTPScreen(
                                     connector = ConnectorHTTP()
                                 )
                                 scanService.startTask(task)
-                                expandScanState()
+                                task.id.value?.let { taskId ->
+                                    expandScanState(taskId)
+                                }
 
                             }
                         } else {

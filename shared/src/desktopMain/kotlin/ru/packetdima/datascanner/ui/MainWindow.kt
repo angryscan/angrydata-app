@@ -1,13 +1,9 @@
 package ru.packetdima.datascanner.ui
 
-import androidx.compose.animation.core.*
+import androidx.compose.animation.*
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,8 +12,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.*
-import java.awt.Dimension
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPlacement
+import androidx.compose.ui.window.rememberDialogState
+import androidx.compose.ui.window.rememberWindowState
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -46,6 +44,7 @@ import ru.packetdima.datascanner.ui.windows.screens.main.MainScreen
 import ru.packetdima.datascanner.ui.windows.screens.scans.ScanResultScreen
 import ru.packetdima.datascanner.ui.windows.screens.scans.ScansScreen
 import ru.packetdima.datascanner.ui.windows.screens.settings.SettingsScreen
+import java.awt.Dimension
 import java.util.*
 
 @Composable
@@ -67,10 +66,6 @@ fun MainWindow(
     val debugMode by remember { appSettings.debugMode }
 
     val backStackEntry by navController.currentBackStackEntryAsState()
-
-    LaunchedEffect(backStackEntry) {
-        println("Current destination: ${backStackEntry?.destination?.route}")
-    }
 
     val appLocale by remember { appSettings.language }
     LaunchedEffect(appLocale) {
@@ -250,8 +245,8 @@ fun MainWindow(
                     ) {
                             composable<AppScreen.Main> {
                                 MainScreen(
-                                    showScan = {
-                                        navController.navigate(AppScreen.Scans)
+                                    showScan = { taskId ->
+                                        navController.navigate(AppScreen.ScanResult(taskId))
                                     }
                                 )
                             }
@@ -266,7 +261,7 @@ fun MainWindow(
                                 val scanResult: AppScreen.ScanResult = backStackEntry.toRoute()
                                 ScanResultScreen(
                                     scanResult.scanId,
-                                    onCloseClick = { navController.navigate(AppScreen.Scans) }
+                                    onCloseClick = { navController.popBackStack() },
                                 )
                             }
                             composable<AppScreen.Settings> {

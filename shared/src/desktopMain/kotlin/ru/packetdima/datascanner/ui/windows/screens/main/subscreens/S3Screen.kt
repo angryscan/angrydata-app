@@ -44,7 +44,7 @@ fun S3Screen(
     settingsExpanded: Boolean,
     expandSettings: () -> Unit,
     hideSettings: () -> Unit,
-    expandScanState: () -> Unit
+    expandScanState: (Int) -> Unit
 ) {
     val scanService = koinInject<ScanService>()
 
@@ -333,7 +333,9 @@ fun S3Screen(
                                     )
                                 )
                                 scanService.startTask(task)
-                                expandScanState()
+                                task.id.value?.let { taskId ->
+                                    expandScanState(taskId)
+                                }
 
                             }
                         } else {

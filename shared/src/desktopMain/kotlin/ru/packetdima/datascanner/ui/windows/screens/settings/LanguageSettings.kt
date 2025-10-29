@@ -9,10 +9,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,13 +20,19 @@ import org.koin.compose.koinInject
 import ru.packetdima.datascanner.common.AppSettings
 import ru.packetdima.datascanner.resources.Res
 import ru.packetdima.datascanner.resources.SettingsScreen_Language
+import java.util.*
 
 @Composable
 fun LanguageSettings() {
     val appSettings = koinInject<AppSettings>()
     var language by remember { appSettings.language }
 
-    SettingsRow(title = stringResource(Res.string.SettingsScreen_Language)) {
+    LaunchedEffect(language) {
+        Locale.setDefault(Locale.forLanguageTag(language.locale))
+    }
+
+    key(language) {
+        SettingsRow(title = stringResource(Res.string.SettingsScreen_Language)) {
         val rows =
             AppSettings.LanguageType.entries.size / 3 + if (AppSettings.LanguageType.entries.size % 3 > 0) 1 else 0
 
@@ -63,6 +66,7 @@ fun LanguageSettings() {
                             onClick = {
                                 language = lang
                                 appSettings.save()
+                                Locale.setDefault(Locale.forLanguageTag(lang.locale))
                             }
                         )
                         .padding(horizontal = 10.dp),
@@ -76,6 +80,7 @@ fun LanguageSettings() {
                 }
             }
         }
+    }
     }
 }
 

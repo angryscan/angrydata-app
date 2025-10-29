@@ -17,13 +17,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import ru.packetdima.datascanner.navigation.AppScreen
 
 @Composable
 fun NavigationTab(
     item: NavigationItem,
     onClick: () -> Unit
 ) {
+    val (width, height) = when (item.route) {
+        is AppScreen.Scans -> 240.dp to 60.dp
+        else -> 180.dp to 60.dp
+    }
+    
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     var isHovered by remember { mutableStateOf(false) }
@@ -79,6 +86,8 @@ fun NavigationTab(
 
     Box(
         modifier = Modifier
+            .width(width)
+            .height(height)
             .scale(scale)
             .alpha(alpha)
             .rotate(rotation)
@@ -185,6 +194,8 @@ fun NavigationTab(
                     MaterialTheme.colorScheme.onPrimary
                 else 
                     MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.scale(textScale)
             )
         }

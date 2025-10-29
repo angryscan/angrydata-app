@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FolderOpen
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,16 +33,18 @@ import ru.packetdima.datascanner.scan.common.files.FileType
 import ru.packetdima.datascanner.scan.functions.CertDetectFun
 import ru.packetdima.datascanner.scan.functions.CodeDetectFun
 import ru.packetdima.datascanner.scan.functions.RKNDomainDetectFun
+import ru.packetdima.datascanner.ui.windows.components.RadioButtonNavigation
 import ru.packetdima.datascanner.ui.windows.screens.main.components.S3FileChooser
 import ru.packetdima.datascanner.ui.windows.screens.main.settings.SettingsBox
 import ru.packetdima.datascanner.ui.windows.screens.main.settings.SettingsButton
 
 @Composable
 fun S3Screen(
+    navController: androidx.navigation.NavController,
     settingsExpanded: Boolean,
     expandSettings: () -> Unit,
     hideSettings: () -> Unit,
-    taskStarted: (taskId: Int) -> Unit
+    expandScanState: (Int) -> Unit
 ) {
     val scanService = koinInject<ScanService>()
 
@@ -162,12 +165,14 @@ fun S3Screen(
     }
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = if (settingsExpanded) 0.dp else 150.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         OutlinedTextField(
             modifier = Modifier
-                .height(60.dp)
+                .height(80.dp)
                 .width(700.dp),
             value = path,
             onValueChange = { path = it },
@@ -175,6 +180,23 @@ fun S3Screen(
             singleLine = true,
             shape = MaterialTheme.shapes.medium,
             isError = selectPathError,
+            leadingIcon = {
+                Box(
+                    modifier = Modifier
+                        .height(48.dp)
+                        .width(64.dp)
+                        .size(48.dp)
+                        .padding(start = 8.dp, top = 4.dp, bottom = 4.dp, end = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        imageVector = Icons.Outlined.Search,
+                        contentDescription = null
+                    )
+                }
+            },
             trailingIcon = {
                 Row {
                     Box(
@@ -262,10 +284,18 @@ fun S3Screen(
             )
         }
 
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+        Box(
+            modifier = Modifier
+                .width(700.dp)
+                .padding(vertical = 0.dp),
+            contentAlignment = Alignment.CenterStart
         ) {
-            Row {
+            RadioButtonNavigation(
+                navController = navController
+            )
+        }
+
+        Row {
                 Button(
                     onClick = {
                         if (endpoint.isNotEmpty() &&
@@ -303,7 +333,9 @@ fun S3Screen(
                                     )
                                 )
                                 scanService.startTask(task)
-                                taskStarted(task.dbTask.id.value)
+                                task.id.value?.let { taskId ->
+                                    expandScanState(taskId)
+                                }
 
                             }
                         } else {
@@ -334,11 +366,15 @@ fun S3Screen(
                     }
                 )
             }
+        
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .padding(bottom = 16.dp)
+        ) {
             SettingsBox(
-                transition = settingsBoxTransition,
-                height = 280.dp
+                transition = settingsBoxTransition
             )
         }
-
     }
 }

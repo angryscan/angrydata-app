@@ -11,7 +11,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.painterResource
@@ -26,8 +25,7 @@ import ru.packetdima.datascanner.ui.windows.components.DescriptionTooltip
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsBox(
-    transition: Transition<Boolean>,
-    height: Dp
+    transition: Transition<Boolean>
 ) {
     val scanSettings = koinInject<ScanSettings>()
 
@@ -48,9 +46,9 @@ fun SettingsBox(
             modifier = Modifier
                 .clip(MaterialTheme.shapes.medium)
                 .background(MaterialTheme.colorScheme.surface)
-                .height(height)
+                .fillMaxHeight()
                 .padding(6.dp)
-                .fillMaxWidth()
+                .width(700.dp)
         ) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -101,7 +99,7 @@ fun SettingsBox(
                 SettingsBoxExtensionsSelection(scanSettings)
 
                 // Detect functions selection
-                SettingsBoxDetectFunctions(scanSettings)
+                SettingsBoxDetectFunctionsGrouped(scanSettings)
 
                 // User signatures selection
                 SettingsBoxUserSignature(scanSettings)

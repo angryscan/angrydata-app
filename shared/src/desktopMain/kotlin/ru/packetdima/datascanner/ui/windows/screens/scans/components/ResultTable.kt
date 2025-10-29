@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.isSecondaryPressed
 import androidx.compose.ui.input.pointer.onPointerEvent
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import info.downdetector.bigdatascanner.common.IDetectFunction
@@ -306,7 +307,7 @@ fun ResultTable(
                                 }
                             }
                             .padding(2.dp),
-                        contentAlignment = Alignment.CenterStart
+                        contentAlignment = Alignment.Center
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically
@@ -339,7 +340,7 @@ fun ResultTable(
                                 }
                             }
                             .padding(2.dp),
-                        contentAlignment = Alignment.CenterStart
+                        contentAlignment = Alignment.Center
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically
@@ -372,7 +373,7 @@ fun ResultTable(
                                 }
                             }
                             .padding(2.dp),
-                        contentAlignment = Alignment.CenterStart
+                        contentAlignment = Alignment.Center
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically
@@ -530,15 +531,24 @@ fun ResultTable(
                             }
                             Text(
                                 text = file.score.toString(),
-                                modifier = Modifier.weight(0.1f)
+                                modifier = Modifier.weight(0.1f),
+                                fontSize = 14.sp,
+                                letterSpacing = 0.1.sp,
+                                textAlign = TextAlign.Center
                             )
                             Text(
                                 text = file.count.toString(),
-                                modifier = Modifier.weight(0.1f)
+                                modifier = Modifier.weight(0.1f),
+                                fontSize = 14.sp,
+                                letterSpacing = 0.1.sp,
+                                textAlign = TextAlign.Center
                             )
                             Text(
                                 text = file.size.toString(),
-                                modifier = Modifier.weight(0.1f)
+                                modifier = Modifier.weight(0.1f),
+                                fontSize = 14.sp,
+                                letterSpacing = 0.1.sp,
+                                textAlign = TextAlign.Center
                             )
                         }
                     }

@@ -13,7 +13,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import ru.packetdima.datascanner.ui.windows.screens.main.components.MainScreenConnector
-import ru.packetdima.datascanner.ui.windows.screens.main.components.UpperMenu
 import ru.packetdima.datascanner.ui.windows.screens.main.subscreens.FileShareScreen
 import ru.packetdima.datascanner.ui.windows.screens.main.subscreens.HTTPScreen
 import ru.packetdima.datascanner.ui.windows.screens.main.subscreens.S3Screen
@@ -21,7 +20,7 @@ import ru.packetdima.datascanner.ui.windows.screens.main.subscreens.S3Screen
 
 @Composable
 fun MainScreen(
-    showScan:(taskID:Int) -> Unit
+    showScan:(taskId:Int) -> Unit
 ) {
     var settingsExpanded by remember { mutableStateOf(false) }
 
@@ -30,18 +29,12 @@ fun MainScreen(
     val navController = rememberNavController()
 
     Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.TopCenter
+        modifier = Modifier.fillMaxSize()
     ) {
-        UpperMenu(
-            navController,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-        )
+        // Основной контент
         Column(
             modifier = Modifier
-                .fillMaxHeight()
-                .width(IntrinsicSize.Min)
+                .fillMaxSize()
                 .padding(horizontal = 90.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
@@ -67,6 +60,7 @@ fun MainScreen(
             ) {
                 composable<MainScreenConnector.FileShare> {
                     FileShareScreen(
+                        navController = navController,
                         settingsExpanded = settingsExpanded,
                         expandSettings = {
                             if (scanStateExpanded)
@@ -76,11 +70,15 @@ fun MainScreen(
                         hideSettings = {
                             settingsExpanded = false
                         },
-                        taskStarted = showScan
+                        expandScanState = { taskId ->
+                            scanStateExpanded = false
+                            showScan(taskId)
+                        }
                     )
                 }
                 composable<MainScreenConnector.S3> {
                     S3Screen(
+                        navController = navController,
                         settingsExpanded = settingsExpanded,
                         expandSettings = {
                             if (scanStateExpanded)
@@ -90,11 +88,15 @@ fun MainScreen(
                         hideSettings = {
                             settingsExpanded = false
                         },
-                        taskStarted = showScan
+                        expandScanState = { taskId ->
+                            scanStateExpanded = false
+                            showScan(taskId)
+                        }
                     )
                 }
                 composable<MainScreenConnector.HTTP> {
                     HTTPScreen(
+                        navController = navController,
                         settingsExpanded = settingsExpanded,
                         expandSettings = {
                             if (scanStateExpanded)
@@ -104,15 +106,17 @@ fun MainScreen(
                         hideSettings = {
                             settingsExpanded = false
                         },
-                        taskStarted = showScan
+                        expandScanState = { taskId ->
+                            scanStateExpanded = false
+                            showScan(taskId)
+                        }
                     )
                 }
             }
 
             Spacer(modifier = Modifier.height(76.dp))
         }
-
-
+        
     }
 }
 

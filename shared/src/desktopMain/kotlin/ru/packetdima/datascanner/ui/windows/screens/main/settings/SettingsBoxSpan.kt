@@ -77,7 +77,7 @@ fun SettingsBoxSpan(
         AnimatedVisibility(expanded) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.width(634.dp)
+                modifier = Modifier.width(700.dp)
             ) {
                 block()
             }

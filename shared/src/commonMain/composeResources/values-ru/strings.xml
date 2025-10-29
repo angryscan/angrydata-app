@@ -70,6 +70,8 @@
     <string name="SideMenu-ScanListPage">Список сканирований</string>
     <string name="SideMenu-SettingsPage">Параметры</string>
     <string name="SideMenu-AboutPage">О программе</string>
+    <string name="About-Description">Описание</string>
+    <string name="About-License">Лицензия</string>
 
     <string name="UpperMenu-Tooltip-FileShare">Сканирование файловых систем</string>
     <string name="UpperMenu-Tooltip-S3">Сканирование хранилища S3</string>
@@ -135,6 +137,12 @@
     <string name="DetectFunction-Description-Code">Поиск программный кода</string>
     <string name="DetectFunction-Description-Cert">Поиск сертификатов</string>
     <string name="DetectFunction-Description-DetectBlockedDomains">Поиск доменлв из реестра заблокированных РосКомНадзором</string>
+    
+    <!-- Группы детектирования -->
+    <string name="DetectGroup-PersonalDataNumbers">Персональные данные (числа)</string>
+    <string name="DetectGroup-PersonalDataText">Персональные данные (текст)</string>
+    <string name="DetectGroup-BankingSecrecy">Банковская тайна</string>
+    <string name="DetectGroup-ITAssets">IT активы</string>
 
     <string name="SettingsScreen-ThreadsCount">Количество потоков</string>
     <string name="SettingsScreen-ContextMenu">Контекстное меню</string>
@@ -187,7 +195,7 @@
 
     <string name="AboutScreen-Version">Версия программы: %1$s</string>
     <string name="AboutScreen-Copyright">Open Source Software, 2025</string>
-    <string name="AboutScreen-Description">Big Data Scanner — персональное программное обеспечение для экспресс-проверки наличия в файлах персональных данных и номеров банковских карт. Big Data Scanner работает со следующими форматами файлов: .xlsx, .docx, .txt, .csv, .xml, .json, .log, .doc, .xls, .pdf, .zip.\nBig Data Scanner не вносит никаких изменений в проверяемые файлы, требуется доступ только для чтения файла.\n\nРезультат работы программы носит рекомендательный характер, может требоваться дополнительная верификация со стороны пользователя.</string>
+    <string name="AboutScreen-Description">Angry Data Scanner — персональное программное обеспечение для экспресс-проверки наличия в файлах персональных данных и номеров банковских карт. Angry Data Scanner работает со следующими форматами файлов: .xlsx, .docx, .txt, .csv, .xml, .json, .log, .doc, .xls, .pdf, .zip.\nAngry Data Scanner не вносит никаких изменений в проверяемые файлы, требуется доступ только для чтения файла.\n\nРезультат работы программы носит рекомендательный характер, может требоваться дополнительная верификация со стороны пользователя.</string>
 
     <string name="MessageBox-Cancel">Отмена</string>
     <string name="MessageBox-OK">ОК</string>

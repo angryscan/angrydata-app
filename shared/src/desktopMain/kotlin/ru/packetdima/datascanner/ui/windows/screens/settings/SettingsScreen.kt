@@ -1,6 +1,11 @@
 package ru.packetdima.datascanner.ui.windows.screens.settings
 
+import androidx.compose.foundation.LocalScrollbarStyle
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -9,57 +14,68 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import org.angryscan.common.engine.hyperscan.HyperScanEngine
-import org.angryscan.common.engine.kotlin.KotlinEngine
-import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import ru.packetdima.datascanner.common.AppSettings
-import ru.packetdima.datascanner.common.ScanSettings
-import ru.packetdima.datascanner.resources.*
-import ru.packetdima.datascanner.scan.ScanService
-import ru.packetdima.datascanner.store.ContextMenu
-import ru.packetdima.datascanner.ui.icons.icon
-import ru.packetdima.datascanner.ui.strings.composableName
-import java.awt.Desktop
+import ru.packetdima.datascanner.ui.windows.screens.settings.items.AboutSettings
+import ru.packetdima.datascanner.ui.windows.screens.settings.items.ContextMenuSettings
+import ru.packetdima.datascanner.ui.windows.screens.settings.items.EngineSettings
+import ru.packetdima.datascanner.ui.windows.screens.settings.items.LanguageSettings
+import ru.packetdima.datascanner.ui.windows.screens.settings.items.LoggingSettings
+import ru.packetdima.datascanner.ui.windows.screens.settings.items.ThemeSettings
+import ru.packetdima.datascanner.ui.windows.screens.settings.items.ThreadCountSettings
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen() {
     val appSettings = koinInject<AppSettings>()
     val language by remember { appSettings.language }
+    val scrollState = rememberScrollState()
 
     key(language) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 32.dp),
-        contentAlignment = Alignment.TopCenter
-    ) {
-        Surface(
-            shape = MaterialTheme.shapes.medium,
+        Box(
             modifier = Modifier
-                .width(760.dp),
-            color = MaterialTheme.colorScheme.surface
+                .fillMaxWidth()
+                .padding(top = 32.dp),
+            contentAlignment = Alignment.TopCenter
         ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+            Surface(
+                shape = MaterialTheme.shapes.medium,
                 modifier = Modifier
-                    .padding(6.dp)
+                    .width(800.dp),
+                color = MaterialTheme.colorScheme.surface
             ) {
-                ThreadCountSettings()
-                ContextMenuSettings()
-                LanguageSettings()
-                ThemeSettings()
-                LoggingSettings()
-                AboutSettings()
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier
+                            .padding(6.dp)
+                            .padding(end = 20.dp)
+                            .verticalScroll(scrollState)
+                    ) {
+                        ThreadCountSettings()
+                        ContextMenuSettings()
+                        LanguageSettings()
+                        ThemeSettings()
+                        LoggingSettings()
+                        AboutSettings()
+                        EngineSettings()
+                    }
+                    VerticalScrollbar(
+                        adapter = rememberScrollbarAdapter(scrollState),
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .fillMaxHeight()
+                            .padding(end = 6.dp)
+                            .width(10.dp),
+                        style = LocalScrollbarStyle.current.copy(
+                            hoverColor = MaterialTheme.colorScheme.primary,
+                            unhoverColor = MaterialTheme.colorScheme.secondary
+                        )
+                    )
+                }
             }
         }
-    }
     }
 }

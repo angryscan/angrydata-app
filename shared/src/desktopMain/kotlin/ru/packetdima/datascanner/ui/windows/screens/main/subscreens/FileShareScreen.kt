@@ -31,10 +31,6 @@ import ru.packetdima.datascanner.scan.ScanService
 import ru.packetdima.datascanner.scan.common.ScanPathHelper
 import ru.packetdima.datascanner.scan.common.connectors.ConnectorFileShare
 import ru.packetdima.datascanner.scan.common.createDialogSettings
-import ru.packetdima.datascanner.scan.common.files.FileType
-import ru.packetdima.datascanner.scan.functions.CertDetectFun
-import ru.packetdima.datascanner.scan.functions.CodeDetectFun
-import ru.packetdima.datascanner.scan.functions.RKNDomainDetectFun
 import ru.packetdima.datascanner.ui.components.SelectionTypes
 import ru.packetdima.datascanner.ui.windows.components.RadioButtonNavigation
 import ru.packetdima.datascanner.ui.windows.screens.main.settings.SettingsBox
@@ -301,27 +297,11 @@ fun FileShareScreen(
                                 path
                             }
                             coroutineScope.launch {
-                                val extensions = scanSettings.extensions
-                                if (scanSettings.detectCode.value)
-                                    extensions.add(FileType.CODE)
-                                if (scanSettings.detectCert.value)
-                                    extensions.add(FileType.CERT)
-
-                                val matchers =
-                                    (scanSettings.matchers + scanSettings.userSignatures)
-                                        .toMutableList()
-                                if (scanSettings.detectCert.value)
-                                    matchers.add(CertDetectFun)
-                                if (scanSettings.detectCode.value)
-                                    matchers.add(CodeDetectFun)
-                                if (scanSettings.detectBlockedDomains.value)
-                                    matchers.add(RKNDomainDetectFun)
-
                                 val task = scanService.createTask(
                                     name = if (selectionType == SelectionTypes.FileWithPaths) path else null,
                                     path = scanPath,
                                     extensions = scanSettings.extensions,
-                                    matchers = matchers,
+                                    matchers = scanSettings.matchers + scanSettings.userSignatures,
                                     fastScan = scanSettings.fastScan.value,
                                     connector = ConnectorFileShare()
                                 )

@@ -97,7 +97,7 @@ fun SettingsBox(
                 // File extensions selection
                 SettingsBoxExtensionsSelection(scanSettings)
 
-                // Detect functions selection
+                // Detect matchers selection
                 SettingsBoxDetectFunctionsGrouped(scanSettings)
 
                 // User signatures selection

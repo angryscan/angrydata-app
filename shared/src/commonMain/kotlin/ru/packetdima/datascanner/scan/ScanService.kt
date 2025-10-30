@@ -20,6 +20,8 @@ import ru.packetdima.datascanner.db.models.*
 import ru.packetdima.datascanner.scan.common.connectors.ConnectorS3
 import ru.packetdima.datascanner.scan.common.connectors.IConnector
 import ru.packetdima.datascanner.scan.common.files.FileType
+import ru.packetdima.datascanner.scan.functions.CertDetectFun
+import ru.packetdima.datascanner.scan.functions.CodeDetectFun
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.io.path.absolutePathString
@@ -232,7 +234,7 @@ class ScanService : KoinComponent {
     suspend fun createTask(
         name: String? = null,
         path: String,
-        extensions: List<FileType>? = null,
+        extensions: List<FileType>,
         matchers: List<IMatcher>,
         fastScan: Boolean? = null,
         connector: IConnector
@@ -250,9 +252,7 @@ class ScanService : KoinComponent {
                         "ID: ${task.id.value}. " +
                         "Path: \"$path\". " +
                         "Extensions: ${
-                            (if (extensions != null)
-                                extensions else
-                                scanSettings.extensions).joinToString { it.name }
+                            extensions.joinToString { it.name }
                         }. " +
                         "Detect functions: ${
                             matchers.joinToString { it.name }
@@ -266,38 +266,22 @@ class ScanService : KoinComponent {
                                     "Region: ${connector.regionStr}. "
                         } else ""
             }
-            if (extensions != null) {
-                extensions.forEach { ext ->
-                    TaskFileExtension.new {
-                        this.task = task
-                        this.extension = ext
-                    }
-                }
-            } else {
-                scanSettings.extensions.forEach { ext ->
-                    TaskFileExtension.new {
-                        this.task = task
-                        this.extension = ext
-                    }
-                }
-                if (scanSettings.detectCert.value) {
-                    TaskFileExtension.new {
-                        this.task = task
-                        this.extension = FileType.CERT
-                    }
-                }
-                if (scanSettings.detectCode.value) {
-                    TaskFileExtension.new {
-                        this.task = task
-                        this.extension = FileType.CODE
-                    }
-                }
-            }
 
             matchers.forEach { m ->
                 TaskMatcher.new {
                     this.task = task
                     matcher = m
+                }
+            }
+
+            val taskExtensions = extensions.toMutableList()
+            if(matchers.contains(CodeDetectFun) && !taskExtensions.contains(FileType.CODE)) taskExtensions.add(FileType.CODE)
+            if(matchers.contains(CertDetectFun) && !taskExtensions.contains(FileType.CERT)) taskExtensions.add(FileType.CERT)
+
+            taskExtensions.forEach { ext ->
+                TaskFileExtension.new {
+                    this.task = task
+                    this.extension = ext
                 }
             }
 

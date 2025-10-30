@@ -1,4 +1,4 @@
-package ru.packetdima.datascanner.ui.windows.screens.settings
+package ru.packetdima.datascanner.ui.windows.screens.settings.items
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -12,6 +12,7 @@ import ru.packetdima.datascanner.resources.Res
 import ru.packetdima.datascanner.resources.SettingsScreen_ContextMenu
 import ru.packetdima.datascanner.resources.SettingsScreen_ContextMenuExplorer
 import ru.packetdima.datascanner.store.ContextMenu
+import ru.packetdima.datascanner.ui.windows.screens.settings.SettingsRow
 
 @Composable
 fun ContextMenuSettings() {

@@ -18,9 +18,6 @@ import ru.packetdima.datascanner.scan.TaskFileResult
 import ru.packetdima.datascanner.scan.TaskFilesViewModel
 import ru.packetdima.datascanner.scan.common.connectors.ConnectorFileShare
 import ru.packetdima.datascanner.scan.common.files.FileType
-import ru.packetdima.datascanner.scan.functions.CertDetectFun
-import ru.packetdima.datascanner.scan.functions.CodeDetectFun
-import ru.packetdima.datascanner.scan.functions.RKNDomainDetectFun
 import ru.packetdima.datascanner.ui.strings.readableName
 import ru.packetdima.datascanner.ui.windows.screens.scans.components.SortColumn
 import ru.packetdima.datascanner.ui.windows.screens.scans.components.comparator
@@ -57,7 +54,7 @@ object Console : KoinComponent {
             logger.info(throwable = null, LogMarkers.UserAction) {
                 "Starting scanning with path: $path " +
                         "extensions: ${scanSettings.extensions.joinToString(", ")} " +
-                        "detect functions: ${scanSettings.matchers.joinToString(", ")} " +
+                        "detect matchers: ${scanSettings.matchers.joinToString(", ")} " +
                         "user signatures: ${scanSettings.userSignatures.joinToString(", ")} " +
                         "fast scan: ${scanSettings.fastScan} "
             }
@@ -72,12 +69,6 @@ object Console : KoinComponent {
             val matchers =
                 (scanSettings.matchers + scanSettings.userSignatures)
                     .toMutableList()
-            if (scanSettings.detectCert.value)
-                matchers.add(CertDetectFun)
-            if (scanSettings.detectCode.value)
-                matchers.add(CodeDetectFun)
-            if (scanSettings.detectBlockedDomains.value)
-                matchers.add(RKNDomainDetectFun)
 
             val task = scanService.createTask(
                 name = if (fileWithPaths) path else null,
@@ -314,7 +305,7 @@ object Console : KoinComponent {
                 }
             }
         }
-        println("Detect functions: ${scanSettings.matchers.joinToString(", ")}")
+        println("Detect matchers: ${scanSettings.matchers.joinToString(", ")}")
 
         if (userSignatures != null) {
             scanSettings.userSignatures.clear()
@@ -329,7 +320,7 @@ object Console : KoinComponent {
                 }
             }
         }
-        println("User signature functions: ${scanSettings.userSignatures.joinToString(", ")}")
+        println("User signature matchers: ${scanSettings.userSignatures.joinToString(", ")}")
         if (engine != null) {
             scanSettings.engine.value = when (engine) {
                 "hyperscan" -> {
@@ -359,7 +350,7 @@ Allowed parameters:
 -path(-p) [path] - path to scan
 -file(-f) [path] - file with paths to scan
 -extensions(-e) [extensions] - comma-separated list of file extensions
--detect_functions(-df) [detect functions] - comma-separated list of detect functions
+-detect_functions(-df) [detect matchers] - comma-separated list of detect matchers
 -user_signatures(-us) [user signatures] - comma-separated list of user detect signatures
 -fast - fast scan
 -full - full scan
@@ -381,7 +372,7 @@ Allowed extensions:
                     }
             }
 
-Allowed detect functions: 
+Allowed detect matchers: 
         ${Matchers.joinToString("\n        ") { it.name.lowercase().replace(' ', '_') }}
 Allowed user detect signatures:
         ${userSignatureSettings.userSignatures.joinToString("\n        ") { it.name.lowercase().replace(' ', '_') }} 

@@ -16,10 +16,10 @@ object RKNDomainDetectFun: IHyperMatcher, IKotlinMatcher, KoinComponent {
     override fun check(value: String) = domainRepo.checkDomain(value)
 
     override val hyperPatterns = listOf(
-        """(?<=https?\s)?([\w.-]+\.[a-z]{2,})(?=\s|$)"""
+        """(?:https?\s)?([\w.-]+\.[a-z]{2,})(\s|$)"""
     )
     override val expressionOptions = setOf(
-        ExpressionOption.MULTILINE
+        ExpressionOption.MULTILINE,
     )
     override val javaPatterns = listOf(
         """(?<=https?\s)?([\w.-]+\.[a-z]{2,})(?=\s|$)"""

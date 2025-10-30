@@ -1,4 +1,4 @@
-package ru.packetdima.datascanner.ui.windows.screens.settings
+package ru.packetdima.datascanner.ui.windows.screens.settings.items
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -18,6 +18,7 @@ import ru.packetdima.datascanner.common.AppSettings
 import ru.packetdima.datascanner.resources.Res
 import ru.packetdima.datascanner.resources.SettingsScreen_ThreadsCount
 import ru.packetdima.datascanner.scan.ScanService
+import ru.packetdima.datascanner.ui.windows.screens.settings.SettingsRow
 
 @Composable
 fun ThreadCountSettings() {

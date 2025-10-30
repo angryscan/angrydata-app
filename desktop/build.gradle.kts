@@ -79,7 +79,11 @@ compose.desktop {
 
             modules("java.sql", "jdk.charsets", "jdk.unsupported", "java.naming")
 
-            targetFormats(TargetFormat.Msi, TargetFormat.Deb)
+            targetFormats(
+                TargetFormat.Msi,
+                TargetFormat.Deb,
+                TargetFormat.Dmg
+            )
 
             appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))
 
@@ -97,6 +101,11 @@ compose.desktop {
                 installationPath = "/opt"
                 iconFile.set(project(":shared").projectDir.resolve("src\\desktopMain\\composeResources\\files\\icon.png"))
                 modules("jdk.security.auth")
+            }
+            macOS {
+                iconFile.set(project(":shared").projectDir.resolve("src\\desktopMain\\composeResources\\files\\icon.icns"))
+                bundleID = "ru.packetdima.datascanner"
+                appCategory = "public.app-category.utilities"
             }
         }
     }

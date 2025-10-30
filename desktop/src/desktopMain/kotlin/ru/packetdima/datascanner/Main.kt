@@ -21,10 +21,7 @@ import ru.packetdima.datascanner.common.AppFiles
 import ru.packetdima.datascanner.common.AppVersion
 import ru.packetdima.datascanner.common.LogMarkers
 import ru.packetdima.datascanner.common.OS
-import ru.packetdima.datascanner.di.databaseModule
-import ru.packetdima.datascanner.di.s3Module
-import ru.packetdima.datascanner.di.scanModule
-import ru.packetdima.datascanner.di.settingsModule
+import ru.packetdima.datascanner.di.*
 import ru.packetdima.datascanner.logging.LogLevel
 import ru.packetdima.datascanner.scan.common.ScanPathHelper
 import ru.packetdima.datascanner.ui.MainWindow
@@ -168,6 +165,31 @@ suspend fun main(args: Array<String>) {
                 }
             ) {
                 var mainIsVisible by remember { mutableStateOf(true) }
+                
+                LaunchedEffect(Unit) {
+                    if (OS.currentOS() == OS.MAC) {
+                        try {
+                            val appClass = Class.forName("com.apple.eawt.Application")
+                            val app = appClass.getMethod("getApplication").invoke(null)
+                            
+                            val listenerClass = Class.forName("com.apple.eawt.AppReOpenedListener")
+                            val proxy = java.lang.reflect.Proxy.newProxyInstance(
+                                listenerClass.classLoader,
+                                arrayOf(listenerClass)
+                            ) { _, _, _ ->
+                                logger.debug { "macOS dock click detected, restoring window" }
+                                mainIsVisible = true
+                                null
+                            }
+                            
+                            appClass.getMethod("addAppEventListener", Class.forName("com.apple.eawt.AppEventListener"))
+                                .invoke(app, proxy)
+                            logger.info { "macOS dock click handler registered successfully" }
+                        } catch (e: Exception) {
+                            logger.warn { "Could not set up macOS dock handler: ${e.message}" }
+                        }
+                    }
+                }
 
                 MainWindow(
                     onCloseRequest = ::exitApplication,

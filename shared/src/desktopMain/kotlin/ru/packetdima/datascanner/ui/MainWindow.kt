@@ -1,19 +1,15 @@
 package ru.packetdima.datascanner.ui
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -31,6 +27,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import ru.packetdima.datascanner.common.AppSettings
+import ru.packetdima.datascanner.common.OS
 import ru.packetdima.datascanner.logging.LogLevel
 import ru.packetdima.datascanner.navigation.AppScreen
 import ru.packetdima.datascanner.resources.Res
@@ -42,13 +39,12 @@ import ru.packetdima.datascanner.scan.common.mainWindow
 import ru.packetdima.datascanner.ui.dialogs.EulaDialog
 import ru.packetdima.datascanner.ui.theme.AppTheme
 import ru.packetdima.datascanner.ui.windows.components.DesktopWindowShapes
-import ru.packetdima.datascanner.ui.windows.components.MainWindowTitleBar
-import ru.packetdima.datascanner.ui.windows.components.SideMenu
-import ru.packetdima.datascanner.ui.windows.screens.about.AboutScreen
+import ru.packetdima.datascanner.ui.windows.components.NavigationSelector
 import ru.packetdima.datascanner.ui.windows.screens.main.MainScreen
 import ru.packetdima.datascanner.ui.windows.screens.scans.ScanResultScreen
 import ru.packetdima.datascanner.ui.windows.screens.scans.ScansScreen
 import ru.packetdima.datascanner.ui.windows.screens.settings.SettingsScreen
+import java.awt.Dimension
 import java.util.*
 
 @Composable
@@ -63,6 +59,7 @@ fun MainWindow(
     val appSettings = koinInject<AppSettings>()
 
     val hideOnMinimize by remember { appSettings.hideOnMinimize }
+    val isMac = OS.currentOS() == OS.MAC
 
     val navController = rememberNavController()
 
@@ -101,6 +98,10 @@ fun MainWindow(
     ) {
         mainWindow = this.window
 
+        LaunchedEffect(Unit) {
+            window.minimumSize = Dimension(1280, 720)
+        }
+
         var eulaAgreedVersion by remember { appSettings.eulaAgreedVersion }
         val eulaVersion = stringResource(Res.string.eula_version).toInt()
         var showEulaDialog by remember { mutableStateOf(eulaAgreedVersion < eulaVersion) }
@@ -132,66 +133,120 @@ fun MainWindow(
                 shadowElevation = 3.dp,
                 tonalElevation = 3.dp
             ) {
-                Row(
+                Column(
                     modifier = Modifier
                         .fillMaxSize()
                 ) {
-                    SideMenu(navController)
-                    Column(
+                    NavigationSelector(
+                        navController = navController,
+                        windowPlacement = windowState.placement,
+                        expanded = windowState.placement == WindowPlacement.Maximized,
+                        onMinimizeClick = {
+                            if (hideOnMinimize && !isMac) {
+                                onHideRequest()
+                            } else {
+                                windowState.isMinimized = true
+                            }
+                        },
+                        onExpandClick = {
+                            if (windowState.placement == WindowPlacement.Maximized)
+                                windowState.placement = WindowPlacement.Floating
+                            else
+                                windowState.placement = WindowPlacement.Maximized
+                        },
+                        onCloseClick = onCloseRequest
+                    )
+                    NavHost(
+                        navController = navController,
+                        startDestination = AppScreen.Main,
                         modifier = Modifier
                             .weight(1f)
-                            .fillMaxHeight(),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                            .fillMaxWidth(),
+                        enterTransition = {
+                            slideInHorizontally(
+                                initialOffsetX = { fullWidth -> (fullWidth * 0.3f).toInt() },
+                                animationSpec = tween(
+                                    durationMillis = 400,
+                                    easing = FastOutSlowInEasing
+                                )
+                            ) + fadeIn(
+                                animationSpec = tween(
+                                    durationMillis = 350,
+                                    easing = LinearOutSlowInEasing
+                                )
+                            ) + scaleIn(
+                                initialScale = 0.95f,
+                                animationSpec = tween(
+                                    durationMillis = 350,
+                                    easing = FastOutSlowInEasing
+                                )
+                            )
+                        },
+                        exitTransition = {
+                            slideOutHorizontally(
+                                targetOffsetX = { fullWidth -> (-fullWidth * 0.3f).toInt() },
+                                animationSpec = tween(
+                                    durationMillis = 300,
+                                    easing = FastOutSlowInEasing
+                                )
+                            ) + fadeOut(
+                                animationSpec = tween(
+                                    durationMillis = 250,
+                                    easing = LinearOutSlowInEasing
+                                )
+                            ) + scaleOut(
+                                targetScale = 1.02f,
+                                animationSpec = tween(
+                                    durationMillis = 250,
+                                    easing = FastOutSlowInEasing
+                                )
+                            )
+                        },
+                        popEnterTransition = {
+                            slideInHorizontally(
+                                initialOffsetX = { fullWidth -> (-fullWidth * 0.3f).toInt() },
+                                animationSpec = tween(
+                                    durationMillis = 400,
+                                    easing = FastOutSlowInEasing
+                                )
+                            ) + fadeIn(
+                                animationSpec = tween(
+                                    durationMillis = 350,
+                                    easing = LinearOutSlowInEasing
+                                )
+                            ) + scaleIn(
+                                initialScale = 0.95f,
+                                animationSpec = tween(
+                                    durationMillis = 350,
+                                    easing = FastOutSlowInEasing
+                                )
+                            )
+                        },
+                        popExitTransition = {
+                            slideOutHorizontally(
+                                targetOffsetX = { fullWidth -> (fullWidth * 0.3f).toInt() },
+                                animationSpec = tween(
+                                    durationMillis = 300,
+                                    easing = FastOutSlowInEasing
+                                )
+                            ) + fadeOut(
+                                animationSpec = tween(
+                                    durationMillis = 250,
+                                    easing = LinearOutSlowInEasing
+                                )
+                            ) + scaleOut(
+                                targetScale = 1.02f,
+                                animationSpec = tween(
+                                    durationMillis = 250,
+                                    easing = FastOutSlowInEasing
+                                )
+                            )
+                        }
                     ) {
-                        MainWindowTitleBar(
-                            windowPlacement = windowState.placement,
-                            expanded = windowState.placement == WindowPlacement.Maximized,
-                            onMinimizeClick = {
-                                if (hideOnMinimize)
-                                    onHideRequest()
-                                else
-                                    windowState.isMinimized = true
-                            },
-                            onExpandClick = {
-                                if (windowState.placement == WindowPlacement.Maximized)
-                                    windowState.placement = WindowPlacement.Floating
-                                else
-                                    windowState.placement = WindowPlacement.Maximized
-                            },
-                            onCloseClick = onCloseRequest
-                        )
-                        NavHost(
-                            navController = navController,
-                            startDestination = AppScreen.Main,
-                            enterTransition = {
-                                slideInVertically(
-                                    initialOffsetY = { it },
-                                    animationSpec = tween(durationMillis = 700, easing = LinearOutSlowInEasing)
-                                ) + fadeIn(tween(700))
-                            },
-                            exitTransition = {
-                                slideOutVertically(
-                                    targetOffsetY = { -it * 3 / 2 },
-                                    animationSpec = tween(durationMillis = 700, easing = LinearOutSlowInEasing)
-                                ) + fadeOut(tween(700))
-                            },
-                            popEnterTransition = {
-                                slideInVertically(
-                                    initialOffsetY = { -it * 3 / 2 },
-                                    animationSpec = tween(durationMillis = 700, easing = LinearOutSlowInEasing)
-                                ) + fadeIn(tween(700))
-                            },
-                            popExitTransition = {
-                                slideOutVertically(
-                                    targetOffsetY = { it },
-                                    animationSpec = tween(durationMillis = 700, easing = LinearOutSlowInEasing)
-                                ) + fadeOut(tween(700))
-                            }
-                        ) {
                             composable<AppScreen.Main> {
                                 MainScreen(
-                                    showScan = {
-                                        navController.navigate(AppScreen.Scans)
+                                    showScan = { taskId ->
+                                        navController.navigate(AppScreen.ScanResult(taskId))
                                     }
                                 )
                             }
@@ -206,17 +261,13 @@ fun MainWindow(
                                 val scanResult: AppScreen.ScanResult = backStackEntry.toRoute()
                                 ScanResultScreen(
                                     scanResult.scanId,
-                                    onCloseClick = { navController.navigate(AppScreen.Scans) }
+                                    onCloseClick = { navController.popBackStack() },
                                 )
                             }
                             composable<AppScreen.Settings> {
                                 SettingsScreen()
                             }
-                            composable<AppScreen.About> {
-                                AboutScreen()
-                            }
                         }
-                    }
                 }
             }
         }

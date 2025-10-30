@@ -36,16 +36,18 @@ import ru.packetdima.datascanner.scan.functions.CertDetectFun
 import ru.packetdima.datascanner.scan.functions.CodeDetectFun
 import ru.packetdima.datascanner.scan.functions.RKNDomainDetectFun
 import ru.packetdima.datascanner.ui.components.SelectionTypes
+import ru.packetdima.datascanner.ui.windows.components.RadioButtonNavigation
 import ru.packetdima.datascanner.ui.windows.screens.main.settings.SettingsBox
 import ru.packetdima.datascanner.ui.windows.screens.main.settings.SettingsButton
 import java.io.File
 
 @Composable
 fun FileShareScreen(
+    navController: androidx.navigation.NavController,
     settingsExpanded: Boolean,
     expandSettings: () -> Unit,
     hideSettings: () -> Unit,
-    expandScanState: () -> Unit
+    expandScanState: (Int) -> Unit
 ) {
     val scanService = koinInject<ScanService>()
 
@@ -130,7 +132,9 @@ fun FileShareScreen(
     }
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(20.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = if (settingsExpanded) 0.dp else 150.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         OutlinedTextField(
@@ -237,6 +241,7 @@ fun FileShareScreen(
                                 selectionType = SelectionTypes.Folder
                                 selectionTypeChooserExpanded = false
                                 scanSettings.save()
+                                folderPicker.launch()
                             },
                             text = { Text(text = stringResource(Res.string.MainScreen_SelectTypeFolder)) }
                         )
@@ -247,6 +252,7 @@ fun FileShareScreen(
                                 selectionType = SelectionTypes.File
                                 selectionTypeChooserExpanded = false
                                 scanSettings.save()
+                                filePicker.launch()
                             },
                             text = { Text(text = stringResource(Res.string.MainScreen_SelectTypeFile)) }
                         )
@@ -257,6 +263,7 @@ fun FileShareScreen(
                                 selectionType = SelectionTypes.FileWithPaths
                                 selectionTypeChooserExpanded = false
                                 scanSettings.save()
+                                pathFilePicker.launch()
                             },
                             text = { Text(text = stringResource(Res.string.MainScreen_SelectTypeFileWithPaths)) }
                         )
@@ -266,10 +273,19 @@ fun FileShareScreen(
                 }
             }
         )
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+
+        Box(
+            modifier = Modifier
+                .width(700.dp)
+                .padding(vertical = 0.dp),
+            contentAlignment = Alignment.CenterStart
         ) {
-            Row {
+            RadioButtonNavigation(
+                navController = navController
+            )
+        }
+
+        Row {
                 Button(
                     onClick = {
                         if (path
@@ -310,7 +326,9 @@ fun FileShareScreen(
                                     connector = ConnectorFileShare()
                                 )
                                 scanService.startTask(task)
-                                expandScanState()
+                                task.id.value?.let { taskId ->
+                                    expandScanState(taskId)
+                                }
 
                             }
                         } else {
@@ -341,11 +359,15 @@ fun FileShareScreen(
                     }
                 )
             }
+        
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .padding(bottom = 16.dp)
+        ) {
             SettingsBox(
-                transition = settingsBoxTransition,
-                height = 384.dp
+                transition = settingsBoxTransition
             )
         }
-
     }
 }

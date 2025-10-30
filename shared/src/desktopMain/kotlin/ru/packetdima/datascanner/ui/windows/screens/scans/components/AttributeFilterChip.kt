@@ -1,8 +1,10 @@
 package ru.packetdima.datascanner.ui.windows.screens.scans.components
 
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Done
+import androidx.compose.material.icons.outlined.CheckBox
+import androidx.compose.material.icons.outlined.CheckBoxOutlineBlank
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -34,13 +36,12 @@ fun AttributeFilterChip(
             )
         },
         leadingIcon = {
-            if(selected) {
-                Icon(
-                    imageVector = Icons.Outlined.Done,
-                    contentDescription = null,
-                    tint = tint
-                )
-            }
+            Icon(
+                imageVector = if (selected) Icons.Outlined.CheckBox else Icons.Outlined.CheckBoxOutlineBlank,
+                contentDescription = if (selected) "Selected" else "Not selected",
+                modifier = Modifier.size(16.dp),
+                tint = tint
+            )
         },
     )
 }

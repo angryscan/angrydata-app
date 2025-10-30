@@ -1,5 +1,6 @@
 package ru.packetdima.datascanner.ui.windows.screens.scans.components
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -7,16 +8,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Http
 import androidx.compose.material.icons.outlined.RocketLaunch
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.unit.dp
@@ -68,6 +67,8 @@ fun ScanTaskCard(
     val progress = if (selectedFiles > 0) 100 * (scanned + skipped) / selectedFiles else 0
 
     val folderSize by taskEntity.folderSize.collectAsState()
+    val selectedFilesSize by taskEntity.selectedFilesSize.collectAsState()
+    val foundFilesSize by taskEntity.foundFilesSize.collectAsState()
 
     val pausedAtInstant = pausedAt?.toInstant(TimeZone.currentSystemDefault())
     val startedAtInstant = startedAt?.toInstant(TimeZone.currentSystemDefault())
@@ -140,11 +141,36 @@ fun ScanTaskCard(
                         )
                     }
 
-                    Icon(
-                        imageVector = state.icon(),
-                        contentDescription = null,
-                        tint = state.color()
-                    )
+                    Box(
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (state == TaskState.SCANNING) {
+                            val infiniteTransition = rememberInfiniteTransition(label = "rotation")
+                            val rotationAngle by infiniteTransition.animateFloat(
+                                initialValue = 0f,
+                                targetValue = 360f,
+                                animationSpec = infiniteRepeatable(
+                                    animation = tween(2000, easing = LinearEasing),
+                                    repeatMode = RepeatMode.Restart
+                                ),
+                                label = "rotation"
+                            )
+                            
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .rotate(rotationAngle),
+                                strokeWidth = 2.dp,
+                                color = state.color()
+                            )
+                        }
+                        
+                        Icon(
+                            imageVector = state.icon(),
+                            contentDescription = null,
+                            tint = state.color()
+                        )
+                    }
 
                     when(taskEntity.dbTask.connector) {
                         is ConnectorS3 -> {
@@ -185,35 +211,32 @@ fun ScanTaskCard(
                     )
                 }
 
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(14.dp),
-                    modifier = Modifier
-                        .height(IntrinsicSize.Min)
-                        .width(200.dp)
-                ) {
-                    VerticalDivider(
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-
-                    ScanTimeStatItem(
-                        startedAt = startedAt,
-                        finishedAt = finishedAt,
-                        pausedAt = pausedAt,
-                        state = state,
-                        progress = progress
-                    )
-                }
             }
 
             Row(
-                horizontalArrangement = Arrangement.spacedBy(30.dp)
+                modifier = Modifier
+                    .height(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
+                ScanTimeStatItem(
+                    startedAt = startedAt,
+                    finishedAt = finishedAt,
+                    pausedAt = pausedAt,
+                    state = state
+                )
+
+                VerticalDivider(
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
                 ScanStat(
                     totalFiles = totalFiles,
                     selectedFiles = selectedFiles,
                     foundFiles = foundFiles,
                     folderSize = folderSize,
+                    selectedFilesSize = selectedFilesSize,
+                    foundFilesSize = foundFilesSize,
                     scanTime = scanTime,
                     scoreSum = scoreSum
                 )

@@ -158,14 +158,18 @@ class ConnectorS3(
                         ?.forEach { objectInfo ->
                             val fileSize = objectInfo.size ?: 0
                             if (fileSize > 0)
-                                objectInfo.key?.let {
-                                    fileSelected(
-                                        FoundedFile(
-                                            path = it,
-                                            size = fileSize
-                                        )
-                                    )
+                                objectInfo.key?.let { key ->
                                     filesCounter.add(fileSize)
+
+                                    val fileExtension = key.substringAfterLast('.', "")
+                                    if (extensions.any { it == fileExtension }) {
+                                        fileSelected(
+                                            FoundedFile(
+                                                path = key,
+                                                size = fileSize
+                                            )
+                                        )
+                                    }
                                 }
                         }
 

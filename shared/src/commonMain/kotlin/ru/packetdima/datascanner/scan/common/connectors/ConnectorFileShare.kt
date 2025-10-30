@@ -31,22 +31,28 @@ class ConnectorFileShare: IConnector {
                         } catch (_: Exception) {
 
                         }
-                    } else if (extensions.any { item.extension == it }) {
-                        val foundedFile = FoundedFile(
-                            path = item.absolutePath,
-                            size = item.length()
-                        )
-                        fileSelected(foundedFile)
-                        filesCounter.add(foundedFile.size)
+                    } else {
+                        filesCounter.add(item.length())
+
+                        if (extensions.any { item.extension == it }) {
+                            val foundedFile = FoundedFile(
+                                path = item.absolutePath,
+                                size = item.length()
+                            )
+                            fileSelected(foundedFile)
+                        }
                     }
                 }
-            } else if (extensions.any { d.extension == it }) {
-                val foundedFile = FoundedFile(
-                    path = d.absolutePath,
-                    size = d.length()
-                )
-                fileSelected(foundedFile)
-                filesCounter.add(foundedFile.size)
+            } else {
+                filesCounter.add(d.length())
+
+                if (extensions.any { d.extension == it }) {
+                    val foundedFile = FoundedFile(
+                        path = d.absolutePath,
+                        size = d.length()
+                    )
+                    fileSelected(foundedFile)
+                }
             }
             return@withContext filesCounter
         }

@@ -55,6 +55,11 @@ jobs:
             desktop/build/packages/install.ps1
             desktop/build/packages/big-data-scanner-${{ env.VERSION }}-linux-amd64.tar.gz
             desktop/build/packages/big-data-scanner_${{ env.VERSION }}_amd64.deb
+            desktop/build/packages/launch.mac
+            desktop/build/packages/big-data-scanner-${{ env.VERSION }}-mac-amd64.zip
+            desktop/build/packages/big-data-scanner-${{ env.VERSION }}-mac-aarch64.zip
+            desktop/build/packages/appcast-aarch64.rss
+            desktop/build/packages/appcast-amd64.rss
             LICENSE.txt
             LICENSE.en.txt
             

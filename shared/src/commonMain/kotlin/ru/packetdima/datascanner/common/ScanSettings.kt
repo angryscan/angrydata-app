@@ -9,6 +9,7 @@ import kotlinx.serialization.Transient
 import org.angryscan.common.engine.IMatcher
 import org.angryscan.common.engine.IScanEngine
 import org.angryscan.common.engine.hyperscan.HyperScanEngine
+import org.angryscan.common.engine.kotlin.KotlinEngine
 import org.angryscan.common.extensions.Matchers
 import org.angryscan.common.matchers.UserSignature
 import org.koin.core.component.KoinComponent
@@ -96,7 +97,13 @@ class ScanSettings : KoinComponent {
             this.fastScan = mutableStateOf(false)
             this.userSignatureSettingsExpanded = mutableStateOf(false)
             this.selectionType = mutableStateOf(SelectionTypes.Folder)
-            this.engine = mutableStateOf(HyperScanEngine::class)
+            this.engine = mutableStateOf(
+                when(OS.currentOS()) {
+                    OS.WINDOWS -> KotlinEngine::class
+                    else -> HyperScanEngine::class
+                }
+
+            )
         }
     }
 

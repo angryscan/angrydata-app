@@ -8,7 +8,7 @@ import kotlin.test.Test
 class XLSXTypeTest : IKoinTestRule {
     @Test
     fun findLocation() {
-        val fileName = "first/first.xls"
+        val fileName = "first/first.xlsx"
 
         CheckLocation.checkByMap(
             fileName,

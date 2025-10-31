@@ -116,13 +116,40 @@ tasks.register<Exec>("convey") {
     outputs.dir(dir)
     environment.put("CONVEYOR_AGREE_TO_LICENSE", "1")
     commandLine("conveyor", "make", "--output-dir", dir.get(), "site")
-    dependsOn("build", "writeConveyorConfig")
+    dependsOn("fixConveyorConfig")
 }
 tasks.register<Exec>("conveyCI") {
     val dir = layout.buildDirectory.dir("packages")
     outputs.dir(dir)
     environment.put("CONVEYOR_AGREE_TO_LICENSE", "1")
     commandLine("conveyor", "-f", "ci.conveyor.conf", "make", "--output-dir", dir.get(),  "site")
+    dependsOn("fixConveyorConfig")
+}
+
+tasks.register("fixConveyorConfig") {
+    val inputFile = file("generated.conveyor.conf")
+    val tempFile = layout.buildDirectory.file("generated.conveyor.tmp.conf").get().asFile
+    doLast {
+        if (!inputFile.exists()) {
+            println("generated.conveyor.conf not found")
+            return@doLast
+        }
+
+        tempFile.bufferedWriter().use { writer ->
+            inputFile.forEachLine { line ->
+                // оставляем все строки, кроме android/ios
+                if (!line.contains("-android-") && !line.contains("-ios-")) {
+                    writer.write(line)
+                    writer.newLine()
+                }
+            }
+        }
+
+        // заменяем оригинальный файл
+        inputFile.delete()
+        tempFile.renameTo(inputFile)
+        println("Removed android/ios entries from generated.conveyor.conf")
+    }
     dependsOn("build", "writeConveyorConfig")
 }
 

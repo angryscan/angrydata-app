@@ -61,7 +61,7 @@ compose.desktop {
 
 
         jvmArgs += listOf(
-            "-Xmx8g"
+            "-Xmx6g"
         )
 
         buildTypes.release.proguard {

@@ -57,7 +57,7 @@ dependencies {
 
 compose.desktop {
     application {
-        mainClass = "ru.packetdima.datascanner.MainKt"
+        mainClass = "org.angryscan.app.MainKt"
 
 
         jvmArgs += listOf(
@@ -72,7 +72,7 @@ compose.desktop {
         }
 
         nativeDistributions {
-            packageName = "Big Data Scanner"
+            packageName = "Angry Data Scanner"
             packageVersion = version.toString()
             copyright = "Open Source Software, 2025"
             licenseFile.set(rootProject.file("LICENSE.en.txt"))
@@ -89,7 +89,7 @@ compose.desktop {
 
             windows {
                 menuGroup = "start-menu-group"
-                installationPath = "Big Data Scanner"
+                installationPath = "Angry Data Scanner"
                 upgradeUuid = "baf17015-b8d3-4b88-9a59-0031a7b53b34"
                 iconFile.set(project(":shared").projectDir.resolve("src\\desktopMain\\composeResources\\files\\icon.ico"))
                 console = true

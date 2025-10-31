@@ -47,17 +47,17 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            desktop/build/packages/big-data-scanner.appinstaller
-            desktop/build/packages/big-data-scanner.crt
-            desktop/build/packages/big-data-scanner.exe
-            desktop/build/packages/big-data-scanner-${{ env.VERSION }}-windows-amd64.zip
-            desktop/build/packages/big-data-scanner-${{ env.VERSION }}.x64.msix
+            desktop/build/packages/angry-data-scanner.appinstaller
+            desktop/build/packages/angry-data-scanner.crt
+            desktop/build/packages/angry-data-scanner.exe
+            desktop/build/packages/angry-data-scanner-${{ env.VERSION }}-windows-amd64.zip
+            desktop/build/packages/angry-data-scanner-${{ env.VERSION }}.x64.msix
             desktop/build/packages/install.ps1
-            desktop/build/packages/big-data-scanner-${{ env.VERSION }}-linux-amd64.tar.gz
-            desktop/build/packages/big-data-scanner_${{ env.VERSION }}_amd64.deb
+            desktop/build/packages/angry-data-scanner-${{ env.VERSION }}-linux-amd64.tar.gz
+            desktop/build/packages/angry-data-scanner_${{ env.VERSION }}_amd64.deb
             desktop/build/packages/launch.mac
-            desktop/build/packages/big-data-scanner-${{ env.VERSION }}-mac-amd64.zip
-            desktop/build/packages/big-data-scanner-${{ env.VERSION }}-mac-aarch64.zip
+            desktop/build/packages/angry-data-scanner-${{ env.VERSION }}-mac-amd64.zip
+            desktop/build/packages/angry-data-scanner-${{ env.VERSION }}-mac-aarch64.zip
             desktop/build/packages/appcast-aarch64.rss
             desktop/build/packages/appcast-amd64.rss
             LICENSE.txt

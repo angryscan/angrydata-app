@@ -91,5 +91,5 @@ kotlin {
 
 compose.resources {
     publicResClass = true
-    packageOfResClass = "ru.packetdima.datascanner.resources"
+    packageOfResClass = "org.angryscan.app.resources"
 }

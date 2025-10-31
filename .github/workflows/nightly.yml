@@ -38,7 +38,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
 
-      - name: Upload artifacts
+      - name: Upload artifacts windows-msix
         uses: actions/upload-artifact@v4
         with:
           name: windows-msix
@@ -49,7 +49,7 @@ jobs:
             desktop/build/packages/*.ps1
             LICENSE*
 
-      - name: Upload artifacts
+      - name: Upload artifacts windows-portable
         uses: actions/upload-artifact@v4
         with:
           name: windows-portable
@@ -57,7 +57,7 @@ jobs:
             desktop/build/packages/*windows*.zip
             LICENSE*
 
-      - name: Upload artifacts
+      - name: Upload artifacts linux-portable
         uses: actions/upload-artifact@v4
         with:
           name: linux-portable
@@ -65,7 +65,7 @@ jobs:
             desktop/build/packages/*.tar.gz
             LICENSE*
 
-      - name: Upload artifacts
+      - name: Upload artifacts linux-deb
         uses: actions/upload-artifact@v4
         with:
           name: linux-deb
@@ -73,7 +73,7 @@ jobs:
             desktop/build/packages/*.deb
             LICENSE*
 
-      - name: Upload artifacts
+      - name: Upload artifacts mac-amd64
         uses: actions/upload-artifact@v4
         with:
           name: mac-amd64
@@ -82,7 +82,7 @@ jobs:
             desktop/build/packages/*-amd64.rss
             LICENSE*
 
-      - name: Upload artifacts
+      - name: Upload artifacts mac-aarch64
         uses: actions/upload-artifact@v4
         with:
           name: mac-aarch64

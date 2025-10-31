@@ -36,7 +36,7 @@ kotlin {
                 api(libs.exposed.datetime)
                 implementation(libs.exposed.migration)
 
-                api(libs.datascanner)
+                api(libs.angryscan.core)
 
                 implementation(libs.files.pdfbox)
                 implementation(libs.files.fastexcel)
@@ -91,5 +91,5 @@ kotlin {
 
 compose.resources {
     publicResClass = true
-    packageOfResClass = "ru.packetdima.datascanner.resources"
+    packageOfResClass = "org.angryscan.app.resources"
 }

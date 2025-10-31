@@ -57,7 +57,7 @@ dependencies {
 
 compose.desktop {
     application {
-        mainClass = "ru.packetdima.datascanner.MainKt"
+        mainClass = "org.angryscan.app.MainKt"
 
 
         jvmArgs += listOf(
@@ -72,7 +72,7 @@ compose.desktop {
         }
 
         nativeDistributions {
-            packageName = "Big Data Scanner"
+            packageName = "Angry Data Scanner"
             packageVersion = version.toString()
             copyright = "Open Source Software, 2025"
             licenseFile.set(rootProject.file("LICENSE.en.txt"))
@@ -89,7 +89,7 @@ compose.desktop {
 
             windows {
                 menuGroup = "start-menu-group"
-                installationPath = "Big Data Scanner"
+                installationPath = "Angry Data Scanner"
                 upgradeUuid = "baf17015-b8d3-4b88-9a59-0031a7b53b34"
                 iconFile.set(project(":shared").projectDir.resolve("src\\desktopMain\\composeResources\\files\\icon.ico"))
                 console = true
@@ -116,13 +116,40 @@ tasks.register<Exec>("convey") {
     outputs.dir(dir)
     environment.put("CONVEYOR_AGREE_TO_LICENSE", "1")
     commandLine("conveyor", "make", "--output-dir", dir.get(), "site")
-    dependsOn("build", "writeConveyorConfig")
+    dependsOn("fixConveyorConfig")
 }
 tasks.register<Exec>("conveyCI") {
     val dir = layout.buildDirectory.dir("packages")
     outputs.dir(dir)
     environment.put("CONVEYOR_AGREE_TO_LICENSE", "1")
     commandLine("conveyor", "-f", "ci.conveyor.conf", "make", "--output-dir", dir.get(),  "site")
+    dependsOn("fixConveyorConfig")
+}
+
+tasks.register("fixConveyorConfig") {
+    val inputFile = file("generated.conveyor.conf")
+    val tempFile = layout.buildDirectory.file("generated.conveyor.tmp.conf").get().asFile
+    doLast {
+        if (!inputFile.exists()) {
+            println("generated.conveyor.conf not found")
+            return@doLast
+        }
+
+        tempFile.bufferedWriter().use { writer ->
+            inputFile.forEachLine { line ->
+                // оставляем все строки, кроме android/ios
+                if (!line.contains("-android-") && !line.contains("-ios-")) {
+                    writer.write(line)
+                    writer.newLine()
+                }
+            }
+        }
+
+        // заменяем оригинальный файл
+        inputFile.delete()
+        tempFile.renameTo(inputFile)
+        println("Removed android/ios entries from generated.conveyor.conf")
+    }
     dependsOn("build", "writeConveyorConfig")
 }
 
